@@ -144,8 +144,8 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
           <div class="config-card">
             <h3>Estado de conexión</h3>
             <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
-              <span class="status-badge status-warn"><span class="dot"></span>Pendiente de configurar</span>
-              <span style="font-size:12px;color:var(--text3);align-self:center">Meta Cloud API — Número dedicado Guadalajara</span>
+              <span class="status-badge status-warn" id="wa-status-badge"><span class="dot"></span>Pendiente de configurar</span>
+              <span style="font-size:12px;color:var(--text3);align-self:center" id="wa-status-detail">Meta Cloud API — Número dedicado Guadalajara</span>
             </div>
             <p style="font-size:12px;color:var(--text2);line-height:1.6">
               Para conectar WhatsApp necesitas obtener 3 datos desde <strong>developers.facebook.com</strong>:<br>
@@ -430,10 +430,11 @@ function loadCurrentSection(){
   if(id==='mensajes')loadQR();
 }
 
+let _sandboxAsesoresExtra=[];
 async function loadAsesores(){
   const el=document.getElementById('asesor-list');
   if(_demo){
-    const list=[{nombre:'Luis R.',rol:'admin'},{nombre:'Karla M.',rol:'asesor'},{nombre:'Diego V.',rol:'asesor'}];
+    const list=[{nombre:'Luis R.',rol:'admin'},{nombre:'Karla M.',rol:'asesor'},{nombre:'Diego V.',rol:'asesor'},..._sandboxAsesoresExtra];
     renderAsesores(list);return;
   }
   try{const list=await sb(`lp_asesores?empresa_id=eq.${EMPRESA_ID}&activo=eq.true&order=nombre.asc`);renderAsesores(list||[]);}
@@ -454,7 +455,15 @@ function showAddAsesor(){document.getElementById('form-asesor').style.display='b
 async function saveAsesor(){
   const nombre=document.getElementById('na-nombre').value.trim();
   if(!nombre)return;
-  if(_demo){showToast('Asesor creado (demo)');document.getElementById('form-asesor').style.display='none';return;}
+  if(_demo){
+    _sandboxAsesoresExtra.push({nombre,telefono:document.getElementById('na-tel').value||null,rol:document.getElementById('na-rol').value});
+    document.getElementById('form-asesor').style.display='none';
+    document.getElementById('na-nombre').value='';
+    document.getElementById('na-tel').value='';
+    loadAsesores();
+    showToast('✅ Asesor agregado (simulado)');
+    return;
+  }
   try{
     await sb('lp_asesores',{method:'POST',body:JSON.stringify({empresa_id:EMPRESA_ID,nombre,telefono:document.getElementById('na-tel').value||null,rol:document.getElementById('na-rol').value})});
     document.getElementById('form-asesor').style.display='none';loadAsesores();showToast('✅ Asesor creado');
@@ -521,7 +530,23 @@ async function saveQR(){
   }catch(e){showToast('❌ '+e.message);}
 }
 
-function saveWAConfig(){showToast(_demo?'Guardado (demo)':'Guardando...');if(!_demo){/* TODO save to lp_empresas */showToast('⚠️ Modo live: guarda las credenciales en Supabase → lp_empresas');}}
+function saveWAConfig(){
+  const phoneId=document.getElementById('wa-phone-id').value.trim();
+  const wabaId=document.getElementById('wa-waba-id').value.trim();
+  const token=document.getElementById('wa-token').value.trim();
+  if(_demo){
+    if(!phoneId||!wabaId||!token){showToast('❌ Completa Phone Number ID, WABA ID y Access Token');return;}
+    const badge=document.getElementById('wa-status-badge');
+    badge.className='status-badge status-ok';
+    badge.innerHTML='<span class="dot"></span>Conectado';
+    document.getElementById('wa-status-detail').textContent=`Meta Cloud API — Número ${phoneId} (simulado)`;
+    showToast('✅ Número conectado (simulado)');
+    return;
+  }
+  showToast('Guardando...');
+  /* TODO save to lp_empresas */
+  showToast('⚠️ Modo live: guarda las credenciales en Supabase → lp_empresas');
+}
 
 function showToast(msg){
   let t=document.getElementById('toast');
