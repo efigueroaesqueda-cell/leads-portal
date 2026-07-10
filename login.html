@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HenryLeads — Iniciar sesión</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d0d0d;--bg2:#141414;--bg3:#1a1a1a;--border:#2a2a2a;--gold:#c8a951;--gold2:#a07820;--text:#e8e8e8;--text2:#aaa;--text3:#666;--red:#e74c3c}
+html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text)}
+body{display:flex;align-items:center;justify-content:center}
+.card{width:100%;max-width:360px;background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:36px 32px;margin:16px}
+.logo{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#111;margin:0 auto 18px}
+h1{font-size:19px;font-weight:700;text-align:center;margin-bottom:4px}
+.sub{font-size:13px;color:var(--text3);text-align:center;margin-bottom:26px}
+label{display:block;font-size:12px;color:var(--text2);margin-bottom:6px;margin-top:16px}
+input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:11px 12px;color:var(--text);font-size:14px}
+input:focus{outline:none;border-color:var(--gold)}
+button{width:100%;margin-top:24px;background:var(--gold);color:#111;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer}
+button:hover{background:var(--gold2)}
+button:disabled{opacity:.6;cursor:default}
+.error{margin-top:14px;font-size:13px;color:var(--red);text-align:center;display:none}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">C</div>
+  <h1>HenryLeads</h1>
+  <div class="sub">Cremalleras LR — Portal de leads</div>
+  <form id="loginForm">
+    <label for="usuario">Usuario</label>
+    <input type="text" id="usuario" autocomplete="username" required autofocus>
+    <label for="password">Contraseña</label>
+    <input type="password" id="password" autocomplete="current-password" required>
+    <button type="submit" id="btnEntrar">Entrar</button>
+    <div class="error" id="errorMsg"></div>
+  </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://bgpugtgjbfseqwwcwpyd.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJncHVndGdqYmZzZXF3d2N3cHlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1NjM4MjEsImV4cCI6MjA5ODEzOTgyMX0.iYp-y00qYWv9uvJX73eAASeKy5qbonXN3Jbwd4qRxPM';
+const sbAuth = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Si ya hay sesion activa, no mostrar el login
+sbAuth.auth.getSession().then(({ data }) => {
+  if (data.session) location.href = 'index.html';
+});
+
+function usuarioToEmail(usuario){
+  usuario = usuario.trim();
+  return usuario.includes('@') ? usuario : `${usuario.toLowerCase()}@henryleads.internal`;
+}
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errorMsg = document.getElementById('errorMsg');
+  const btn = document.getElementById('btnEntrar');
+  errorMsg.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Entrando...';
+
+  const email = usuarioToEmail(document.getElementById('usuario').value);
+  const password = document.getElementById('password').value;
+
+  const { error } = await sbAuth.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    errorMsg.textContent = 'Usuario o contraseña incorrectos.';
+    errorMsg.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Entrar';
+    return;
+  }
+
+  location.href = 'index.html';
+});
+</script>
+</body>
+</html>

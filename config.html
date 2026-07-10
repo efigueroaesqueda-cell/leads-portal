@@ -114,6 +114,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
     <a href="config.html" class="snav-btn active"><span>⚙️</span><span class="tooltip">Config</span></a>
     <div class="snav-bottom">
       <div class="snav-btn" id="btn-demo" onclick="toggleDemo()"><span>🎭</span><span class="tooltip">Demo</span></div>
+      <div class="snav-btn" id="btn-logout" onclick="logout()"><span>🚪</span><span class="tooltip">Salir</span></div>
     </div>
   </nav>
 
@@ -391,12 +392,23 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL='https://bgpugtgjbfseqwwcwpyd.supabase.co';
 const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJncHVndGdqYmZzZXF3d2N3cHlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1NjM4MjEsImV4cCI6MjA5ODEzOTgyMX0.iYp-y00qYWv9uvJX73eAASeKy5qbonXN3Jbwd4qRxPM';
 const EMPRESA_ID='11111111-0000-0000-0000-000000000001';
 const HEADERS={'apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${SUPABASE_ANON_KEY}`,'Content-Type':'application/json','Prefer':'return=representation'};
 let _demo=new URLSearchParams(location.search).get('demo')==='1';
+
+const sbAuth = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+async function requireAuth(){
+  if(_demo) return true;
+  const { data } = await sbAuth.auth.getSession();
+  if(!data.session){ location.href = 'login.html'; return false; }
+  HEADERS.Authorization = `Bearer ${data.session.access_token}`;
+  return true;
+}
+async function logout(){ await sbAuth.auth.signOut(); location.href = 'login.html'; }
 
 const AVATAR_COLORS=['#c8a951','#3498db','#9b59b6','#1abc9c','#e67e22','#e74c3c','#2ecc71'];
 function avatarColor(s){let h=0;for(let c of s)h=(h*31+c.charCodeAt(0))&0xffffffff;return AVATAR_COLORS[Math.abs(h)%AVATAR_COLORS.length];}
@@ -522,7 +534,7 @@ function showToast(msg){
 }
 
 if(_demo)document.getElementById('demo-banner').style.display='block';
-loadCurrentSection();
+requireAuth().then(ok => { if(ok) loadCurrentSection(); });
 </script>
 </body>
 </html>

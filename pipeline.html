@@ -116,6 +116,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
     <a href="config.html" class="snav-btn"><span>⚙️</span><span class="tooltip">Config</span></a>
     <div class="snav-bottom">
       <div class="snav-btn" id="btn-demo" onclick="toggleDemo()"><span>🎭</span><span class="tooltip">Demo</span></div>
+      <div class="snav-btn" id="btn-logout" onclick="logout()"><span>🚪</span><span class="tooltip">Salir</span></div>
     </div>
   </nav>
 
@@ -181,11 +182,23 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL      = 'https://bgpugtgjbfseqwwcwpyd.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJncHVndGdqYmZzZXF3d2N3cHlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1NjM4MjEsImV4cCI6MjA5ODEzOTgyMX0.iYp-y00qYWv9uvJX73eAASeKy5qbonXN3Jbwd4qRxPM';
 const EMPRESA_ID = '11111111-0000-0000-0000-000000000001';
 const HEADERS = {'apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${SUPABASE_ANON_KEY}`,'Content-Type':'application/json','Prefer':'return=representation'};
+
+const sbAuth = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+async function requireAuth(){
+  const isDemo = new URLSearchParams(location.search).get('demo')==='1';
+  if(isDemo) return true;
+  const { data } = await sbAuth.auth.getSession();
+  if(!data.session){ location.href = 'login.html'; return false; }
+  HEADERS.Authorization = `Bearer ${data.session.access_token}`;
+  return true;
+}
+async function logout(){ await sbAuth.auth.signOut(); location.href = 'login.html'; }
 
 let _demo = new URLSearchParams(location.search).get('demo')==='1';
 let _etapas=[], _leads=[], _asesores=[];
@@ -355,7 +368,7 @@ function closeModal(){document.getElementById('modal-lead').style.display='none'
 async function loadData(){init();}
 
 if(_demo)document.getElementById('demo-banner').style.display='block';
-init();
+requireAuth().then(ok => { if(ok) init(); });
 </script>
 </body>
 </html>

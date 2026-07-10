@@ -218,6 +218,10 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
         🎭
         <span class="tooltip">Demo</span>
       </div>
+      <div class="snav-btn" id="btn-logout" title="Cerrar sesión" onclick="logout()">
+        🚪
+        <span class="tooltip">Salir</span>
+      </div>
     </div>
   </nav>
 
@@ -334,6 +338,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ── CONFIG ────────────────────────────────────────────────────
 const SUPABASE_URL      = 'https://bgpugtgjbfseqwwcwpyd.supabase.co';
@@ -345,6 +350,21 @@ const HEADERS = {
   'Content-Type': 'application/json',
   'Prefer': 'return=representation'
 };
+
+// ── AUTH ──────────────────────────────────────────────────────
+const sbAuth = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+async function requireAuth(){
+  const isDemo = new URLSearchParams(location.search).get('demo')==='1';
+  if(isDemo) return true;
+  const { data } = await sbAuth.auth.getSession();
+  if(!data.session){ location.href = 'login.html'; return false; }
+  HEADERS.Authorization = `Bearer ${data.session.access_token}`;
+  return true;
+}
+async function logout(){
+  await sbAuth.auth.signOut();
+  location.href = 'login.html';
+}
 
 // ── STATE ─────────────────────────────────────────────────────
 let _demo = new URLSearchParams(location.search).get('demo')==='1';
@@ -882,7 +902,7 @@ function showToast(msg, dur=3000){
 
 // ── START ─────────────────────────────────────────────────────
 if(_demo) document.getElementById('demo-banner').style.display='block';
-init();
+requireAuth().then(ok => { if(ok) init(); });
 </script>
 </body>
 </html>

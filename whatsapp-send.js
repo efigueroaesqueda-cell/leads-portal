@@ -67,23 +67,24 @@ Deno.serve(async (req) => {
     const wa_message_id = metaJson.messages?.[0]?.id || null;
     console.log(`✅ Mensaje enviado via Meta: ${wa_message_id}`);
 
-    const { error: insertErr } = await supabase.from('lp_mensajes').insert({
-      lead_id,
-      direccion: 'saliente',
-      tipo: 'texto',
-      contenido,
-      wa_message_id,
-      leido: true,
+    const { error: insertErr } = await supabase.rpc('wh_insert_mensaje', {
+      p_lead_id: lead_id,
+      p_direccion: 'saliente',
+      p_tipo: 'texto',
+      p_contenido: contenido,
+      p_wa_message_id: wa_message_id,
+      p_leido: true,
+      p_created_at: new Date().toISOString(),
     });
 
     if (insertErr) {
       console.error('❌ Error guardando mensaje saliente:', JSON.stringify(insertErr));
     }
 
-    const { error: updErr } = await supabase
-      .from('lp_leads')
-      .update({ ultimo_contacto: new Date().toISOString(), updated_at: new Date().toISOString() })
-      .eq('id', lead_id);
+    const { error: updErr } = await supabase.rpc('wh_update_lead_contacto', {
+      p_lead_id: lead_id,
+      p_timestamp: new Date().toISOString(),
+    });
 
     if (updErr) console.error('❌ Error actualizando ultimo_contacto:', JSON.stringify(updErr));
 
