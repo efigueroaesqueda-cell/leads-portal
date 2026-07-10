@@ -716,19 +716,21 @@ async function sendMessage(){
 
   if(!_demo){
     try{
-      await sb('lp_mensajes', { method:'POST', body:JSON.stringify({
-        lead_id:_activeLead.id,
-        direccion:'saliente',
-        contenido:text,
-        asesor_id:null
-      })});
-      await sb(`lp_leads?id=eq.${_activeLead.id}`, { method:'PATCH', body:JSON.stringify({
-        updated_at:new Date().toISOString(),
-        ultimo_mensaje:text
-      })});
-      // TODO: Enviar via Meta WhatsApp API
-      // await sendWhatsApp(_activeLead.telefono, text);
-    } catch(e){ console.error('Error al guardar mensaje:',e); }
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/whatsapp-send`, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${SUPABASE_ANON_KEY}` },
+        body:JSON.stringify({
+          lead_id:_activeLead.id,
+          telefono:_activeLead.telefono,
+          contenido:text
+        })
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error ? JSON.stringify(data.error) : 'Error al enviar');
+    } catch(e){
+      console.error('Error al enviar mensaje:',e);
+      showToast('❌ No se pudo enviar el mensaje');
+    }
   }
 }
 

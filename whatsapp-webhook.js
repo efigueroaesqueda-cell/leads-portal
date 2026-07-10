@@ -12,7 +12,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const SUPABASE_URL     = Deno.env.get('SUPABASE_URL');
-const SUPABASE_KEY     = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+const SUPABASE_KEY     = Deno.env.get('WEBHOOK_SERVICE_ROLE_KEY'); // Supabase dejo de auto-inyectar SUPABASE_SERVICE_ROLE_KEY (migro a SUPABASE_SECRET_KEYS); este secreto se agrego a mano el 2026-07-09
 const VERIFY_TOKEN     = Deno.env.get('WA_VERIFY_TOKEN');    // el que defines tú
 const EMPRESA_ID       = '11111111-0000-0000-0000-000000000001';
 
@@ -78,29 +78,37 @@ async function handleIncomingMessage(msg, contact) {
   const timestamp = new Date(parseInt(msg.timestamp) * 1000).toISOString();
 
   // Buscar o crear lead
-  let { data: leads } = await supabase
+  const { data: leads, error: findErr } = await supabase
     .from('lp_leads')
     .select('id, nombre')
     .eq('empresa_id', EMPRESA_ID)
     .eq('telefono', telefono)
     .limit(1);
 
+  if (findErr) {
+    console.error('❌ Error buscando lead:', JSON.stringify(findErr));
+    return;
+  }
+
   let leadId;
   if (leads?.length) {
     leadId = leads[0].id;
     // Incrementar contador de no leídos
-    await supabase.rpc('increment_no_leidos', { lead_id_param: leadId });
+    const { error: incErr } = await supabase.rpc('increment_no_leidos', { lead_id_param: leadId });
+    if (incErr) console.error('❌ Error incrementando no_leidos:', JSON.stringify(incErr));
   } else {
     // Crear nuevo lead
     const nombre = contact?.profile?.name || null;
-    const { data: etapas } = await supabase
+    const { data: etapas, error: etapasErr } = await supabase
       .from('lp_etapas')
       .select('id')
       .eq('empresa_id', EMPRESA_ID)
       .order('orden')
       .limit(1);
 
-    const { data: newLead } = await supabase
+    if (etapasErr) console.error('❌ Error leyendo etapas:', JSON.stringify(etapasErr));
+
+    const { data: newLead, error: leadErr } = await supabase
       .from('lp_leads')
       .insert({
         empresa_id: EMPRESA_ID,
@@ -114,14 +122,22 @@ async function handleIncomingMessage(msg, contact) {
       .select('id')
       .single();
 
+    if (leadErr) {
+      console.error('❌ Error creando lead:', JSON.stringify(leadErr));
+      return;
+    }
+
     leadId = newLead?.id;
     console.log(`✅ Nuevo lead creado: ${nombre} (${telefono})`);
   }
 
-  if (!leadId) return;
+  if (!leadId) {
+    console.error('❌ No se obtuvo leadId, no se guarda el mensaje');
+    return;
+  }
 
   // Guardar mensaje
-  await supabase.from('lp_mensajes').insert({
+  const { error: msgErr } = await supabase.from('lp_mensajes').insert({
     lead_id: leadId,
     direccion: 'entrante',
     tipo: tipo === 'text' ? 'texto' : tipo,
@@ -131,11 +147,18 @@ async function handleIncomingMessage(msg, contact) {
     created_at: timestamp,
   });
 
+  if (msgErr) {
+    console.error('❌ Error guardando mensaje:', JSON.stringify(msgErr));
+    return;
+  }
+
   // Actualizar último contacto del lead
-  await supabase
+  const { error: updErr } = await supabase
     .from('lp_leads')
     .update({ ultimo_contacto: timestamp, updated_at: new Date().toISOString() })
     .eq('id', leadId);
+
+  if (updErr) console.error('❌ Error actualizando ultimo_contacto:', JSON.stringify(updErr));
 
   console.log(`✅ Mensaje guardado para lead ${leadId}`);
 }
@@ -143,10 +166,11 @@ async function handleIncomingMessage(msg, contact) {
 async function handleStatusUpdate(status) {
   // Actualizar estado del mensaje (enviado/entregado/leído)
   if (status.wa_message_id) {
-    await supabase
+    const { error } = await supabase
       .from('lp_mensajes')
       .update({ leido: status.status === 'read' })
       .eq('wa_message_id', status.wa_message_id);
+    if (error) console.error('❌ Error actualizando estado de mensaje:', JSON.stringify(error));
   }
 }
 
