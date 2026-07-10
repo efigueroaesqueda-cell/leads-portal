@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cremalleras LR — Portal de Leads</title>
+<style>
+/* ── RESET & BASE ──────────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0d0d;--bg2:#141414;--bg3:#1a1a1a;--bg4:#222;
+  --border:#2a2a2a;--border2:#333;
+  --gold:#c8a951;--gold2:#a07820;
+  --text:#e8e8e8;--text2:#aaa;--text3:#666;
+  --green:#2ecc71;--red:#e74c3c;--blue:#3498db;--orange:#f39c12;--purple:#9b59b6;--teal:#1abc9c;
+  --inbox-w:340px;
+  --header-h:56px;
+}
+html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+
+/* ── LAYOUT ────────────────────────────────────────────────── */
+#app{display:flex;height:100vh;overflow:hidden}
+
+/* SIDEBAR NAV */
+#sidenav{width:56px;min-width:56px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:4px;z-index:10}
+.snav-logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#111;margin-bottom:8px;cursor:pointer}
+.snav-btn{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;transition:all .15s;border:none;background:transparent;color:var(--text2);text-decoration:none;position:relative}
+.snav-btn:hover{background:var(--bg4);color:var(--text)}
+.snav-btn.active{background:rgba(200,169,81,.15);color:var(--gold)}
+.snav-badge{position:absolute;top:4px;right:4px;background:var(--red);color:#fff;font-size:9px;font-weight:700;border-radius:8px;padding:1px 4px;min-width:14px;text-align:center;line-height:14px}
+.snav-sep{width:30px;height:1px;background:var(--border);margin:4px 0}
+.snav-bottom{margin-top:auto}
+
+/* INBOX PANEL */
+#inbox-panel{width:var(--inbox-w);min-width:var(--inbox-w);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100%}
+.inbox-header{height:var(--header-h);border-bottom:1px solid var(--border);padding:0 14px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.inbox-header h2{font-size:15px;font-weight:700;color:var(--text);flex:1}
+.btn-icon{width:30px;height:30px;border-radius:8px;background:var(--bg4);border:1px solid var(--border2);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .15s}
+.btn-icon:hover{color:var(--text);border-color:var(--border2)}
+.inbox-search{padding:10px 12px;border-bottom:1px solid var(--border);flex-shrink:0}
+.inbox-search input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:7px 12px;color:var(--text);font-size:13px;outline:none}
+.inbox-search input:focus{border-color:var(--gold)}
+.inbox-search input::placeholder{color:var(--text3)}
+.inbox-filters{padding:8px 12px;border-bottom:1px solid var(--border);display:flex;gap:6px;overflow-x:auto;flex-shrink:0}
+.inbox-filters::-webkit-scrollbar{display:none}
+.filter-chip{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;border:1px solid var(--border2);background:transparent;color:var(--text2);transition:all .15s}
+.filter-chip:hover{border-color:var(--gold);color:var(--gold)}
+.filter-chip.active{background:rgba(200,169,81,.15);border-color:var(--gold);color:var(--gold)}
+.inbox-list{flex:1;overflow-y:auto}
+.inbox-list::-webkit-scrollbar{width:4px}
+.inbox-list::-webkit-scrollbar-track{background:transparent}
+.inbox-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* CONVERSATION ITEM */
+.conv-item{display:flex;gap:10px;padding:12px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s;position:relative}
+.conv-item:hover{background:var(--bg3)}
+.conv-item.active{background:rgba(200,169,81,.07);border-left:2px solid var(--gold)}
+.conv-avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0;color:#111}
+.conv-body{flex:1;min-width:0}
+.conv-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.conv-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
+.conv-time{font-size:10px;color:var(--text3);flex-shrink:0}
+.conv-preview{font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+.conv-tags{display:flex;gap:4px;flex-wrap:wrap}
+.tag-dot{display:inline-block;width:6px;height:6px;border-radius:50%}
+.stage-pill{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
+.unread-badge{background:var(--green);color:#111;font-size:10px;font-weight:700;border-radius:10px;padding:1px 6px;min-width:18px;text-align:center}
+.tipo-icon{font-size:10px;padding:1px 5px;border-radius:4px;font-weight:700}
+.tipo-mecanico{background:rgba(39,174,96,.2);color:var(--green)}
+.tipo-refaccionaria{background:rgba(52,152,219,.2);color:var(--blue)}
+.tipo-usuario{background:rgba(149,165,166,.15);color:#aaa}
+
+/* CHAT PANEL */
+#chat-panel{flex:1;display:flex;flex-direction:column;height:100%;min-width:0}
+#chat-empty{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:var(--text3)}
+#chat-empty .icon{font-size:48px;opacity:.3}
+
+/* CHAT HEADER */
+#chat-header{height:var(--header-h);border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;background:var(--bg2)}
+.chat-lead-info{flex:1;min-width:0}
+.chat-lead-name{font-size:15px;font-weight:700;color:var(--text)}
+.chat-lead-meta{font-size:11px;color:var(--text2)}
+.chat-actions{display:flex;gap:8px;align-items:center}
+.stage-select{background:var(--bg4);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:12px;padding:5px 10px;cursor:pointer;outline:none}
+.stage-select:focus{border-color:var(--gold)}
+
+/* CHAT MESSAGES */
+#chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px}
+#chat-messages::-webkit-scrollbar{width:4px}
+#chat-messages::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.msg-group{display:flex;flex-direction:column;gap:2px}
+.msg-bubble{max-width:70%;padding:9px 13px;border-radius:16px;font-size:13px;line-height:1.45;position:relative}
+.msg-entrante{background:var(--bg3);border:1px solid var(--border);border-bottom-left-radius:4px;align-self:flex-start}
+.msg-saliente{background:linear-gradient(135deg,rgba(200,169,81,.2),rgba(160,120,32,.15));border:1px solid rgba(200,169,81,.25);border-bottom-right-radius:4px;align-self:flex-end}
+.msg-time{font-size:10px;color:var(--text3);margin-top:2px}
+.msg-time.right{text-align:right}
+.msg-asesor{font-size:10px;color:var(--gold);margin-bottom:2px}
+.date-divider{text-align:center;font-size:11px;color:var(--text3);padding:8px 0;position:relative}
+.date-divider::before{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:var(--border);z-index:0}
+.date-divider span{background:var(--bg);padding:0 12px;position:relative;z-index:1}
+
+/* CHAT INPUT */
+#chat-input-area{border-top:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+.quick-replies{padding:8px 12px;display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid var(--border)}
+.quick-replies::-webkit-scrollbar{display:none}
+.qr-btn{padding:5px 12px;border-radius:16px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:12px;cursor:pointer;white-space:nowrap;transition:all .15s}
+.qr-btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(200,169,81,.07)}
+.input-row{display:flex;gap:8px;align-items:flex-end;padding:10px 12px}
+#msg-input{flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:10px 14px;color:var(--text);font-size:13px;resize:none;outline:none;font-family:inherit;line-height:1.4;max-height:120px;min-height:40px}
+#msg-input:focus{border-color:var(--gold)}
+#msg-input::placeholder{color:var(--text3)}
+.btn-send{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;color:#111;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;font-weight:700}
+.btn-send:hover{box-shadow:0 4px 16px rgba(200,169,81,.4);transform:translateY(-1px)}
+.btn-send:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+/* LEAD PROFILE PANEL */
+#profile-panel{width:280px;min-width:280px;background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;height:100%;overflow:hidden}
+.profile-header{height:var(--header-h);border-bottom:1px solid var(--border);padding:0 14px;display:flex;align-items:center;justify-content:space-between}
+.profile-header h3{font-size:13px;font-weight:700;color:var(--text2)}
+.profile-body{flex:1;overflow-y:auto;padding:16px}
+.profile-body::-webkit-scrollbar{width:4px}
+.profile-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.profile-avatar{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:#111;margin:0 auto 12px}
+.profile-name{text-align:center;font-size:16px;font-weight:700;margin-bottom:4px}
+.profile-phone{text-align:center;font-size:12px;color:var(--text2);margin-bottom:16px}
+.profile-section{margin-bottom:16px}
+.profile-section h4{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+.profile-field{margin-bottom:8px}
+.profile-field label{font-size:11px;color:var(--text3);display:block;margin-bottom:3px}
+.profile-field select,.profile-field input,.profile-field textarea{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;color:var(--text);font-size:12px;outline:none;font-family:inherit}
+.profile-field select:focus,.profile-field input:focus,.profile-field textarea:focus{border-color:var(--gold)}
+.profile-field textarea{resize:vertical;min-height:60px}
+.etiquetas-wrap{display:flex;flex-wrap:wrap;gap:5px}
+.etiqueta-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer}
+.etiqueta-chip.remove::after{content:'×';margin-left:3px;opacity:.7}
+.add-etiqueta{padding:3px 8px;border-radius:10px;font-size:11px;background:var(--bg4);border:1px dashed var(--border2);color:var(--text3);cursor:pointer}
+.add-etiqueta:hover{border-color:var(--gold);color:var(--gold)}
+.btn-guardar{width:100%;padding:9px;border-radius:8px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;color:#111;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;margin-top:8px}
+.btn-guardar:hover{box-shadow:0 4px 16px rgba(200,169,81,.3);transform:translateY(-1px)}
+
+/* MODALS */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:24px;width:460px;max-width:95vw}
+.modal h3{font-size:16px;font-weight:700;margin-bottom:16px;color:var(--text)}
+.modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end}
+.btn{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
+.btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#111}
+.btn-primary:hover{box-shadow:0 4px 16px rgba(200,169,81,.3)}
+.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--text2)}
+.btn-ghost:hover{border-color:var(--text2);color:var(--text)}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px;font-weight:600}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;outline:none;font-family:inherit}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--gold)}
+.tipo-btns{display:flex;gap:8px}
+.tipo-btn{flex:1;padding:9px;border-radius:8px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;font-size:12px;font-weight:600;text-align:center;transition:all .15s}
+.tipo-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(200,169,81,.1)}
+
+/* DEMO BANNER */
+#demo-banner{background:rgba(200,169,81,.08);border-bottom:1px solid rgba(200,169,81,.2);padding:6px 16px;text-align:center;font-size:11px;color:var(--gold);font-weight:600}
+
+/* TOOLTIP */
+.tooltip{position:absolute;left:60px;top:50%;transform:translateY(-50%);background:#222;border:1px solid var(--border2);padding:4px 10px;border-radius:6px;font-size:11px;color:var(--text);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:50}
+.snav-btn:hover .tooltip{opacity:1}
+
+/* LOADING */
+.loading{display:flex;align-items:center;justify-content:center;height:100%;flex-direction:column;gap:12px;color:var(--text3)}
+.spinner{width:28px;height:28px;border:2px solid var(--border2);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* SCROLLBAR GLOBAL */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* RESPONSIVE TABLET */
+@media(max-width:900px){
+  #profile-panel{display:none}
+  :root{--inbox-w:280px}
+}
+@media(max-width:640px){
+  #inbox-panel{display:none}
+  #inbox-panel.show-mobile{display:flex;position:fixed;inset:0;z-index:20;width:100%}
+  :root{--inbox-w:100%}
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- SIDEBAR NAV -->
+  <nav id="sidenav">
+    <div class="snav-logo" title="Cremalleras LR">C</div>
+
+    <a href="index.html" class="snav-btn active" title="Bandeja">
+      💬
+      <span class="snav-badge" id="badge-inbox">0</span>
+      <span class="tooltip">Bandeja</span>
+    </a>
+    <a href="pipeline.html" class="snav-btn" title="Pipeline">
+      📊
+      <span class="tooltip">Pipeline</span>
+    </a>
+    <a href="leads.html" class="snav-btn" title="Leads">
+      👥
+      <span class="tooltip">Leads</span>
+    </a>
+
+    <div class="snav-sep"></div>
+    <a href="config.html" class="snav-btn" title="Configuración">
+      ⚙️
+      <span class="tooltip">Config</span>
+    </a>
+
+    <div class="snav-bottom">
+      <div class="snav-btn" id="btn-demo" title="Modo Demo" onclick="toggleDemo()">
+        🎭
+        <span class="tooltip">Demo</span>
+      </div>
+      <div class="snav-btn" id="btn-logout" title="Cerrar sesión" onclick="logout()">
+        🚪
+        <span class="tooltip">Salir</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- INBOX PANEL -->
+  <div id="inbox-panel">
+    <div class="inbox-header">
+      <h2>Bandeja</h2>
+      <div class="btn-icon" onclick="showNewLeadModal()" title="Nuevo lead">＋</div>
+      <div class="btn-icon" id="btn-refresh" onclick="loadLeads()" title="Actualizar">↻</div>
+    </div>
+    <div class="inbox-search">
+      <input type="text" id="search-input" placeholder="Buscar por nombre o teléfono..." oninput="filterLeads()">
+    </div>
+    <div class="inbox-filters">
+      <span class="filter-chip active" data-filter="todos" onclick="setFilter('todos',this)">Todos</span>
+      <span class="filter-chip" data-filter="sin_leer" onclick="setFilter('sin_leer',this)">Sin leer</span>
+      <span class="filter-chip" data-filter="mecanico" onclick="setFilter('mecanico',this)">Mecánicos</span>
+      <span class="filter-chip" data-filter="refaccionaria" onclick="setFilter('refaccionaria',this)">Refaccionarias</span>
+      <span class="filter-chip" data-filter="usuario_final" onclick="setFilter('usuario_final',this)">Usuarios</span>
+    </div>
+    <div class="inbox-list" id="inbox-list">
+      <div class="loading"><div class="spinner"></div><span>Cargando...</span></div>
+    </div>
+  </div>
+
+  <!-- CHAT PANEL -->
+  <div id="chat-panel">
+    <div id="demo-banner" style="display:block;background:#7a2323;color:#fff">🧪 SANDBOX DE PRUEBAS — Esto NO es la página real, datos simulados</div>
+
+    <div id="chat-empty">
+      <div class="icon">💬</div>
+      <div style="font-size:16px;color:var(--text2);font-weight:600">Selecciona una conversación</div>
+      <div style="font-size:13px">o crea un nuevo lead con el botón ＋</div>
+    </div>
+
+    <div id="chat-view" style="display:none;flex:1;flex-direction:column;height:100%">
+      <!-- Chat Header -->
+      <div id="chat-header">
+        <div class="conv-avatar" id="ch-avatar" style="width:36px;height:36px;font-size:14px;background:#888"></div>
+        <div class="chat-lead-info">
+          <div class="chat-lead-name" id="ch-name">—</div>
+          <div class="chat-lead-meta" id="ch-meta">—</div>
+        </div>
+        <div class="chat-actions">
+          <select class="stage-select" id="stage-select" onchange="moveStage()">
+            <option value="">Etapa...</option>
+          </select>
+          <div class="btn-icon" onclick="toggleProfile()" title="Perfil">👤</div>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div id="chat-messages"></div>
+
+      <!-- Input area -->
+      <div id="chat-input-area">
+        <div class="quick-replies" id="quick-replies-bar"></div>
+        <div class="input-row">
+          <textarea id="msg-input" placeholder="Escribe un mensaje..." rows="1"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"
+            oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"></textarea>
+          <button class="btn-send" onclick="sendMessage()">➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE PANEL -->
+  <div id="profile-panel">
+    <div class="profile-header">
+      <h3>Perfil del Lead</h3>
+      <div class="btn-icon" onclick="toggleProfile()" title="Cerrar">✕</div>
+    </div>
+    <div class="profile-body" id="profile-body">
+      <div class="loading"><div class="spinner"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NUEVO LEAD -->
+<div class="modal-overlay" id="modal-new-lead" style="display:none" onclick="if(event.target===this)closeModal('modal-new-lead')">
+  <div class="modal">
+    <h3>➕ Nuevo Lead</h3>
+    <div class="form-group">
+      <label>Teléfono (WhatsApp)*</label>
+      <input type="tel" id="nl-telefono" placeholder="+52 33 1234 5678">
+    </div>
+    <div class="form-group">
+      <label>Nombre</label>
+      <input type="text" id="nl-nombre" placeholder="Nombre del cliente">
+    </div>
+    <div class="form-group">
+      <label>Tipo de cliente</label>
+      <div class="tipo-btns">
+        <div class="tipo-btn active" data-tipo="usuario_final" onclick="selectTipo(this)">👤 Usuario</div>
+        <div class="tipo-btn" data-tipo="mecanico" onclick="selectTipo(this)">🔧 Mecánico</div>
+        <div class="tipo-btn" data-tipo="refaccionaria" onclick="selectTipo(this)">🏪 Refaccionaria</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Asesor asignado</label>
+      <select id="nl-asesor">
+        <option value="">Sin asignar</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Vehículo (opcional)</label>
+      <input type="text" id="nl-vehiculo" placeholder="Ej: Toyota Corolla 2019">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-new-lead')">Cancelar</button>
+      <button class="btn btn-primary" onclick="createLead()">Crear Lead</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ── CONFIG ────────────────────────────────────────────────────
+const SUPABASE_URL      = 'https://bgpugtgjbfseqwwcwpyd.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJncHVndGdqYmZzZXF3d2N3cHlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1NjM4MjEsImV4cCI6MjA5ODEzOTgyMX0.iYp-y00qYWv9uvJX73eAASeKy5qbonXN3Jbwd4qRxPM';
+const EMPRESA_ID = '11111111-0000-0000-0000-000000000001';
+const HEADERS = {
+  'apikey': SUPABASE_ANON_KEY,
+  'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+  'Content-Type': 'application/json',
+  'Prefer': 'return=representation'
+};
+
+// ── AUTH ──────────────────────────────────────────────────────
+const sbAuth = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+async function requireAuth(){
+  return true; // SANDBOX: siempre modo demo, no requiere login ni toca Supabase real
+}
+async function logout(){
+  await sbAuth.auth.signOut();
+  location.href = 'login.html';
+}
+
+// ── STATE ─────────────────────────────────────────────────────
+let _demo = true; // SANDBOX: siempre modo demo, nunca toca datos reales
+let _leads = [];
+let _leadsAll = [];
+let _etapas = [];
+let _etiquetas = [];
+let _asesores = [];
+let _quickReplies = [];
+let _activeLead = null;
+let _mensajes = [];
+let _filterActive = 'todos';
+let _profileVisible = true;
+let _realtimeSub = null;
+
+// ── COLORES AVATAR ────────────────────────────────────────────
+const AVATAR_COLORS = ['#c8a951','#3498db','#9b59b6','#1abc9c','#e67e22','#e74c3c','#2ecc71'];
+function avatarColor(str){ let h=0; for(let c of str) h=(h*31+c.charCodeAt(0))&0xffffffff; return AVATAR_COLORS[Math.abs(h)%AVATAR_COLORS.length]; }
+function initials(n){ if(!n) return '?'; const p=n.trim().split(' '); return (p[0][0]+(p[1]?p[1][0]:'')).toUpperCase(); }
+
+// ── SUPABASE HELPERS ──────────────────────────────────────────
+async function sb(path, options={}){
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { headers: HEADERS, ...options });
+  if(!r.ok){ const e=await r.json(); throw new Error(e.message||r.statusText); }
+  if(r.status===204) return null;
+  return r.json();
+}
+
+// ── DEMO DATA ─────────────────────────────────────────────────
+function _sr(seed, min, max){ let s=seed*1664525+1013904223; s=s&0xffffffff; return min+Math.abs(s)%(max-min+1); }
+function demoLeads(){
+  const nombres=['Carlos Hdz','María López','Roberto Vega','Ana Flores','Luis Torres',
+    'Pedro Ruiz','Diana Castro','Miguel Ángel','José Martínez','Elena García',
+    'Fernando Ríos','Claudia Mora','Jorge Soto','Patricia Núñez','Andrés Villa'];
+  const tipos=['usuario_final','usuario_final','mecanico','refaccionaria','mecanico','usuario_final','usuario_final','mecanico','refaccionaria','usuario_final','usuario_final','mecanico','usuario_final','refaccionaria','mecanico'];
+  const previews=[
+    'Buenas tardes, me interesa la cremallera del Tsuru',
+    'Cuánto cuesta la dirección electroasistida Altima?',
+    'Jefe necesito la cremallera Hylux doble cabina urgente',
+    'Buenos días, precios mayoreo cremalleras Nissan?',
+    '¿Tienen bomba de dirección para RAM 1500?',
+    'Vi su anuncio, necesito cotización',
+    'Qué garantía tienen sus cremalleras?',
+    'Cliente mío necesita cremallera Aveo, qué tienen?',
+    'Pedido grande para esta semana, ¿me dan crédito?',
+    'Hola, llevo 3 días sin dirección 😅 urge',
+    'Me recomendaron con ustedes, ¿son confiables?',
+    'La pieza que me mandaron no es la correcta',
+    'Sí me interesa, ¿cuándo tienen disponibilidad?',
+    '10 piezas cremallera Pointer, ¿precio especial?',
+    'Colega me pasó su número, trabajo en taller'];
+  const etapas_keys=['Pendiente','Contestado','Prospecto','Cotizado','Agendado','Cerrado'];
+  const ahora = Date.now();
+  return nombres.map((n,i)=>({
+    id:`demo-lead-${i}`,
+    nombre:n,
+    telefono:`+52 33 ${_sr(i*7,1000,9999)} ${_sr(i*13,1000,9999)}`,
+    tipo_cliente:tipos[i],
+    etapa:{nombre:etapas_keys[_sr(i*3,0,5)],color:['#888','#3498db','#9b59b6','#f39c12','#1abc9c','#2ecc71'][_sr(i*3,0,5)]},
+    no_leidos:_sr(i*11,0,3)>2?_sr(i*17,1,9):0,
+    ultimo_contacto:new Date(ahora - _sr(i*5,1,72)*3600000).toISOString(),
+    preview:previews[i],
+    asesor:{nombre:['Luis R.','Karla M.','Diego V.'][_sr(i*9,0,2)]},
+    etiquetas_lead:i%3===0?[{etiqueta:{nombre:'Mecánico Alianza',color:'#27ae60'}}]:[]
+  }));
+}
+
+function demoMensajes(leadId){
+  const idx = parseInt(leadId.split('-')[2]||'0');
+  const now = Date.now();
+  const pares = [
+    ['Hola, me interesa conocer sus precios para cremalleras', 'Claro! ¿Para qué vehículo necesitas?'],
+    ['Es para un Tsuru 2012, dirección mecánica', '¡Perfecto! Tenemos stock disponible. Te mando cotización en un momento.'],
+    ['Gracias, ¿cuánto tiempo tienen de garantía?', 'Toda nuestra línea lleva 6 meses de garantía o 10,000 km, lo que ocurra primero 💪'],
+  ];
+  const msgs = [];
+  pares.forEach(([ent,sal],i)=>{
+    msgs.push({ id:`dm-${idx}-${i*2}`, lead_id:leadId, direccion:'entrante', contenido:ent, created_at:new Date(now-(pares.length-i)*7200000+1000).toISOString() });
+    msgs.push({ id:`dm-${idx}-${i*2+1}`, lead_id:leadId, direccion:'saliente', contenido:sal, asesor:{nombre:'Luis R.'}, created_at:new Date(now-(pares.length-i)*7200000+60000).toISOString() });
+  });
+  return msgs;
+}
+
+function demoQuickReplies(){
+  return [
+    {id:'qr1',titulo:'Bienvenida',contenido:'¡Hola! Gracias por contactar a Cremalleras LR 🚗 ¿En qué te puedo ayudar?'},
+    {id:'qr2',titulo:'Datos vehículo',contenido:'Para cotizarte necesito: marca, modelo, año y síntoma de la dirección ¿Me los compartes?'},
+    {id:'qr3',titulo:'Cotización lista',contenido:'Te comparto la cotización 👆 ¿Tienes alguna pregunta?'},
+    {id:'qr4',titulo:'Seguimiento',contenido:'Hola, ¿pudiste revisar la cotización? Estamos para cualquier duda 😊'},
+    {id:'qr5',titulo:'Mecánico Alianza',contenido:'Como mecánico aliado tienes 5% de descuento en toda la línea 💪 ¿Qué pieza necesitas?'},
+  ];
+}
+
+function demoEtapas(){
+  return [
+    {id:'et1',nombre:'Pendiente',color:'#888',icono:'⏳'},
+    {id:'et2',nombre:'Contestado',color:'#3498db',icono:'💬'},
+    {id:'et3',nombre:'Prospecto',color:'#9b59b6',icono:'🎯'},
+    {id:'et4',nombre:'Cotizado',color:'#f39c12',icono:'📋'},
+    {id:'et5',nombre:'Agendado',color:'#1abc9c',icono:'📅'},
+    {id:'et6',nombre:'Cerrado',color:'#2ecc71',icono:'✅'},
+  ];
+}
+
+function demoAsesores(){
+  return [{id:'a1',nombre:'Luis R.',rol:'admin'},{id:'a2',nombre:'Karla M.',rol:'asesor'},{id:'a3',nombre:'Diego V.',rol:'asesor'}];
+}
+
+// ── TOGGLE DEMO ───────────────────────────────────────────────
+function toggleDemo(){
+  _demo = !_demo;
+  document.getElementById('demo-banner').style.display = _demo ? 'block' : 'none';
+  document.getElementById('btn-demo').style.color = _demo ? 'var(--gold)' : '';
+  init();
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+async function init(){
+  try{
+    if(_demo){
+      _etapas = demoEtapas();
+      _asesores = demoAsesores();
+      _quickReplies = demoQuickReplies();
+      _leadsAll = demoLeads();
+    } else {
+      // Load from Supabase
+      const [etapas, asesores, qr] = await Promise.all([
+        sb(`lp_etapas?empresa_id=eq.${EMPRESA_ID}&order=orden.asc`),
+        sb(`lp_asesores?empresa_id=eq.${EMPRESA_ID}&activo=eq.true&order=nombre.asc`),
+        sb(`lp_mensajes_rapidos?empresa_id=eq.${EMPRESA_ID}&activo=eq.true&order=orden.asc`),
+      ]);
+      _etapas = etapas||[];
+      _asesores = asesores||[];
+      _quickReplies = qr||[];
+
+      await loadLeads();
+    }
+
+    // Populate selects
+    const nlAsesor = document.getElementById('nl-asesor');
+    nlAsesor.innerHTML = '<option value="">Sin asignar</option>';
+    _asesores.forEach(a => nlAsesor.innerHTML += `<option value="${a.id}">${a.nombre}</option>`);
+
+    renderInbox();
+    renderQuickReplies();
+
+    if(_demo) renderInbox();
+
+    // Realtime (solo modo live)
+    if(!_demo) subscribeRealtime();
+
+  } catch(e){
+    console.error(e);
+    if(!_demo){
+      document.getElementById('inbox-list').innerHTML = `<div style="padding:20px;text-align:center;color:var(--text3)">⚠️ Sin conexión a base de datos.<br><small>Activa el modo demo con 🎭</small></div>`;
+    }
+  }
+  // Demo auto-activate from URL
+  if(_demo) document.getElementById('demo-banner').style.display='block';
+}
+
+async function loadLeads(){
+  const list = await sb(`lp_leads?empresa_id=eq.${EMPRESA_ID}&order=updated_at.desc&select=*,etapa:lp_etapas(nombre,color),asesor:lp_asesores(nombre),etiquetas_lead:lp_lead_etiquetas(etiqueta:lp_etiquetas(nombre,color))`);
+  _leadsAll = list||[];
+  renderInbox();
+}
+
+// ── REALTIME ──────────────────────────────────────────────────
+function subscribeRealtime(){
+  // Supabase Realtime via WebSocket
+  const ws = new WebSocket(`${SUPABASE_URL.replace('https','wss')}/realtime/v1/websocket?apikey=${SUPABASE_ANON_KEY}&vsn=1.0.0`);
+  ws.onopen = () => {
+    ws.send(JSON.stringify({topic:'realtime:public:lp_mensajes',event:'phx_join',payload:{},ref:1}));
+    ws.send(JSON.stringify({topic:'realtime:public:lp_leads',event:'phx_join',payload:{},ref:2}));
+  };
+  ws.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+    if(msg.event==='INSERT'&&msg.topic.includes('lp_mensajes')){
+      const m = msg.payload.record;
+      if(_activeLead && m.lead_id===_activeLead.id){
+        _mensajes.push(m);
+        renderMessages();
+        scrollToBottom();
+      }
+      // Actualizar preview en inbox
+      loadLeads();
+    }
+    if(msg.event!=='phx_reply') return;
+  };
+}
+
+// ── RENDER INBOX ──────────────────────────────────────────────
+let _search='';
+function filterLeads(){
+  _search = document.getElementById('search-input').value.toLowerCase();
+  renderInbox();
+}
+
+function setFilter(f, el){
+  _filterActive = f;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderInbox();
+}
+
+function getFilteredLeads(){
+  let list = _leadsAll;
+  if(_filterActive==='sin_leer') list = list.filter(l=>(l.no_leidos||0)>0);
+  else if(_filterActive!=='todos') list = list.filter(l=>l.tipo_cliente===_filterActive);
+  if(_search) list = list.filter(l=>(l.nombre||'').toLowerCase().includes(_search)||(l.telefono||'').includes(_search));
+  return list;
+}
+
+function tipoClass(t){ return t==='mecanico'?'tipo-mecanico':t==='refaccionaria'?'tipo-refaccionaria':'tipo-usuario'; }
+function tipoLabel(t){ return t==='mecanico'?'🔧 MEC':t==='refaccionaria'?'🏪 REF':'👤'; }
+
+function relativeTime(ts){
+  const diff=(Date.now()-new Date(ts))/1000;
+  if(diff<60) return 'ahora';
+  if(diff<3600) return `${Math.floor(diff/60)}min`;
+  if(diff<86400) return `${Math.floor(diff/3600)}h`;
+  return `${Math.floor(diff/86400)}d`;
+}
+
+function renderInbox(){
+  const list = getFilteredLeads();
+  const el = document.getElementById('inbox-list');
+  const totalUnread = _leadsAll.reduce((a,l)=>a+(l.no_leidos||0),0);
+  const badge = document.getElementById('badge-inbox');
+  badge.textContent = totalUnread;
+  badge.style.display = totalUnread>0?'':'none';
+
+  if(!list.length){
+    el.innerHTML='<div style="padding:30px;text-align:center;color:var(--text3)">Sin resultados</div>';
+    return;
+  }
+
+  el.innerHTML = list.map(l=>{
+    const col = avatarColor(l.nombre||l.telefono||'?');
+    const ini = initials(l.nombre||l.telefono);
+    const etapa = l.etapa||{nombre:'—',color:'#888'};
+    const isActive = _activeLead && _activeLead.id===l.id;
+    const preview = _demo ? (l.preview||'...') : (l.ultimo_mensaje||'—');
+    const etiquetas = (l.etiquetas_lead||[]).slice(0,3);
+    return `
+    <div class="conv-item${isActive?' active':''}" onclick="openLead('${l.id}')">
+      <div class="conv-avatar" style="background:${col}">${ini}</div>
+      <div class="conv-body">
+        <div class="conv-top">
+          <span class="conv-name">${l.nombre||l.telefono}</span>
+          <span class="conv-time">${l.ultimo_contacto?relativeTime(l.ultimo_contacto):''}</span>
+        </div>
+        <div class="conv-preview">${preview}</div>
+        <div class="conv-tags" style="align-items:center;gap:5px">
+          <span class="stage-pill" style="background:${etapa.color}22;color:${etapa.color}">${etapa.nombre}</span>
+          <span class="tipo-icon ${tipoClass(l.tipo_cliente)}">${tipoLabel(l.tipo_cliente)}</span>
+          ${etiquetas.map(e=>`<span class="tag-dot" style="background:${e.etiqueta.color}" title="${e.etiqueta.nombre}"></span>`).join('')}
+          ${(l.no_leidos||0)>0?`<span class="unread-badge" style="margin-left:auto">${l.no_leidos}</span>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── OPEN LEAD ─────────────────────────────────────────────────
+async function openLead(id){
+  _activeLead = (_demo?demoLeads():_leadsAll).find(l=>l.id===id)||_leadsAll.find(l=>l.id===id);
+  if(!_activeLead) return;
+
+  // Update active state in inbox
+  document.querySelectorAll('.conv-item').forEach(el=>{
+    el.classList.toggle('active', el.onclick.toString().includes(`'${id}'`));
+  });
+  // Re-render to update active highlight
+  renderInbox();
+
+  // Show chat
+  document.getElementById('chat-empty').style.display='none';
+  const cv = document.getElementById('chat-view');
+  cv.style.display='flex';
+
+  // Header
+  const col=avatarColor(_activeLead.nombre||_activeLead.telefono||'?');
+  document.getElementById('ch-avatar').style.background=col;
+  document.getElementById('ch-avatar').textContent=initials(_activeLead.nombre||_activeLead.telefono);
+  document.getElementById('ch-name').textContent=_activeLead.nombre||_activeLead.telefono;
+  document.getElementById('ch-meta').textContent=`${_activeLead.telefono||''} · ${tipoLabel(_activeLead.tipo_cliente)} ${_activeLead.tipo_cliente} · ${_activeLead.asesor?.nombre||'Sin asesor'}`;
+
+  // Stage select
+  const ss = document.getElementById('stage-select');
+  const etapa = _activeLead.etapa||{};
+  ss.innerHTML = _etapas.map(e=>`<option value="${e.id}" ${(e.nombre===etapa.nombre)?'selected':''}>${e.icono||''} ${e.nombre}</option>`).join('');
+
+  // Load messages
+  document.getElementById('chat-messages').innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  try{
+    if(_demo){
+      _mensajes = demoMensajes(id);
+    } else {
+      _mensajes = await sb(`lp_mensajes?lead_id=eq.${id}&order=created_at.asc&select=*,asesor:lp_asesores(nombre)`) || [];
+      // Mark as read
+      await sb(`lp_leads?id=eq.${id}`, { method:'PATCH', body:JSON.stringify({no_leidos:0}) });
+      _activeLead.no_leidos=0;
+      renderInbox();
+    }
+    renderMessages();
+    scrollToBottom();
+  } catch(e){ console.error(e); }
+
+  // Profile
+  renderProfile();
+}
+
+// ── RENDER MESSAGES ───────────────────────────────────────────
+function formatDate(ts){
+  const d=new Date(ts), today=new Date();
+  if(d.toDateString()===today.toDateString()) return 'Hoy';
+  const yest=new Date(); yest.setDate(yest.getDate()-1);
+  if(d.toDateString()===yest.toDateString()) return 'Ayer';
+  return d.toLocaleDateString('es-MX',{weekday:'long',month:'long',day:'numeric'});
+}
+function formatTime(ts){ return new Date(ts).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}); }
+
+function renderMessages(){
+  const el=document.getElementById('chat-messages');
+  if(!_mensajes.length){
+    el.innerHTML='<div style="text-align:center;color:var(--text3);padding:30px;font-size:13px">Sin mensajes aún. Envía el primero 👋</div>';
+    return;
+  }
+  let html=''; let lastDate='';
+  _mensajes.forEach(m=>{
+    const d=formatDate(m.created_at);
+    if(d!==lastDate){
+      html+=`<div class="date-divider"><span>${d}</span></div>`;
+      lastDate=d;
+    }
+    const ent=m.direccion==='entrante';
+    html+=`<div class="msg-group" style="align-items:${ent?'flex-start':'flex-end'}">
+      ${!ent&&m.asesor?.nombre?`<div class="msg-asesor">${m.asesor.nombre}</div>`:''}
+      <div class="msg-bubble msg-${m.direccion}">${escHtml(m.contenido)}</div>
+      <div class="msg-time${ent?'':' right'}">${formatTime(m.created_at)}</div>
+    </div>`;
+  });
+  el.innerHTML=html;
+}
+
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
+function scrollToBottom(){ const el=document.getElementById('chat-messages'); el.scrollTop=el.scrollHeight; }
+
+// ── SEND MESSAGE ──────────────────────────────────────────────
+async function sendMessage(){
+  const input=document.getElementById('msg-input');
+  const text=input.value.trim();
+  if(!text||!_activeLead) return;
+  input.value='';
+  input.style.height='auto';
+
+  const msg={
+    id:`local-${Date.now()}`,
+    lead_id:_activeLead.id,
+    direccion:'saliente',
+    contenido:text,
+    asesor:{nombre:'Luis R.'},
+    created_at:new Date().toISOString()
+  };
+  _mensajes.push(msg);
+  renderMessages();
+  scrollToBottom();
+
+  if(!_demo){
+    try{
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/whatsapp-send`, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${SUPABASE_ANON_KEY}` },
+        body:JSON.stringify({
+          lead_id:_activeLead.id,
+          telefono:_activeLead.telefono,
+          contenido:text
+        })
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error ? JSON.stringify(data.error) : 'Error al enviar');
+    } catch(e){
+      console.error('Error al enviar mensaje:',e);
+      showToast('❌ No se pudo enviar el mensaje');
+    }
+  }
+}
+
+// ── QUICK REPLIES ─────────────────────────────────────────────
+function renderQuickReplies(){
+  const el=document.getElementById('quick-replies-bar');
+  el.innerHTML=_quickReplies.map(qr=>`
+    <div class="qr-btn" onclick="useQuickReply('${qr.id}')">${qr.titulo}</div>
+  `).join('');
+}
+
+function useQuickReply(id){
+  const qr=_quickReplies.find(q=>q.id===id);
+  if(!qr) return;
+  document.getElementById('msg-input').value=qr.contenido;
+  document.getElementById('msg-input').focus();
+}
+
+// ── MOVE STAGE ────────────────────────────────────────────────
+async function moveStage(){
+  const etapaId=document.getElementById('stage-select').value;
+  if(!_activeLead||!etapaId) return;
+  const etapa=_etapas.find(e=>e.id===etapaId);
+  if(etapa) _activeLead.etapa=etapa;
+  if(!_demo){
+    try{ await sb(`lp_leads?id=eq.${_activeLead.id}`, { method:'PATCH', body:JSON.stringify({etapa_id:etapaId}) }); }
+    catch(e){ console.error(e); }
+  }
+  renderInbox();
+}
+
+// ── PROFILE PANEL ─────────────────────────────────────────────
+function toggleProfile(){
+  _profileVisible=!_profileVisible;
+  document.getElementById('profile-panel').style.display=_profileVisible?'flex':'none';
+}
+
+function renderProfile(){
+  if(!_activeLead) return;
+  const l=_activeLead;
+  const col=avatarColor(l.nombre||l.telefono||'?');
+  const etiquetas=(l.etiquetas_lead||[]);
+  document.getElementById('profile-body').innerHTML=`
+    <div class="profile-avatar" style="background:${col}">${initials(l.nombre||l.telefono)}</div>
+    <div class="profile-name">${l.nombre||'Sin nombre'}</div>
+    <div class="profile-phone">${l.telefono||'—'}</div>
+
+    <div class="profile-section">
+      <h4>Información</h4>
+      <div class="profile-field"><label>Nombre</label><input type="text" id="pf-nombre" value="${l.nombre||''}" onchange="updateProfileField('nombre',this.value)"></div>
+      <div class="profile-field">
+        <label>Tipo de cliente</label>
+        <select id="pf-tipo" onchange="updateProfileField('tipo_cliente',this.value)">
+          <option value="usuario_final" ${l.tipo_cliente==='usuario_final'?'selected':''}>👤 Usuario Final</option>
+          <option value="mecanico" ${l.tipo_cliente==='mecanico'?'selected':''}>🔧 Mecánico</option>
+          <option value="refaccionaria" ${l.tipo_cliente==='refaccionaria'?'selected':''}>🏪 Refaccionaria</option>
+        </select>
+      </div>
+      <div class="profile-field">
+        <label>Asesor asignado</label>
+        <select id="pf-asesor" onchange="updateProfileField('asesor_id',this.value)">
+          <option value="">Sin asignar</option>
+          ${_asesores.map(a=>`<option value="${a.id}" ${l.asesor?.nombre===a.nombre?'selected':''}>${a.nombre}</option>`).join('')}
+        </select>
+      </div>
+      <div class="profile-field"><label>Vehículo</label><input type="text" id="pf-vehiculo" value="${l.vehiculo_info||''}" placeholder="Ej: Toyota Corolla 2019" onchange="updateProfileField('vehiculo_info',this.value)"></div>
+      <div class="profile-field"><label>Notas</label><textarea id="pf-notas" onchange="updateProfileField('notas',this.value)">${l.notas||''}</textarea></div>
+    </div>
+
+    <div class="profile-section">
+      <h4>Etiquetas</h4>
+      <div class="etiquetas-wrap" id="pf-etiquetas">
+        ${etiquetas.map(e=>`<span class="etiqueta-chip remove" style="background:${e.etiqueta.color}22;color:${e.etiqueta.color}">${e.etiqueta.nombre}</span>`).join('')}
+        <span class="add-etiqueta" onclick="addEtiqueta()">＋ Agregar</span>
+      </div>
+    </div>
+
+    <button class="btn-guardar" onclick="saveProfile()">💾 Guardar cambios</button>
+  `;
+}
+
+let _profileChanges={};
+function updateProfileField(key,val){ _profileChanges[key]=val; }
+
+async function saveProfile(){
+  if(!_activeLead) return;
+  if(_demo){ showToast('Guardado (demo)'); return; }
+  try{
+    await sb(`lp_leads?id=eq.${_activeLead.id}`, { method:'PATCH', body:JSON.stringify({..._profileChanges,updated_at:new Date().toISOString()}) });
+    Object.assign(_activeLead, _profileChanges);
+    _profileChanges={};
+    showToast('✅ Guardado');
+    renderInbox();
+  } catch(e){ showToast('❌ Error al guardar'); }
+}
+
+function addEtiqueta(){ showToast('Próximamente: selector de etiquetas'); }
+
+// ── NEW LEAD MODAL ────────────────────────────────────────────
+let _nlTipo='usuario_final';
+function showNewLeadModal(){ document.getElementById('modal-new-lead').style.display='flex'; }
+function closeModal(id){ document.getElementById(id).style.display='none'; }
+function selectTipo(el){
+  document.querySelectorAll('.tipo-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  _nlTipo=el.dataset.tipo;
+}
+
+async function createLead(){
+  const tel=document.getElementById('nl-telefono').value.trim();
+  if(!tel){ showToast('❌ Ingresa un teléfono'); return; }
+  const nombre=document.getElementById('nl-nombre').value.trim();
+  const asesor=document.getElementById('nl-asesor').value;
+  const vehiculo=document.getElementById('nl-vehiculo').value.trim();
+  const etapaId=_etapas[0]?.id;
+
+  if(_demo){
+    showToast('✅ Lead creado (demo)');
+    closeModal('modal-new-lead');
+    return;
+  }
+  try{
+    const [lead]=await sb('lp_leads', { method:'POST', body:JSON.stringify({
+      empresa_id:EMPRESA_ID,
+      nombre:nombre||null,
+      telefono:tel,
+      tipo_cliente:_nlTipo,
+      asesor_id:asesor||null,
+      vehiculo_info:vehiculo||null,
+      etapa_id:etapaId||null
+    })});
+    closeModal('modal-new-lead');
+    await loadLeads();
+    openLead(lead.id);
+    showToast('✅ Lead creado');
+  } catch(e){ showToast('❌ Error: '+e.message); }
+}
+
+// ── TOAST ─────────────────────────────────────────────────────
+function showToast(msg, dur=3000){
+  let t=document.getElementById('toast');
+  if(!t){ t=document.createElement('div'); t.id='toast';
+    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#222;border:1px solid #444;padding:10px 20px;border-radius:10px;color:#fff;font-size:13px;z-index:999;transition:opacity .3s';
+    document.body.appendChild(t); }
+  t.textContent=msg; t.style.opacity='1';
+  clearTimeout(t._t);
+  t._t=setTimeout(()=>t.style.opacity='0',dur);
+}
+
+// ── START ─────────────────────────────────────────────────────
+if(_demo) document.getElementById('demo-banner').style.display='block';
+requireAuth().then(ok => { if(ok) init(); });
+</script>
+</body>
+</html>
