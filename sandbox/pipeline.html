@@ -168,11 +168,11 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
       </div>
       <div class="modal-section">
         <label>Asesor</label>
-        <select id="ml-asesor"></select>
+        <select id="ml-asesor" onchange="moveLeadStage()"></select>
       </div>
       <div class="modal-section">
         <label>Notas rápidas</label>
-        <textarea id="ml-notas" rows="3" placeholder="Agrega una nota..."></textarea>
+        <textarea id="ml-notas" rows="3" placeholder="Agrega una nota..." onblur="moveLeadStage()"></textarea>
       </div>
     </div>
     <div class="modal-actions">
@@ -353,9 +353,25 @@ function openLeadModal(id){
 }
 
 async function moveLeadStage(){
-  if(!_selectedLead||_demo)return;
+  if(!_selectedLead)return;
   const etapaId=document.getElementById('ml-etapa').value;
-  try{ await sb(`lp_leads?id=eq.${_selectedLead.id}`,{method:'PATCH',body:JSON.stringify({etapa_id:etapaId})}); }
+  const asesorId=document.getElementById('ml-asesor').value;
+  const notas=document.getElementById('ml-notas').value;
+  if(_demo){
+    const etapa=_etapas.find(e=>e.id===etapaId);
+    if(etapa)_selectedLead.etapa=etapa;
+    const asesor=_asesores.find(a=>a.id===asesorId);
+    _selectedLead.asesor=asesor?{nombre:asesor.nombre}:null;
+    _selectedLead.notas=notas;
+    document.getElementById('ml-badges').innerHTML=`
+      <span class="badge" style="border-color:${_selectedLead.etapa?.color||'#888'};color:${_selectedLead.etapa?.color||'#888'}">${_selectedLead.etapa?.icono||''} ${_selectedLead.etapa?.nombre||'—'}</span>
+      <span class="badge" style="border-color:#555;color:#aaa">${tipoLabel(_selectedLead.tipo_cliente)}</span>
+      ${_selectedLead.asesor?.nombre?`<span class="badge" style="border-color:#555;color:#aaa">👤 ${_selectedLead.asesor.nombre}</span>`:''}
+    `;
+    renderKanban();
+    return;
+  }
+  try{ await sb(`lp_leads?id=eq.${_selectedLead.id}`,{method:'PATCH',body:JSON.stringify({etapa_id:etapaId,asesor_id:asesorId||null,notas})}); closeModal(); await loadData(); }
   catch(e){console.error(e);}
 }
 

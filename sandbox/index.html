@@ -626,7 +626,7 @@ function renderInbox(){
 
 // ── OPEN LEAD ─────────────────────────────────────────────────
 async function openLead(id){
-  _activeLead = (_demo?demoLeads():_leadsAll).find(l=>l.id===id)||_leadsAll.find(l=>l.id===id);
+  _activeLead = _leadsAll.find(l=>l.id===id);
   if(!_activeLead) return;
 
   // Update active state in inbox
@@ -832,7 +832,18 @@ function updateProfileField(key,val){ _profileChanges[key]=val; }
 
 async function saveProfile(){
   if(!_activeLead) return;
-  if(_demo){ showToast('Guardado (demo)'); return; }
+  if(_demo){
+    if('asesor_id' in _profileChanges){
+      const a=_asesores.find(x=>x.id===_profileChanges.asesor_id);
+      _activeLead.asesor=a?{nombre:a.nombre}:null;
+      delete _profileChanges.asesor_id;
+    }
+    Object.assign(_activeLead,_profileChanges);
+    _profileChanges={};
+    showToast('✅ Guardado (simulado)');
+    renderInbox();
+    return;
+  }
   try{
     await sb(`lp_leads?id=eq.${_activeLead.id}`, { method:'PATCH', body:JSON.stringify({..._profileChanges,updated_at:new Date().toISOString()}) });
     Object.assign(_activeLead, _profileChanges);
@@ -863,8 +874,24 @@ async function createLead(){
   const etapaId=_etapas[0]?.id;
 
   if(_demo){
-    showToast('✅ Lead creado (demo)');
+    const asesorObj=_asesores.find(a=>a.id===asesor);
+    const nuevo={
+      id:'nl-'+Date.now(),
+      nombre:nombre||null,
+      telefono:tel,
+      tipo_cliente:_nlTipo,
+      asesor:asesorObj?{nombre:asesorObj.nombre}:null,
+      vehiculo_info:vehiculo||null,
+      etapa:_etapas[0]||null,
+      no_leidos:0,
+      ultimo_contacto:new Date().toISOString(),
+      etiquetas_lead:[]
+    };
+    _leadsAll.unshift(nuevo);
     closeModal('modal-new-lead');
+    renderInbox();
+    openLead(nuevo.id);
+    showToast('✅ Lead creado (simulado)');
     return;
   }
   try{

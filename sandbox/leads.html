@@ -408,7 +408,26 @@ function selTipo(el){document.querySelectorAll('.tipo-btn').forEach(b=>b.classLi
 async function createLead(){
   const tel=document.getElementById('nl-tel').value.trim();
   if(!tel){alert('Teléfono requerido');return;}
-  if(_demo){closeModal('modal-new-lead');showToast('✅ Lead creado (demo)');return;}
+  if(_demo){
+    const asesorObj=_asesores.find(a=>a.id===document.getElementById('nl-asesor').value);
+    const etapaObj=_etapas.find(e=>e.id===document.getElementById('nl-etapa').value)||_etapas[0];
+    _leads.unshift({
+      id:'nl-'+Date.now(),
+      nombre:document.getElementById('nl-nombre').value||null,
+      telefono:tel,
+      tipo_cliente:_nlTipo,
+      vehiculo_info:document.getElementById('nl-vehiculo').value||null,
+      asesor:asesorObj?{nombre:asesorObj.nombre}:null,
+      etapa:etapaObj||null,
+      no_leidos:0,
+      ultimo_contacto:new Date().toISOString(),
+      etiquetas_lead:[]
+    });
+    closeModal('modal-new-lead');
+    applyFilters();
+    showToast('✅ Lead creado (simulado)');
+    return;
+  }
   try{
     const[l]=await sb('lp_leads',{method:'POST',body:JSON.stringify({
       empresa_id:EMPRESA_ID,nombre:document.getElementById('nl-nombre').value||null,
