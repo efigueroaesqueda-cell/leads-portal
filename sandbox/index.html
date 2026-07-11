@@ -120,10 +120,11 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 .attach-option{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13px;color:var(--text);cursor:pointer;white-space:nowrap}
 .attach-option:hover{background:var(--bg4)}
 
-.pending-attach{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 14px;background:var(--bg3);border-bottom:1px solid var(--border)}
-.pending-attach-info{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);overflow:hidden}
-.pending-attach-info span:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pending-attach-cancel{width:24px;height:24px;border-radius:50%;background:var(--bg4);border:none;color:var(--text2);cursor:pointer;flex-shrink:0;font-size:12px}
+.pending-attach-list{display:flex;flex-direction:column;gap:1px;max-height:160px;overflow-y:auto;background:var(--bg3);border-bottom:1px solid var(--border)}
+.pending-attach-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 14px}
+.pending-attach-info{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);overflow:hidden;flex:1}
+.pending-attach-info span.pa-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pending-attach-cancel{width:22px;height:22px;border-radius:50%;background:var(--bg4);border:none;color:var(--text2);cursor:pointer;flex-shrink:0;font-size:12px}
 .pending-attach-cancel:hover{color:var(--red);background:rgba(231,76,60,.15)}
 
 .btn-mic{width:40px;height:40px;border-radius:12px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;gap:4px}
@@ -302,14 +303,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
       <!-- Input area -->
       <div id="chat-input-area">
         <div class="quick-replies" id="quick-replies-bar"></div>
-        <div class="pending-attach" id="pending-attach" style="display:none">
-          <div class="pending-attach-info">
-            <span id="pending-attach-icon">📎</span>
-            <span id="pending-attach-name"></span>
-            <audio id="pending-attach-audio" controls style="display:none;height:32px;max-width:180px"></audio>
-          </div>
-          <button class="pending-attach-cancel" onclick="cancelAttach()" title="Quitar">✕</button>
-        </div>
+        <div class="pending-attach-list" id="pending-attach-list" style="display:none"></div>
         <div class="input-row">
           <div class="attach-wrap">
             <button class="btn-attach" onclick="toggleAttachMenu(event)" title="Adjuntar">＋</button>
@@ -674,7 +668,8 @@ async function openLead(id){
   _activeLead = _leadsAll.find(l=>l.id===id);
   if(!_activeLead) return;
 
-  cancelAttach();
+  _pendingAttachments=[];
+  renderPendingAttach();
   if(_mediaRecorder && _mediaRecorder.state==='recording') _mediaRecorder.stop();
 
   // Update active state in inbox
@@ -768,44 +763,46 @@ function toggleAttachMenu(e){
 }
 document.addEventListener('click', ()=> document.getElementById('attach-menu')?.classList.remove('show'));
 
-let _pendingAttachment = null; // { tipo, icon, name, url }
+let _pendingAttachments = []; // [{ tipo, icon, name, url }]
 
 function attachFile(tipo){
   document.getElementById('attach-menu').classList.remove('show');
   if(!_activeLead) return;
   const accept = tipo==='imagen' ? 'image/*' : '*/*';
   const inp = document.createElement('input');
-  inp.type='file'; inp.accept=accept;
+  inp.type='file'; inp.accept=accept; inp.multiple=true;
   inp.onchange = ()=>{
-    if(!inp.files[0]) return;
+    if(!inp.files.length) return;
     const icon = tipo==='imagen'?'📷':'📄';
-    _pendingAttachment = { tipo, icon, name: inp.files[0].name, url:null };
-    showPendingAttach();
+    [...inp.files].forEach(f=>{
+      _pendingAttachments.push({ tipo, icon, name:f.name, url:null });
+    });
+    renderPendingAttach();
   };
   inp.click();
 }
 
-function showPendingAttach(){
-  const bar = document.getElementById('pending-attach');
-  const audioEl = document.getElementById('pending-attach-audio');
-  document.getElementById('pending-attach-icon').textContent = _pendingAttachment.icon;
-  if(_pendingAttachment.tipo==='audio'){
-    document.getElementById('pending-attach-name').style.display='none';
-    audioEl.src = _pendingAttachment.url;
-    audioEl.style.display='inline-block';
-  } else {
-    document.getElementById('pending-attach-name').style.display='inline';
-    document.getElementById('pending-attach-name').textContent = _pendingAttachment.name;
-    audioEl.style.display='none';
-  }
-  bar.style.display='flex';
-  updateSendMicVisibility();
+function renderPendingAttach(){
+  const list = document.getElementById('pending-attach-list');
+  if(!_pendingAttachments.length){ list.style.display='none'; list.innerHTML=''; return; }
+  list.style.display='flex';
+  list.innerHTML = _pendingAttachments.map((a,i)=>{
+    if(a.tipo==='audio'){
+      return `<div class="pending-attach-item">
+        <div class="pending-attach-info"><span>${a.icon}</span><audio controls src="${a.url}" style="height:30px;max-width:180px"></audio></div>
+        <button class="pending-attach-cancel" onclick="cancelAttach(${i})" title="Quitar">✕</button>
+      </div>`;
+    }
+    return `<div class="pending-attach-item">
+      <div class="pending-attach-info"><span>${a.icon}</span><span class="pa-name">${a.name}</span></div>
+      <button class="pending-attach-cancel" onclick="cancelAttach(${i})" title="Quitar">✕</button>
+    </div>`;
+  }).join('');
 }
 
-function cancelAttach(){
-  _pendingAttachment = null;
-  document.getElementById('pending-attach').style.display='none';
-  updateSendMicVisibility();
+function cancelAttach(idx){
+  _pendingAttachments.splice(idx,1);
+  renderPendingAttach();
 }
 
 function updateSendMicVisibility(){
@@ -831,9 +828,9 @@ async function toggleRecording(){
       stream.getTracks().forEach(t=>t.stop());
       const blob = new Blob(_recordedChunks, {type:'audio/webm'});
       const url = URL.createObjectURL(blob);
-      _pendingAttachment = { tipo:'audio', icon:'🎤', name:'Nota de voz', url };
+      _pendingAttachments.push({ tipo:'audio', icon:'🎤', name:'Nota de voz', url });
       stopRecordUI();
-      showPendingAttach();
+      renderPendingAttach();
     };
     _mediaRecorder.start();
     startRecordUI();
@@ -885,23 +882,25 @@ async function sendMessage(){
   const input=document.getElementById('msg-input');
   const text=input.value.trim();
   if(!_activeLead) return;
-  if(!text && !_pendingAttachment) return;
+  if(!text && !_pendingAttachments.length) return;
 
-  if(_pendingAttachment){
-    const msg={
-      id:`local-${Date.now()}`,
-      lead_id:_activeLead.id,
-      direccion:'saliente',
-      contenido: _pendingAttachment.tipo==='audio' ? '🎤 Nota de voz' : `${_pendingAttachment.icon} ${_pendingAttachment.name}`,
-      tipo: _pendingAttachment.tipo,
-      audioUrl: _pendingAttachment.tipo==='audio' ? _pendingAttachment.url : null,
-      asesor:{nombre:'Luis R.'},
-      created_at:new Date().toISOString()
-    };
-    _mensajes.push(msg);
-    _pendingAttachment=null;
-    document.getElementById('pending-attach').style.display='none';
-    showToast('✅ Adjunto enviado (simulado)');
+  if(_pendingAttachments.length){
+    _pendingAttachments.forEach((a,i)=>{
+      const msg={
+        id:`local-${Date.now()}-${i}`,
+        lead_id:_activeLead.id,
+        direccion:'saliente',
+        contenido: a.tipo==='audio' ? '🎤 Nota de voz' : `${a.icon} ${a.name}`,
+        tipo: a.tipo,
+        audioUrl: a.tipo==='audio' ? a.url : null,
+        asesor:{nombre:'Luis R.'},
+        created_at:new Date().toISOString()
+      };
+      _mensajes.push(msg);
+    });
+    showToast(`✅ ${_pendingAttachments.length} adjunto(s) enviado(s) (simulado)`);
+    _pendingAttachments=[];
+    renderPendingAttach();
   }
 
   if(text){
