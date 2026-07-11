@@ -71,7 +71,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 .tipo-usuario{background:rgba(149,165,166,.15);color:#aaa}
 
 /* CHAT PANEL */
-#chat-panel{flex:1;display:flex;flex-direction:column;height:100%;min-width:0}
+#chat-panel{flex:1;display:flex;flex-direction:column;height:100%;min-width:0;min-height:0}
 #chat-empty{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:var(--text3)}
 #chat-empty .icon{font-size:48px;opacity:.3}
 
@@ -112,6 +112,13 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 .btn-send{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;color:#111;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;font-weight:700}
 .btn-send:hover{box-shadow:0 4px 16px rgba(200,169,81,.4);transform:translateY(-1px)}
 .btn-send:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.attach-wrap{position:relative;flex-shrink:0}
+.btn-attach{width:40px;height:40px;border-radius:12px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.btn-attach:hover{color:var(--gold);border-color:var(--gold)}
+.attach-menu{display:none;position:absolute;bottom:48px;left:0;background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:6px;min-width:150px;box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:20}
+.attach-menu.show{display:block}
+.attach-option{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13px;color:var(--text);cursor:pointer;white-space:nowrap}
+.attach-option:hover{background:var(--bg4)}
 
 /* LEAD PROFILE PANEL */
 #profile-panel{width:280px;min-width:280px;background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;height:100%;overflow:hidden}
@@ -257,7 +264,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
       <div style="font-size:13px">o crea un nuevo lead con el botón ＋</div>
     </div>
 
-    <div id="chat-view" style="display:none;flex:1;flex-direction:column;height:100%">
+    <div id="chat-view" style="display:none;flex:1;flex-direction:column;height:100%;min-height:0">
       <!-- Chat Header -->
       <div id="chat-header">
         <div class="conv-avatar" id="ch-avatar" style="width:36px;height:36px;font-size:14px;background:#888"></div>
@@ -280,6 +287,14 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
       <div id="chat-input-area">
         <div class="quick-replies" id="quick-replies-bar"></div>
         <div class="input-row">
+          <div class="attach-wrap">
+            <button class="btn-attach" onclick="toggleAttachMenu(event)" title="Adjuntar">＋</button>
+            <div class="attach-menu" id="attach-menu">
+              <div class="attach-option" onclick="attachFile('imagen')">📷 <span>Imagen</span></div>
+              <div class="attach-option" onclick="attachFile('documento')">📄 <span>Documento</span></div>
+              <div class="attach-option" onclick="attachFile('audio')">🎤 <span>Audio</span></div>
+            </div>
+          </div>
           <textarea id="msg-input" placeholder="Escribe un mensaje..." rows="1"
             onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"
             oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"></textarea>
@@ -708,6 +723,38 @@ function renderMessages(){
 
 function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
 function scrollToBottom(){ const el=document.getElementById('chat-messages'); el.scrollTop=el.scrollHeight; }
+
+// ── ADJUNTAR ARCHIVOS (simulado) ─────────────────────────────
+function toggleAttachMenu(e){
+  e.stopPropagation();
+  document.getElementById('attach-menu').classList.toggle('show');
+}
+document.addEventListener('click', ()=> document.getElementById('attach-menu')?.classList.remove('show'));
+
+function attachFile(tipo){
+  document.getElementById('attach-menu').classList.remove('show');
+  if(!_activeLead) return;
+  const accept = tipo==='imagen' ? 'image/*' : tipo==='audio' ? 'audio/*' : '*/*';
+  const inp = document.createElement('input');
+  inp.type='file'; inp.accept=accept;
+  inp.onchange = ()=>{
+    if(!inp.files[0]) return;
+    const icon = tipo==='imagen'?'📷':tipo==='audio'?'🎤':'📄';
+    const msg={
+      id:`local-${Date.now()}`,
+      lead_id:_activeLead.id,
+      direccion:'saliente',
+      contenido:`${icon} ${inp.files[0].name}`,
+      asesor:{nombre:'Luis R.'},
+      created_at:new Date().toISOString()
+    };
+    _mensajes.push(msg);
+    renderMessages();
+    scrollToBottom();
+    showToast('✅ Archivo agregado (simulado)');
+  };
+  inp.click();
+}
 
 // ── SEND MESSAGE ──────────────────────────────────────────────
 async function sendMessage(){
