@@ -172,7 +172,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
       </div>
       <div class="modal-section">
         <label>Notas rápidas</label>
-        <textarea id="ml-notas" rows="3" placeholder="Agrega una nota..." onblur="moveLeadStage()"></textarea>
+        <textarea id="ml-notas" rows="3" placeholder="Agrega una nota..." oninput="this.value=this.value.toUpperCase()" onblur="moveLeadStage()"></textarea>
       </div>
     </div>
     <div class="modal-actions">
