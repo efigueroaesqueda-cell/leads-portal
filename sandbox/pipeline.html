@@ -43,7 +43,9 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 
 /* FILTERS BAR */
 .filters-bar{padding:10px 20px;border-bottom:1px solid var(--border);background:var(--bg2);display:flex;gap:8px;align-items:center;flex-shrink:0}
-.filter-chip{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;border:1px solid var(--border2);background:transparent;color:var(--text2);transition:all .15s}
+.filter-chip{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:grab;white-space:nowrap;border:1px solid var(--border2);background:transparent;color:var(--text2);transition:all .15s;user-select:none}
+.filter-chip:active{cursor:grabbing}
+.filter-chip.dragging{opacity:.4}
 .filter-chip:hover,.filter-chip.active{border-color:var(--gold);color:var(--gold);background:rgba(200,169,81,.1)}
 .filters-bar select{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text2);font-size:12px;padding:5px 10px;cursor:pointer;outline:none}
 .filters-bar select:focus{border-color:var(--gold)}
@@ -54,16 +56,26 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 #kanban::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 
 .kanban-col{min-width:240px;width:240px;display:flex;flex-direction:column;gap:8px;flex-shrink:0}
-.col-header{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;background:var(--bg3);border:1px solid var(--border);flex-shrink:0}
+.kanban-col.dragging{opacity:.4}
+.col-header{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;background:var(--bg3);border:1px solid var(--border);flex-shrink:0;cursor:grab;user-select:none}
+.col-header:active{cursor:grabbing}
 .col-icono{font-size:16px}
 .col-nombre{font-size:13px;font-weight:700;flex:1}
 .col-count{font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--bg4)}
-.col-body{flex:1;display:flex;flex-direction:column;gap:8px;overflow-y:auto;padding:4px 2px}
+.col-action{width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text3);cursor:pointer;flex-shrink:0}
+.col-action:hover{background:var(--bg4);color:var(--text)}
+.col-body{flex:1;display:flex;flex-direction:column;gap:8px;overflow-y:auto;padding:4px 2px;border-radius:8px;transition:background .15s}
 .col-body::-webkit-scrollbar{width:3px}
 .col-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.col-body.drop-target{background:rgba(200,169,81,.08);outline:2px dashed var(--gold)}
+.kanban-col-add{min-width:120px;width:120px;flex-shrink:0;display:flex;align-items:flex-start;padding-top:2px}
+.btn-add-etapa{width:100%;padding:10px 8px;border-radius:10px;background:transparent;border:1px dashed var(--border2);color:var(--text3);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-add-etapa:hover{color:var(--gold);border-color:var(--gold)}
 
 /* LEAD CARD */
-.lead-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;transition:all .15s;position:relative}
+.lead-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;cursor:grab;transition:all .15s;position:relative}
+.lead-card:active{cursor:grabbing}
+.lead-card.dragging-card{opacity:.4}
 .lead-card:hover{border-color:var(--border2);background:var(--bg3);transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,.3)}
 .card-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#111;float:left;margin-right:8px;flex-shrink:0}
 .card-name{font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -296,25 +308,35 @@ function renderKanban(){
     const leads=list.filter(l=>(l.etapa?.nombre||'Pendiente')===etapa.nombre);
     const col=document.createElement('div');
     col.className='kanban-col';
+    col.dataset.etapaId=etapa.id;
     col.innerHTML=`
       <div class="col-header">
         <span class="col-icono">${etapa.icono||'📋'}</span>
         <span class="col-nombre">${etapa.nombre}</span>
         <span class="col-count" style="background:${etapa.color}22;color:${etapa.color}">${leads.length}</span>
+        <span class="col-action" onclick="renameEtapa('${etapa.id}')" title="Renombrar">✏️</span>
+        <span class="col-action" onclick="deleteEtapa('${etapa.id}')" title="Borrar embudo">🗑</span>
       </div>
-      <div class="col-body" id="col-${etapa.id}">
+      <div class="col-body" id="col-${etapa.id}" data-etapa-id="${etapa.id}">
         ${leads.length?leads.map(l=>cardHTML(l)).join(''):'<div style="text-align:center;padding:20px;font-size:12px;color:var(--text3)">Sin leads</div>'}
       </div>
     `;
     kanban.appendChild(col);
   });
+  const addCol=document.createElement('div');
+  addCol.className='kanban-col-add';
+  addCol.innerHTML=`<button class="btn-add-etapa" onclick="promptNewEtapa()">＋ Nuevo embudo</button>`;
+  kanban.appendChild(addCol);
+
+  attachColumnDrag();
+  attachCardDrag();
 }
 
 function cardHTML(l){
   const col=avatarColor(l.nombre||l.telefono||'?');
   const ini=initials(l.nombre||l.telefono);
   const veh=l.vehiculo_info?`<div style="font-size:10px;color:var(--text3);margin-top:2px">🚗 ${l.vehiculo_info}</div>`:'';
-  return`<div class="lead-card" onclick="openLeadModal('${l.id}')">
+  return`<div class="lead-card" data-lead-id="${l.id}" onclick="openLeadModal('${l.id}')">
     ${(l.no_leidos||0)>0?`<div class="card-unread">${l.no_leidos}</div>`:''}
     <div class="card-avatar" style="background:${col}">${ini}</div>
     <div style="overflow:hidden">
@@ -329,6 +351,187 @@ function cardHTML(l){
       ${l.asesor?.nombre?`<span class="card-asesor">${l.asesor.nombre}</span>`:''}
     </div>
   </div>`;
+}
+
+function showToast(msg, dur=3000){
+  let t=document.getElementById('toast');
+  if(!t){ t=document.createElement('div'); t.id='toast';
+    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#222;border:1px solid #444;padding:10px 20px;border-radius:10px;color:#fff;font-size:13px;z-index:999;transition:opacity .3s';
+    document.body.appendChild(t); }
+  t.textContent=msg; t.style.opacity='1';
+  clearTimeout(t._t);
+  t._t=setTimeout(()=>t.style.opacity='0',dur);
+}
+
+// ── ARRASTRAR LEADS ENTRE COLUMNAS ───────────────────────────
+function attachCardDrag(){
+  document.querySelectorAll('.lead-card').forEach(card=>{
+    card.addEventListener('pointerdown', (e)=>{
+      const startX=e.clientX, startY=e.clientY;
+      const pid=e.pointerId;
+      let dragging=false;
+      const onMove=(ev)=>{
+        const dx=ev.clientX-startX, dy=ev.clientY-startY;
+        if(!dragging && Math.hypot(dx,dy)>8){
+          dragging=true;
+          card.setPointerCapture(pid);
+          card.classList.add('dragging-card');
+        }
+        if(!dragging) return;
+        document.querySelectorAll('.col-body').forEach(cb=>cb.classList.remove('drop-target'));
+        const el=document.elementFromPoint(ev.clientX, ev.clientY);
+        const colBody=el?.closest('.col-body');
+        if(colBody) colBody.classList.add('drop-target');
+      };
+      const onUp=(ev)=>{
+        document.removeEventListener('pointermove', onMove);
+        document.removeEventListener('pointerup', onUp);
+        document.querySelectorAll('.col-body').forEach(cb=>cb.classList.remove('drop-target'));
+        if(dragging){
+          card.releasePointerCapture(pid);
+          const el=document.elementFromPoint(ev.clientX, ev.clientY);
+          const colBody=el?.closest('.col-body');
+          if(colBody) moveLeadToEtapa(card.dataset.leadId, colBody.dataset.etapaId);
+        }
+      };
+      document.addEventListener('pointermove', onMove);
+      document.addEventListener('pointerup', onUp);
+    });
+  });
+}
+
+function moveLeadToEtapa(leadId, etapaId){
+  const lead=_leads.find(l=>l.id===leadId);
+  const etapa=_etapas.find(e=>e.id===etapaId);
+  if(!lead||!etapa||lead.etapa?.id===etapa.id) return;
+  lead.etapa=etapa;
+  renderKanban();
+  showToast(`✅ Movido a "${etapa.nombre}"`);
+}
+
+// ── ARRASTRAR PARA REORDENAR COLUMNAS ────────────────────────
+function attachColumnDrag(){
+  document.querySelectorAll('.col-header').forEach(header=>{
+    header.addEventListener('pointerdown', (e)=>{
+      if(e.target.closest('.col-action')) return;
+      const item=header.closest('.kanban-col');
+      const startX=e.clientX, startY=e.clientY;
+      const pid=e.pointerId;
+      let dragging=false;
+      const onMove=(ev)=>{
+        const dx=ev.clientX-startX, dy=ev.clientY-startY;
+        if(!dragging && Math.hypot(dx,dy)>8){
+          dragging=true;
+          header.setPointerCapture(pid);
+          item.classList.add('dragging');
+        }
+        if(!dragging) return;
+        const siblings=[...document.querySelectorAll('.kanban-col')].filter(i=>i!==item);
+        for(const sib of siblings){
+          const r=sib.getBoundingClientRect();
+          if(ev.clientX>r.left && ev.clientX<r.right){
+            if(ev.clientX<r.left+r.width/2) item.parentNode.insertBefore(item, sib);
+            else item.parentNode.insertBefore(item, sib.nextSibling);
+            break;
+          }
+        }
+      };
+      const onUp=()=>{
+        document.removeEventListener('pointermove', onMove);
+        document.removeEventListener('pointerup', onUp);
+        if(dragging){
+          header.releasePointerCapture(pid);
+          item.classList.remove('dragging');
+          const ids=[...document.querySelectorAll('.kanban-col')].map(c=>c.dataset.etapaId);
+          const newOrder=ids.map(id=>_etapas.find(e=>e.id===id)).filter(Boolean);
+          newOrder.forEach((e,i)=>e.orden=i+1);
+          _etapas=newOrder;
+        }
+      };
+      document.addEventListener('pointermove', onMove);
+      document.addEventListener('pointerup', onUp);
+    });
+  });
+}
+
+// ── CREAR / RENOMBRAR / BORRAR EMBUDOS ───────────────────────
+function promptNewEtapa(){
+  const nombre=prompt('Nombre del nuevo embudo:');
+  if(!nombre||!nombre.trim()) return;
+  const colores=['#888888','#3498db','#9b59b6','#f39c12','#1abc9c','#2ecc71','#e74c3c','#e67e22'];
+  const nueva={ id:'et-'+Date.now(), nombre:nombre.trim().toUpperCase(), color:colores[_etapas.length%colores.length], icono:'📌', orden:_etapas.length+1 };
+  _etapas.push(nueva);
+  renderKanban();
+  showToast('✅ Embudo creado');
+}
+
+function renameEtapa(id){
+  const etapa=_etapas.find(e=>e.id===id);
+  if(!etapa) return;
+  const nombre=prompt('Nuevo nombre del embudo:', etapa.nombre);
+  if(!nombre||!nombre.trim()) return;
+  etapa.nombre=nombre.trim().toUpperCase();
+  renderKanban();
+  showToast('✅ Embudo renombrado');
+}
+
+function deleteEtapa(id){
+  if(_etapas.length<=1){ showToast('❌ Debe quedar al menos un embudo'); return; }
+  const etapa=_etapas.find(e=>e.id===id);
+  if(!etapa) return;
+  const leadsEnEtapa=_leads.filter(l=>l.etapa?.id===id);
+  const otras=_etapas.filter(e=>e.id!==id);
+  if(leadsEnEtapa.length){
+    const opciones=otras.map((e,i)=>`${i+1}. ${e.nombre}`).join('\n');
+    const resp=prompt(`"${etapa.nombre}" tiene ${leadsEnEtapa.length} lead(s). ¿A cuál embudo los movemos?\n\n${opciones}\n\nEscribe el número:`);
+    const idx=parseInt(resp)-1;
+    if(isNaN(idx)||!otras[idx]){ showToast('❌ Cancelado, no se borró el embudo'); return; }
+    leadsEnEtapa.forEach(l=> l.etapa=otras[idx]);
+  }
+  _etapas=otras;
+  renderKanban();
+  showToast('✅ Embudo borrado');
+}
+
+// ── ARRASTRAR PARA REORDENAR CHIPS DE FILTRO ─────────────────
+function attachChipDrag(){
+  const container=document.querySelector('.filters-bar');
+  if(!container) return;
+  container.querySelectorAll('.filter-chip').forEach(chip=>{
+    chip.addEventListener('pointerdown', (e)=>{
+      const startX=e.clientX, startY=e.clientY;
+      const pid=e.pointerId;
+      let dragging=false;
+      const onMove=(ev)=>{
+        const dx=ev.clientX-startX, dy=ev.clientY-startY;
+        if(!dragging && Math.hypot(dx,dy)>8){
+          dragging=true;
+          chip.setPointerCapture(pid);
+          chip.classList.add('dragging');
+        }
+        if(!dragging) return;
+        const siblings=[...container.querySelectorAll('.filter-chip')].filter(i=>i!==chip);
+        for(const sib of siblings){
+          const r=sib.getBoundingClientRect();
+          if(ev.clientX>r.left && ev.clientX<r.right){
+            if(ev.clientX<r.left+r.width/2) container.insertBefore(chip, sib);
+            else container.insertBefore(chip, sib.nextSibling);
+            break;
+          }
+        }
+      };
+      const onUp=()=>{
+        document.removeEventListener('pointermove', onMove);
+        document.removeEventListener('pointerup', onUp);
+        if(dragging){
+          chip.releasePointerCapture(pid);
+          chip.classList.remove('dragging');
+        }
+      };
+      document.addEventListener('pointermove', onMove);
+      document.addEventListener('pointerup', onUp);
+    });
+  });
 }
 
 function openLeadModal(id){
@@ -379,7 +582,7 @@ function closeModal(){document.getElementById('modal-lead').style.display='none'
 async function loadData(){init();}
 
 if(_demo)document.getElementById('demo-banner').style.display='block';
-requireAuth().then(ok => { if(ok) init(); });
+requireAuth().then(ok => { if(ok){ init(); attachChipDrag(); } });
 </script>
 </body>
 </html>
