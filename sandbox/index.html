@@ -27,6 +27,12 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 .snav-btn{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;transition:all .15s;border:none;background:transparent;color:var(--text2);text-decoration:none;position:relative}
 .snav-btn:hover{background:var(--bg4);color:var(--text)}
 .snav-btn.active{background:rgba(200,169,81,.15);color:var(--gold)}
+@keyframes tourPulse{
+  0%{box-shadow:0 0 0 0 rgba(200,169,81,.7)}
+  70%{box-shadow:0 0 0 9px rgba(200,169,81,0)}
+  100%{box-shadow:0 0 0 0 rgba(200,169,81,0)}
+}
+.snav-btn.pulse-attention{color:var(--gold);animation:tourPulse 1.8s infinite}
 .snav-badge{position:absolute;top:4px;right:4px;background:var(--red);color:#fff;font-size:9px;font-weight:700;border-radius:8px;padding:1px 4px;min-width:14px;text-align:center;line-height:14px}
 .snav-sep{width:30px;height:1px;background:var(--border);margin:4px 0}
 .snav-bottom{margin-top:auto}
@@ -290,7 +296,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 
     <div class="snav-bottom">
       <div class="snav-btn" id="btn-tour" title="Recorrido por aplicación" onclick="startTour()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M14.19 14.19L6 18l3.81-8.19L18 6l-3.81 8.19z" fill="currentColor" stroke="none"/></svg>
         <span class="tooltip">Recorrido por aplicación</span>
       </div>
       <div class="snav-btn" id="btn-demo" title="Modo Demo" onclick="toggleDemo()">
@@ -665,8 +671,10 @@ async function init(){
 
   // Recorrido guiado: automático la primera vez que alguien entra en este
   // navegador. Después de verlo (o saltarlo), solo se puede volver a abrir
-  // a mano con el botón de la brújula en el menú lateral.
+  // a mano con el botón de la brújula en el menú lateral (que parpadea
+  // hasta que alguien lo usa, para que sea fácil de encontrar).
   if(!localStorage.getItem(LS_KEY_TOUR_VISTO)){
+    document.getElementById('btn-tour').classList.add('pulse-attention');
     setTimeout(startTour, 900);
   }
 }
@@ -1487,6 +1495,7 @@ let _tourIndex=0;
 
 function startTour(){
   _tourIndex=0;
+  document.getElementById('btn-tour').classList.remove('pulse-attention');
   if(!_activeLead && _leadsAll && _leadsAll.length) openLead(_leadsAll[0].id);
   document.getElementById('tour-backdrop').classList.add('show');
   document.getElementById('tour-tooltip').classList.add('show');

@@ -23,6 +23,28 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 .snav-btn{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;transition:all .15s;border:none;background:transparent;color:var(--text2);text-decoration:none;position:relative}
 .snav-btn:hover{background:var(--bg4);color:var(--text)}
 .snav-btn.active{background:rgba(200,169,81,.15);color:var(--gold)}
+@keyframes tourPulse{
+  0%{box-shadow:0 0 0 0 rgba(200,169,81,.7)}
+  70%{box-shadow:0 0 0 9px rgba(200,169,81,0)}
+  100%{box-shadow:0 0 0 0 rgba(200,169,81,0)}
+}
+.snav-btn.pulse-attention{color:var(--gold);animation:tourPulse 1.8s infinite}
+#tour-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300}
+#tour-backdrop.show{display:block}
+#tour-highlight{display:none;position:fixed;z-index:301;border:2px solid var(--gold);border-radius:10px;box-shadow:0 0 0 4000px rgba(0,0,0,.55);pointer-events:none;transition:all .25s ease}
+#tour-highlight.show{display:block}
+#tour-tooltip{display:none;position:fixed;z-index:302;background:var(--bg2);border:1px solid var(--gold);border-radius:12px;padding:16px;width:280px;box-shadow:0 12px 32px rgba(0,0,0,.5);transition:all .25s ease}
+#tour-tooltip.show{display:block}
+.tour-step-count{font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px}
+.tour-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px}
+.tour-text{font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:14px}
+.tour-actions{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tour-skip{font-size:11px;color:var(--text3);cursor:pointer;background:none;border:none;padding:0}
+.tour-skip:hover{color:var(--text2)}
+.tour-nav{display:flex;gap:6px}
+.tour-btn{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none}
+.tour-btn-prev{background:transparent;border:1px solid var(--border2);color:var(--text2)}
+.tour-btn-next{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#111}
 .snav-sep{width:30px;height:1px;background:var(--border);margin:4px 0}
 .snav-bottom{margin-top:auto}
 .tooltip{position:absolute;left:60px;top:50%;transform:translateY(-50%);background:#222;border:1px solid var(--border2);padding:4px 10px;border-radius:6px;font-size:11px;color:var(--text);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:50}
@@ -129,6 +151,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
     <a href="config.html" class="snav-btn"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span><span class="tooltip">Config</span></a>
     <a href="config.html#mensajes" class="snav-btn"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span><span class="tooltip">Respuestas rápidas</span></a>
     <div class="snav-bottom">
+      <div class="snav-btn" id="btn-tour" title="Recorrido por aplicación" onclick="startTour()"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M14.19 14.19L6 18l3.81-8.19L18 6l-3.81 8.19z" fill="currentColor" stroke="none"/></svg></span><span class="tooltip">Recorrido por aplicación</span></div>
       <div class="snav-btn" id="btn-demo" onclick="toggleDemo()"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.5L4.5 19a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 9.5V3"/><path d="M7 15h10"/></svg></span><span class="tooltip">Demo</span></div>
       <div class="snav-btn" id="btn-logout" onclick="logout()"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span><span class="tooltip">Salir</span></div>
     </div>
@@ -192,6 +215,22 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal()">Cerrar</button>
       <a id="ml-chat-link" href="#" class="btn btn-primary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg> Ir al chat</a>
+    </div>
+  </div>
+</div>
+
+<!-- RECORRIDO GUIADO -->
+<div id="tour-backdrop" onclick="endTour()"></div>
+<div id="tour-highlight"></div>
+<div id="tour-tooltip">
+  <div class="tour-step-count" id="tour-step-count"></div>
+  <div class="tour-title" id="tour-title"></div>
+  <div class="tour-text" id="tour-text"></div>
+  <div class="tour-actions">
+    <button class="tour-skip" onclick="endTour()">Saltar recorrido</button>
+    <div class="tour-nav">
+      <button class="tour-btn tour-btn-prev" id="tour-btn-prev" onclick="prevTourStep()">Atrás</button>
+      <button class="tour-btn tour-btn-next" id="tour-btn-next" onclick="nextTourStep()">Siguiente</button>
     </div>
   </div>
 </div>
@@ -277,6 +316,83 @@ async function init(){
   renderStats();
   renderKanban();
   if(_demo)document.getElementById('demo-banner').style.display='block';
+
+  if(!localStorage.getItem(LS_KEY_TOUR_VISTO)){
+    document.getElementById('btn-tour').classList.add('pulse-attention');
+    setTimeout(startTour, 900);
+  }
+}
+
+// ── RECORRIDO GUIADO (PRODUCT TOUR) ────────────────────────────
+const LS_KEY_TOUR_VISTO='henryleads_tour_visto_pipeline';
+const TOUR_STEPS=[
+  {selector:'#sidenav', title:'Menú principal', text:'Desde aquí te mueves entre Bandeja, Pipeline, Leads y Configuración. Este mismo botón de brújula vive abajo del todo, por si quieres repetir el recorrido después.', pos:'right'},
+  {selector:'.page-header', title:'Resumen de tu pipeline', text:'De un vistazo ves cuántos leads tienes en total, cuántos siguen abiertos y cuántos cerraste hoy.', pos:'bottom'},
+  {selector:'.filters-bar', title:'Filtros', text:'Filtra por tipo de cliente o por asesor para ver solo lo que te interesa.', pos:'bottom'},
+  {selector:'.kanban-col', title:'Cada columna es una etapa', text:'Puedes arrastrar un lead entre columnas para mover su etapa — o crear tus propios embudos con el botón "＋ Nuevo embudo" al final.', pos:'right'},
+  {selector:'.lead-card', title:'La tarjeta de un lead', text:'Un clic aquí abre su ficha completa: mover etapa, cambiar asesor y notas rápidas.', pos:'right'},
+];
+let _tourIndex=0;
+
+function startTour(){
+  _tourIndex=0;
+  document.getElementById('btn-tour').classList.remove('pulse-attention');
+  document.getElementById('tour-backdrop').classList.add('show');
+  document.getElementById('tour-tooltip').classList.add('show');
+  showTourStep();
+}
+function showTourStep(){
+  const step=TOUR_STEPS[_tourIndex];
+  const el=document.querySelector(step.selector);
+  if(!el){
+    if(_tourIndex<TOUR_STEPS.length-1){ nextTourStep(); } else { endTour(); }
+    return;
+  }
+  document.getElementById('tour-step-count').textContent=`Paso ${_tourIndex+1} de ${TOUR_STEPS.length}`;
+  document.getElementById('tour-title').textContent=step.title;
+  document.getElementById('tour-text').textContent=step.text;
+  document.getElementById('tour-btn-prev').style.visibility=_tourIndex===0?'hidden':'visible';
+  document.getElementById('tour-btn-next').textContent=_tourIndex===TOUR_STEPS.length-1?'Terminar':'Siguiente';
+  el.scrollIntoView({block:'center', behavior:'smooth'});
+  positionTour(el, step);
+}
+function positionTour(el, step){
+  const r=el.getBoundingClientRect();
+  const hl=document.getElementById('tour-highlight');
+  hl.style.left=(r.left-6)+'px';
+  hl.style.top=(r.top-6)+'px';
+  hl.style.width=(r.width+12)+'px';
+  hl.style.height=(r.height+12)+'px';
+  hl.classList.add('show');
+
+  const tip=document.getElementById('tour-tooltip');
+  const tw=280, gap=14;
+  const th=tip.offsetHeight||160;
+  let left, top;
+  if(step.pos==='right'){ left=r.right+gap; top=r.top; }
+  else if(step.pos==='left'){ left=r.left-tw-gap; top=r.top; }
+  else if(step.pos==='bottom'){ left=r.left; top=r.bottom+gap; }
+  else { left=r.left; top=r.top-th-gap; }
+  left=Math.max(10, Math.min(left, window.innerWidth-tw-10));
+  top=Math.max(10, Math.min(top, window.innerHeight-th-10));
+  tip.style.left=left+'px';
+  tip.style.top=top+'px';
+}
+function nextTourStep(){
+  if(_tourIndex>=TOUR_STEPS.length-1){ endTour(); return; }
+  _tourIndex++;
+  showTourStep();
+}
+function prevTourStep(){
+  if(_tourIndex<=0) return;
+  _tourIndex--;
+  showTourStep();
+}
+function endTour(){
+  document.getElementById('tour-backdrop').classList.remove('show');
+  document.getElementById('tour-highlight').classList.remove('show');
+  document.getElementById('tour-tooltip').classList.remove('show');
+  localStorage.setItem(LS_KEY_TOUR_VISTO,'1');
 }
 
 function renderStats(){
