@@ -134,7 +134,20 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 .btn-mic.recording #mic-timer{display:inline}
 @keyframes pulse-mic{0%,100%{opacity:1}50%{opacity:.6}}
 
-.msg-audio-bubble{width:230px;max-width:80vw;padding:8px 10px}
+.msg-audio-bubble{width:250px;max-width:80vw;padding:8px 10px}
+
+/* REPRODUCTOR DE AUDIO PROPIO */
+.audio-player{display:flex;align-items:center;gap:7px;width:100%}
+.ap-play{width:26px;height:26px;border-radius:50%;background:var(--gold);border:none;color:#111;font-size:11px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0}
+.ap-progress{flex:1;height:4px;background:rgba(255,255,255,.15);border-radius:2px;cursor:pointer;min-width:40px}
+.ap-progress-fill{height:100%;background:var(--gold);border-radius:2px;width:0%}
+.ap-time{font-size:10px;color:var(--text3);flex-shrink:0;min-width:34px}
+.ap-vol-wrap{position:relative;flex-shrink:0}
+.ap-vol-btn{background:transparent;border:none;color:var(--text2);cursor:pointer;font-size:13px;padding:2px;display:flex}
+.ap-vol-btn:hover{color:var(--gold)}
+.ap-vol-popup{display:none;position:absolute;bottom:26px;left:50%;transform:translateX(-50%);background:var(--bg4);border:1px solid var(--border2);border-radius:8px;padding:10px 8px;box-shadow:0 4px 16px rgba(0,0,0,.4);z-index:20}
+.ap-vol-popup.show{display:block}
+.ap-vol-slider{writing-mode:vertical-lr;direction:rtl;width:6px;height:70px;accent-color:var(--gold);cursor:pointer}
 
 /* LEAD PROFILE PANEL */
 #profile-panel{width:280px;min-width:280px;background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;height:100%;min-height:0;overflow:hidden}
@@ -741,9 +754,7 @@ function renderMessages(){
     }
     const ent=m.direccion==='entrante';
     const esAudio = m.tipo==='audio' && m.audioUrl;
-    const bubbleContent = esAudio
-      ? `<audio controls src="${m.audioUrl}" style="width:100%;height:34px;display:block"></audio>`
-      : escHtml(m.contenido);
+    const bubbleContent = esAudio ? audioPlayerHTML(m.audioUrl) : escHtml(m.contenido);
     html+=`<div class="msg-group" style="align-items:${ent?'flex-start':'flex-end'}">
       ${!ent&&m.asesor?.nombre?`<div class="msg-asesor">${m.asesor.nombre}</div>`:''}
       <div class="msg-bubble msg-${m.direccion}${esAudio?' msg-audio-bubble':''}">${bubbleContent}</div>
@@ -751,6 +762,69 @@ function renderMessages(){
     </div>`;
   });
   el.innerHTML=html;
+  initAudioPlayers(el);
+}
+
+// ── REPRODUCTOR DE AUDIO PROPIO (con volumen vertical) ────────
+function audioPlayerHTML(url){
+  return `<div class="audio-player">
+    <button class="ap-play" type="button">▶</button>
+    <div class="ap-progress"><div class="ap-progress-fill"></div></div>
+    <span class="ap-time">0:00</span>
+    <div class="ap-vol-wrap">
+      <button class="ap-vol-btn" type="button">🔊</button>
+      <div class="ap-vol-popup"><input type="range" class="ap-vol-slider" min="0" max="100" value="100"></div>
+    </div>
+    <audio class="ap-audio-el" src="${url}" preload="metadata"></audio>
+  </div>`;
+}
+
+function initAudioPlayers(scope){
+  (scope||document).querySelectorAll('.audio-player').forEach(player=>{
+    if(player.dataset.init) return;
+    player.dataset.init='1';
+    const audio=player.querySelector('.ap-audio-el');
+    const playBtn=player.querySelector('.ap-play');
+    const fill=player.querySelector('.ap-progress-fill');
+    const timeEl=player.querySelector('.ap-time');
+    const progress=player.querySelector('.ap-progress');
+    const volBtn=player.querySelector('.ap-vol-btn');
+    const volPopup=player.querySelector('.ap-vol-popup');
+    const volSlider=player.querySelector('.ap-vol-slider');
+
+    audio.addEventListener('loadedmetadata', ()=>{ timeEl.textContent=apFormatTime(audio.duration); });
+    audio.addEventListener('timeupdate', ()=>{
+      const pct=audio.duration?(audio.currentTime/audio.duration*100):0;
+      fill.style.width=pct+'%';
+      timeEl.textContent=apFormatTime(audio.currentTime)+' / '+apFormatTime(audio.duration||0);
+    });
+    audio.addEventListener('ended', ()=>{ playBtn.textContent='▶'; });
+    playBtn.addEventListener('click', ()=>{
+      if(audio.paused){ audio.play(); playBtn.textContent='⏸'; }
+      else{ audio.pause(); playBtn.textContent='▶'; }
+    });
+    progress.addEventListener('click', (e)=>{
+      const rect=progress.getBoundingClientRect();
+      const pct=(e.clientX-rect.left)/rect.width;
+      if(audio.duration) audio.currentTime=pct*audio.duration;
+    });
+    volBtn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      document.querySelectorAll('.ap-vol-popup.show').forEach(p=>{ if(p!==volPopup) p.classList.remove('show'); });
+      volPopup.classList.toggle('show');
+    });
+    volSlider.addEventListener('input', ()=>{
+      audio.volume=volSlider.value/100;
+      volBtn.textContent = audio.volume==0?'🔇':audio.volume<0.5?'🔉':'🔊';
+    });
+  });
+}
+document.addEventListener('click', ()=> document.querySelectorAll('.ap-vol-popup.show').forEach(p=>p.classList.remove('show')));
+
+function apFormatTime(sec){
+  if(!isFinite(sec)) return '0:00';
+  const m=Math.floor(sec/60), s=Math.floor(sec%60);
+  return m+':'+String(s).padStart(2,'0');
 }
 
 function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
@@ -789,7 +863,7 @@ function renderPendingAttach(){
   list.innerHTML = _pendingAttachments.map((a,i)=>{
     if(a.tipo==='audio'){
       return `<div class="pending-attach-item">
-        <div class="pending-attach-info"><span>${a.icon}</span><audio controls src="${a.url}" style="height:30px;max-width:180px"></audio></div>
+        <div class="pending-attach-info" style="max-width:220px">${audioPlayerHTML(a.url)}</div>
         <button class="pending-attach-cancel" onclick="cancelAttach(${i})" title="Quitar">✕</button>
       </div>`;
     }
@@ -798,6 +872,7 @@ function renderPendingAttach(){
       <button class="pending-attach-cancel" onclick="cancelAttach(${i})" title="Quitar">✕</button>
     </div>`;
   }).join('');
+  initAudioPlayers(list);
 }
 
 function cancelAttach(idx){
