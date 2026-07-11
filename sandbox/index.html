@@ -305,7 +305,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
   </div>
 
   <!-- PROFILE PANEL -->
-  <div id="profile-panel">
+  <div id="profile-panel" style="display:none">
     <div class="profile-header">
       <h3>Perfil del Lead</h3>
       <div class="btn-icon" onclick="toggleProfile()" title="Cerrar">✕</div>
@@ -387,7 +387,7 @@ let _quickReplies = [];
 let _activeLead = null;
 let _mensajes = [];
 let _filterActive = 'todos';
-let _profileVisible = true;
+let _profileVisible = false;
 let _realtimeSub = null;
 
 // ── COLORES AVATAR ────────────────────────────────────────────
