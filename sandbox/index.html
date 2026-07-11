@@ -90,6 +90,8 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 #chat-messages::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 .msg-group{display:flex;flex-direction:column;gap:2px}
 .msg-bubble{max-width:70%;padding:9px 13px;border-radius:16px;font-size:13px;line-height:1.45;position:relative}
+.msg-bubble a{color:var(--blue);text-decoration:underline;word-break:break-all}
+.msg-bubble a:hover{color:#5dade2}
 .msg-entrante{background:var(--bg3);border:1px solid var(--border);border-bottom-left-radius:4px;align-self:flex-start}
 .msg-saliente{background:linear-gradient(135deg,rgba(200,169,81,.2),rgba(160,120,32,.15));border:1px solid rgba(200,169,81,.25);border-bottom-right-radius:4px;align-self:flex-end}
 .msg-time{font-size:10px;color:var(--text3);margin-top:2px}
@@ -105,7 +107,20 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 .quick-replies::-webkit-scrollbar{display:none}
 .qr-btn{padding:5px 12px;border-radius:16px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:12px;cursor:pointer;white-space:nowrap;transition:all .15s}
 .qr-btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(200,169,81,.07)}
-.input-row{display:flex;gap:8px;align-items:flex-end;padding:10px 12px}
+.input-row{position:relative;display:flex;gap:8px;align-items:flex-end;padding:10px 12px}
+.qr-dropdown{display:none;position:absolute;bottom:52px;left:52px;right:90px;background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:6px;max-height:260px;box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:25;flex-direction:column}
+.qr-dropdown.show{display:flex}
+.qr-drop-list{overflow-y:auto;flex:1 1 auto;min-height:0}
+.qr-drop-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer}
+.qr-drop-item:hover{background:var(--bg4)}
+.qr-drop-text{flex:1;min-width:0}
+.qr-drop-title{font-size:13px;font-weight:600;color:var(--text)}
+.qr-drop-preview{font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qr-drop-x{width:22px;height:22px;border-radius:50%;background:var(--bg4);border:none;color:var(--text2);cursor:pointer;flex-shrink:0;font-size:12px;display:flex;align-items:center;justify-content:center}
+.qr-drop-x:hover{color:var(--red);background:rgba(231,76,60,.15)}
+.qr-drop-empty{padding:10px;text-align:center;font-size:12px;color:var(--text3)}
+.qr-drop-add{display:flex;align-items:center;gap:6px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--gold);border-bottom:1px solid var(--border);margin-bottom:4px;flex-shrink:0}
+.qr-drop-add:hover{background:rgba(200,169,81,.1)}
 #msg-input{flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:10px 14px;color:var(--text);font-size:13px;resize:none;outline:none;font-family:inherit;line-height:1.4;max-height:120px;min-height:40px}
 #msg-input:focus{border-color:var(--gold)}
 #msg-input::placeholder{color:var(--text3)}
@@ -143,7 +158,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 .ap-progress-fill{height:100%;background:var(--gold);border-radius:2px;width:0%}
 .ap-time{font-size:10px;color:var(--text3);flex-shrink:0;min-width:34px}
 .ap-vol-wrap{position:relative;flex-shrink:0}
-.ap-vol-btn{background:transparent;border:none;color:var(--text2);cursor:pointer;font-size:13px;padding:2px;display:flex}
+.ap-vol-btn{background:transparent;border:none;color:var(--text2);cursor:pointer;font-size:13px;padding:2px;display:flex;align-items:center}
 .ap-vol-btn:hover{color:var(--gold)}
 .ap-vol-popup{display:none;position:absolute;bottom:26px;left:50%;transform:translateX(-50%);background:var(--bg4);border:1px solid var(--border2);border-radius:8px;padding:10px 8px;box-shadow:0 4px 16px rgba(0,0,0,.4);z-index:20}
 .ap-vol-popup.show{display:block}
@@ -189,6 +204,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 .form-group label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px;font-weight:600}
 .form-group input,.form-group select,.form-group textarea{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;outline:none;font-family:inherit}
 .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--gold)}
+.form-group .hint{font-size:11px;color:var(--text3);margin-top:4px}
 .tipo-btns{display:flex;gap:8px}
 .tipo-btn{flex:1;padding:9px;border-radius:8px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;font-size:12px;font-weight:600;text-align:center;transition:all .15s}
 .tipo-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(200,169,81,.1)}
@@ -231,32 +247,36 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
     <div class="snav-logo" title="Cremalleras LR">C</div>
 
     <a href="index.html" class="snav-btn active" title="Bandeja">
-      💬
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
       <span class="snav-badge" id="badge-inbox">0</span>
       <span class="tooltip">Bandeja</span>
     </a>
     <a href="pipeline.html" class="snav-btn" title="Pipeline">
-      📊
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
       <span class="tooltip">Pipeline</span>
     </a>
     <a href="leads.html" class="snav-btn" title="Leads">
-      👥
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       <span class="tooltip">Leads</span>
     </a>
 
     <div class="snav-sep"></div>
     <a href="config.html" class="snav-btn" title="Configuración">
-      ⚙️
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       <span class="tooltip">Config</span>
+    </a>
+    <a href="config.html#mensajes" class="snav-btn" title="Respuestas rápidas">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      <span class="tooltip">Respuestas rápidas</span>
     </a>
 
     <div class="snav-bottom">
       <div class="snav-btn" id="btn-demo" title="Modo Demo" onclick="toggleDemo()">
-        🎭
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.5L4.5 19a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 9.5V3"/><path d="M7 15h10"/></svg>
         <span class="tooltip">Demo</span>
       </div>
       <div class="snav-btn" id="btn-logout" title="Cerrar sesión" onclick="logout()">
-        🚪
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         <span class="tooltip">Salir</span>
       </div>
     </div>
@@ -286,10 +306,10 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 
   <!-- CHAT PANEL -->
   <div id="chat-panel">
-    <div id="demo-banner" style="display:block;background:#7a2323;color:#fff">🧪 SANDBOX DE PRUEBAS — Esto NO es la página real, datos simulados</div>
+    <div id="demo-banner" style="display:block;background:#7a2323;color:#fff"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M9 3h6"/><path d="M10 3v6.5L4.5 19a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 9.5V3"/><path d="M7 15h10"/></svg> SANDBOX DE PRUEBAS — Esto NO es la página real, datos simulados</div>
 
     <div id="chat-empty">
-      <div class="icon">💬</div>
+      <div class="icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
       <div style="font-size:16px;color:var(--text2);font-weight:600">Selecciona una conversación</div>
       <div style="font-size:13px">o crea un nuevo lead con el botón ＋</div>
     </div>
@@ -306,7 +326,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
           <select class="stage-select" id="stage-select" onchange="moveStage()">
             <option value="">Etapa...</option>
           </select>
-          <div class="btn-icon" onclick="toggleProfile()" title="Perfil">👤</div>
+          <div class="btn-icon" onclick="toggleProfile()" title="Perfil"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
         </div>
       </div>
 
@@ -321,17 +341,18 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
           <div class="attach-wrap">
             <button class="btn-attach" onclick="toggleAttachMenu(event)" title="Adjuntar">＋</button>
             <div class="attach-menu" id="attach-menu">
-              <div class="attach-option" onclick="attachFile('imagen')">📷 <span>Imagen</span></div>
-              <div class="attach-option" onclick="attachFile('documento')">📄 <span>Documento</span></div>
+              <div class="attach-option" onclick="attachFile('imagen')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> <span>Imagen</span></div>
+              <div class="attach-option" onclick="attachFile('documento')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> <span>Documento</span></div>
             </div>
           </div>
-          <textarea id="msg-input" placeholder="Escribe un mensaje..." rows="1"
+          <div class="qr-dropdown" id="qr-dropdown"></div>
+          <textarea id="msg-input" placeholder="Escribe un mensaje... (usa / para respuestas rápidas)" rows="1"
             onkeydown="handleMsgKeydown(event)"
-            oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"></textarea>
+            oninput="handleMsgInput(event)"></textarea>
           <button class="btn-mic" id="btn-mic" onclick="toggleRecording()" title="Grabar audio">
-            <span id="mic-icon">🎤</span><span id="mic-timer">00:00</span>
+            <span id="mic-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></span><span id="mic-timer">00:00</span>
           </button>
-          <button class="btn-send" id="btn-send" onclick="sendMessage()">➤</button>
+          <button class="btn-send" id="btn-send" onclick="sendMessage()"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg></button>
         </div>
       </div>
     </div>
@@ -341,13 +362,13 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
   <div id="profile-panel" style="display:none">
     <div class="profile-header">
       <h3>Perfil del Lead</h3>
-      <div class="btn-icon" onclick="toggleProfile()" title="Cerrar">✕</div>
+      <div class="btn-icon" onclick="toggleProfile()" title="Cerrar"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
     </div>
     <div class="profile-body" id="profile-body">
       <div class="loading"><div class="spinner"></div></div>
     </div>
     <div class="profile-footer">
-      <button class="btn-guardar" onclick="saveProfile()">💾 Guardar cambios</button>
+      <button class="btn-guardar" onclick="saveProfile()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Guardar cambios</button>
     </div>
   </div>
 </div>
@@ -355,7 +376,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 <!-- MODAL NUEVO LEAD -->
 <div class="modal-overlay" id="modal-new-lead" style="display:none" onclick="if(event.target===this)closeModal('modal-new-lead')">
   <div class="modal">
-    <h3>➕ Nuevo Lead</h3>
+    <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Nuevo Lead</h3>
     <div class="form-group">
       <label>Teléfono (WhatsApp)*</label>
       <input type="tel" id="nl-telefono" placeholder="+52 33 1234 5678">
@@ -367,16 +388,19 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
     <div class="form-group">
       <label>Tipo de cliente</label>
       <div class="tipo-btns">
-        <div class="tipo-btn active" data-tipo="usuario_final" onclick="selectTipo(this)">👤 Usuario</div>
-        <div class="tipo-btn" data-tipo="mecanico" onclick="selectTipo(this)">🔧 Mecánico</div>
-        <div class="tipo-btn" data-tipo="refaccionaria" onclick="selectTipo(this)">🏪 Refaccionaria</div>
+        <div class="tipo-btn active" data-tipo="usuario_final" onclick="selectTipo(this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Usuario</div>
+        <div class="tipo-btn" data-tipo="mecanico" onclick="selectTipo(this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> Mecánico</div>
+        <div class="tipo-btn" data-tipo="refaccionaria" onclick="selectTipo(this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M3 9l1-5h16l1 5"/><path d="M3 9a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"/><path d="M4 9v10a1 1 0 0 0 1 1h4v-6h6v6h4a1 1 0 0 0 1-1V9"/></svg> Refaccionaria</div>
       </div>
+    </div>
+    <div class="form-group" id="nl-demo-sesion" style="display:none">
+      <label><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><path d="M9 3h6"/><path d="M10 3v6.5L4.5 19a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 9.5V3"/><path d="M7 15h10"/></svg> Simular sesión como (solo sandbox)</label>
+      <select id="nl-sesion-asesor" onchange="setSessionAsesor(this.value)"></select>
     </div>
     <div class="form-group">
       <label>Asesor asignado</label>
-      <select id="nl-asesor">
-        <option value="">Sin asignar</option>
-      </select>
+      <select id="nl-asesor"></select>
+      <div id="nl-asesor-auto" style="display:none;font-size:12px;color:var(--text2);padding:8px 0"></div>
     </div>
     <div class="form-group">
       <label>Vehículo (opcional)</label>
@@ -385,6 +409,26 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('modal-new-lead')">Cancelar</button>
       <button class="btn btn-primary" onclick="createLead()">Crear Lead</button>
+    </div>
+  </div>
+</div>
+
+<!-- NUEVA RESPUESTA RÁPIDA -->
+<div class="modal-overlay" id="modal-qr" style="display:none" onclick="if(event.target===this)closeModal('modal-qr')">
+  <div class="modal">
+    <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Nueva respuesta rápida</h3>
+    <div class="form-group">
+      <label>Título corto (así se ve el botón) *</label>
+      <input type="text" id="qr-modal-titulo" placeholder="Ej: Bienvenida">
+    </div>
+    <div class="form-group">
+      <label>Contenido del mensaje *</label>
+      <textarea id="qr-modal-contenido" rows="4" placeholder="Escribe el mensaje completo..."></textarea>
+      <div class="hint">Usa [NOMBRE] o (nombre) para el nombre del lead, y [UBI] o (ubi) para la ubicación del negocio — se rellenan solos.</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-qr')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarQuickReplyDesdeModal()">Guardar</button>
     </div>
   </div>
 </div>
@@ -497,11 +541,11 @@ function demoMensajes(leadId){
 
 function demoQuickReplies(){
   return [
-    {id:'qr1',titulo:'Bienvenida',contenido:'¡Hola! Gracias por contactar a Cremalleras LR 🚗 ¿En qué te puedo ayudar?'},
-    {id:'qr2',titulo:'Datos vehículo',contenido:'Para cotizarte necesito: marca, modelo, año y síntoma de la dirección ¿Me los compartes?'},
-    {id:'qr3',titulo:'Cotización lista',contenido:'Te comparto la cotización 👆 ¿Tienes alguna pregunta?'},
-    {id:'qr4',titulo:'Seguimiento',contenido:'Hola, ¿pudiste revisar la cotización? Estamos para cualquier duda 😊'},
-    {id:'qr5',titulo:'Mecánico Alianza',contenido:'Como mecánico aliado tienes 5% de descuento en toda la línea 💪 ¿Qué pieza necesitas?'},
+    {id:'qr1',titulo:'Bienvenida',contenido:'¡Hola [NOMBRE]! Gracias por contactar a Cremalleras LR 🚗 ¿En qué te puedo ayudar?',usos:0,oculta:false},
+    {id:'qr2',titulo:'Datos vehículo',contenido:'Para cotizarte necesito: marca, modelo, año y síntoma de la dirección ¿Me los compartes?',usos:0,oculta:false},
+    {id:'qr3',titulo:'Cotización lista',contenido:'Te comparto la cotización 👆 [NOMBRE], ¿tienes alguna pregunta?',usos:0,oculta:false},
+    {id:'qr4',titulo:'Seguimiento',contenido:'Buen día [NOMBRE], con el gusto de saludarlo. ¿Tuvo oportunidad de revisar la propuesta que le compartí?',usos:0,oculta:false},
+    {id:'qr5',titulo:'Mecánico Alianza',contenido:'Como mecánico aliado tienes 5% de descuento en toda la línea 💪 ¿Qué pieza necesitas?',usos:0,oculta:false},
   ];
 }
 
@@ -545,15 +589,24 @@ async function init(){
       ]);
       _etapas = etapas||[];
       _asesores = asesores||[];
-      _quickReplies = qr||[];
+      _quickReplies = (qr||[]).map(q=>({...q, usos:q.usos||0, oculta:q.oculta||false}));
 
       await loadLeads();
     }
+    sortQuickReplies();
 
     // Populate selects
     const nlAsesor = document.getElementById('nl-asesor');
     nlAsesor.innerHTML = '<option value="">Sin asignar</option>';
     _asesores.forEach(a => nlAsesor.innerHTML += `<option value="${a.id}">${a.nombre}</option>`);
+
+    // Simulador de sesión (solo sandbox): por default entras como admin,
+    // igual que hoy. Cámbialo aquí para probar cómo se ve como asesor único.
+    _sessionAsesor = _asesores.find(a=>a.rol==='admin') || _asesores[0] || null;
+    const nlSesion = document.getElementById('nl-sesion-asesor');
+    nlSesion.innerHTML = _asesores.map(a=>`<option value="${a.id}">${a.nombre} (${a.rol})</option>`).join('');
+    if(_sessionAsesor) nlSesion.value = _sessionAsesor.id;
+    document.getElementById('nl-demo-sesion').style.display = _demo ? 'block' : 'none';
 
     renderInbox();
     renderQuickReplies();
@@ -566,7 +619,7 @@ async function init(){
   } catch(e){
     console.error(e);
     if(!_demo){
-      document.getElementById('inbox-list').innerHTML = `<div style="padding:20px;text-align:center;color:var(--text3)">⚠️ Sin conexión a base de datos.<br><small>Activa el modo demo con 🎭</small></div>`;
+      document.getElementById('inbox-list').innerHTML = `<div style="padding:20px;text-align:center;color:var(--text3)">⚠️ Sin conexión a base de datos.<br><small>Activa el modo demo desde el menú lateral</small></div>`;
     }
   }
   // Demo auto-activate from URL
@@ -626,7 +679,12 @@ function getFilteredLeads(){
 }
 
 function tipoClass(t){ return t==='mecanico'?'tipo-mecanico':t==='refaccionaria'?'tipo-refaccionaria':'tipo-usuario'; }
-function tipoLabel(t){ return t==='mecanico'?'🔧 MEC':t==='refaccionaria'?'🏪 REF':'👤'; }
+function tipoLabel(t){ return t==='mecanico'?'MEC':t==='refaccionaria'?'REF':'USR'; }
+function tipoIconSvg(t){
+  if(t==='mecanico') return '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>';
+  if(t==='refaccionaria') return '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><path d="M3 9l1-5h16l1 5"/><path d="M3 9a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"/><path d="M4 9v10a1 1 0 0 0 1 1h4v-6h6v6h4a1 1 0 0 0 1-1V9"/></svg>';
+  return '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+}
 
 function relativeTime(ts){
   const diff=(Date.now()-new Date(ts))/1000;
@@ -667,7 +725,7 @@ function renderInbox(){
         <div class="conv-preview">${preview}</div>
         <div class="conv-tags" style="align-items:center;gap:5px">
           <span class="stage-pill" style="background:${etapa.color}22;color:${etapa.color}">${etapa.nombre}</span>
-          <span class="tipo-icon ${tipoClass(l.tipo_cliente)}">${tipoLabel(l.tipo_cliente)}</span>
+          <span class="tipo-icon ${tipoClass(l.tipo_cliente)}">${tipoIconSvg(l.tipo_cliente)} ${tipoLabel(l.tipo_cliente)}</span>
           ${etiquetas.map(e=>`<span class="tag-dot" style="background:${e.etiqueta.color}" title="${e.etiqueta.nombre}"></span>`).join('')}
           ${(l.no_leidos||0)>0?`<span class="unread-badge" style="margin-left:auto">${l.no_leidos}</span>`:''}
         </div>
@@ -754,7 +812,7 @@ function renderMessages(){
     }
     const ent=m.direccion==='entrante';
     const esAudio = m.tipo==='audio' && m.audioUrl;
-    const bubbleContent = esAudio ? audioPlayerHTML(m.audioUrl) : escHtml(m.contenido);
+    const bubbleContent = esAudio ? audioPlayerHTML(m.audioUrl) : linkify(escHtml(m.contenido));
     html+=`<div class="msg-group" style="align-items:${ent?'flex-start':'flex-end'}">
       ${!ent&&m.asesor?.nombre?`<div class="msg-asesor">${m.asesor.nombre}</div>`:''}
       <div class="msg-bubble msg-${m.direccion}${esAudio?' msg-audio-bubble':''}">${bubbleContent}</div>
@@ -766,13 +824,21 @@ function renderMessages(){
 }
 
 // ── REPRODUCTOR DE AUDIO PROPIO (con volumen vertical) ────────
+const ICO_PLAY='<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>';
+const ICO_PAUSE='<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+const ICO_VOL_ALTO='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
+const ICO_VOL_BAJO='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
+const ICO_VOL_MUDO='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
+const ICO_MIC='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>';
+const ICO_STOP='<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>';
+
 function audioPlayerHTML(url){
   return `<div class="audio-player">
-    <button class="ap-play" type="button">▶</button>
+    <button class="ap-play" type="button">${ICO_PLAY}</button>
     <div class="ap-progress"><div class="ap-progress-fill"></div></div>
     <span class="ap-time">0:00</span>
     <div class="ap-vol-wrap">
-      <button class="ap-vol-btn" type="button">🔊</button>
+      <button class="ap-vol-btn" type="button">${ICO_VOL_ALTO}</button>
       <div class="ap-vol-popup"><input type="range" class="ap-vol-slider" min="0" max="100" value="100"></div>
     </div>
     <audio class="ap-audio-el" src="${url}" preload="metadata"></audio>
@@ -798,10 +864,10 @@ function initAudioPlayers(scope){
       fill.style.width=pct+'%';
       timeEl.textContent=apFormatTime(audio.currentTime)+' / '+apFormatTime(audio.duration||0);
     });
-    audio.addEventListener('ended', ()=>{ playBtn.textContent='▶'; });
+    audio.addEventListener('ended', ()=>{ playBtn.innerHTML=ICO_PLAY; });
     playBtn.addEventListener('click', ()=>{
-      if(audio.paused){ audio.play(); playBtn.textContent='⏸'; }
-      else{ audio.pause(); playBtn.textContent='▶'; }
+      if(audio.paused){ audio.play(); playBtn.innerHTML=ICO_PAUSE; }
+      else{ audio.pause(); playBtn.innerHTML=ICO_PLAY; }
     });
     progress.addEventListener('click', (e)=>{
       const rect=progress.getBoundingClientRect();
@@ -815,7 +881,7 @@ function initAudioPlayers(scope){
     });
     volSlider.addEventListener('input', ()=>{
       audio.volume=volSlider.value/100;
-      volBtn.textContent = audio.volume==0?'🔇':audio.volume<0.5?'🔉':'🔊';
+      volBtn.innerHTML = audio.volume==0?ICO_VOL_MUDO:audio.volume<0.5?ICO_VOL_BAJO:ICO_VOL_ALTO;
     });
   });
 }
@@ -828,6 +894,14 @@ function apFormatTime(sec){
 }
 
 function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
+
+// Resalta links dentro de un mensaje ya escapado con escHtml (por eso solo
+// busca http/https — nunca corre sobre texto sin escapar, para no abrir
+// hueco de seguridad). Aquí es solo para que el asesor los vea claros en
+// nuestro panel; en el WhatsApp real del cliente, WhatsApp ya los resalta solo.
+function linkify(htmlEscapado){
+  return htmlEscapado.replace(/(https?:\/\/[^\s<]+)/g, url=>`<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`);
+}
 function scrollToBottom(){ const el=document.getElementById('chat-messages'); el.scrollTop=el.scrollHeight; }
 
 // ── ADJUNTAR ARCHIVOS (simulado) ─────────────────────────────
@@ -864,12 +938,15 @@ function renderPendingAttach(){
     if(a.tipo==='audio'){
       return `<div class="pending-attach-item">
         <div class="pending-attach-info" style="max-width:220px">${audioPlayerHTML(a.url)}</div>
-        <button class="pending-attach-cancel" onclick="cancelAttach(${i})" title="Quitar">✕</button>
+        <button class="pending-attach-cancel" onclick="cancelAttach(${i})" title="Quitar"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>`;
     }
+    const iconoPreview = a.tipo==='imagen'
+      ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>'
+      : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
     return `<div class="pending-attach-item">
-      <div class="pending-attach-info"><span>${a.icon}</span><span class="pa-name">${a.name}</span></div>
-      <button class="pending-attach-cancel" onclick="cancelAttach(${i})" title="Quitar">✕</button>
+      <div class="pending-attach-info"><span>${iconoPreview}</span><span class="pa-name">${a.name}</span></div>
+      <button class="pending-attach-cancel" onclick="cancelAttach(${i})" title="Quitar"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>`;
   }).join('');
   initAudioPlayers(list);
@@ -917,7 +994,7 @@ async function toggleRecording(){
 function startRecordUI(){
   _recordSeconds=0;
   document.getElementById('btn-mic').classList.add('recording');
-  document.getElementById('mic-icon').textContent='⏹';
+  document.getElementById('mic-icon').innerHTML=ICO_STOP;
   _recordTimer = setInterval(()=>{
     _recordSeconds++;
     const m=String(Math.floor(_recordSeconds/60)).padStart(2,'0');
@@ -928,7 +1005,7 @@ function startRecordUI(){
 function stopRecordUI(){
   clearInterval(_recordTimer);
   document.getElementById('btn-mic').classList.remove('recording');
-  document.getElementById('mic-icon').textContent='🎤';
+  document.getElementById('mic-icon').innerHTML=ICO_MIC;
   document.getElementById('mic-timer').textContent='00:00';
 }
 
@@ -936,6 +1013,10 @@ function stopRecordUI(){
 // Enter solo (sin Shift) envía. Flecha abajo inserta un renglón nuevo
 // en vez de mover el cursor, para bajar de línea sin usar Shift+Enter.
 function handleMsgKeydown(event){
+  if(event.key==='Escape'){
+    closeQRDropdown();
+    return;
+  }
   if(event.key==='Enter' && !event.shiftKey){
     event.preventDefault();
     sendMessage();
@@ -1017,19 +1098,140 @@ async function sendMessage(){
 }
 
 // ── QUICK REPLIES ─────────────────────────────────────────────
+// Orden: la más usada va primero (izquierda). Ocultar ≠ eliminar: una
+// respuesta oculta sigue existiendo, solo deja de aparecer en la barra
+// y en el menú "/" hasta que se vuelva a dar de alta desde Config.
+function sortQuickReplies(){
+  _quickReplies.sort((a,b)=>(b.usos||0)-(a.usos||0));
+}
+
+// [NOMBRE] o (NOMBRE) se rellena solo con el nombre del lead activo (el que
+// trae su WhatsApp al primer contacto, o el que tú le hayas puesto a mano en
+// su perfil — es el mismo campo). Si el lead no tiene nombre registrado,
+// cae en "cliente" para que el mensaje nunca salga con el corchete literal.
+// [UBI] o (UBI) jala la ubicación del negocio guardada en Configuración →
+// Empresa (mismo dato en todas las pantallas, vía almacenamiento local).
+const LS_KEY_UBICACION = 'henryleads_ubicacion_negocio';
+function personalizarTexto(texto){
+  if(!texto) return texto;
+  const nombreCompleto = (_activeLead && _activeLead.nombre) ? _activeLead.nombre.trim() : '';
+  const primerNombre = nombreCompleto ? nombreCompleto.split(' ')[0] : '';
+  const ubicacion = localStorage.getItem(LS_KEY_UBICACION);
+  return texto
+    .replace(/[\[(]nombre[\])]/gi, primerNombre || 'cliente')
+    .replace(/[\[(]ubi[\])]/gi, ubicacion || '(agrega tu ubicación en Configuración → Empresa)');
+}
+
 function renderQuickReplies(){
   const el=document.getElementById('quick-replies-bar');
-  el.innerHTML=_quickReplies.map(qr=>`
-    <div class="qr-btn" onclick="useQuickReply('${qr.id}')">${qr.titulo}</div>
+  el.innerHTML=_quickReplies.filter(qr=>!qr.oculta).map(qr=>`
+    <div class="qr-btn" onclick="useQuickReply('${qr.id}')">${escHtml(qr.titulo)}</div>
   `).join('');
+}
+
+// Encuentra el "/filtro" que abrió el menú, sin importar si está al
+// principio o después de texto que ya habías escrito (o de otra
+// respuesta rápida que ya insertaste).
+function trailingSlashMatch(valor){
+  return valor.match(/\/(\S*)$/);
 }
 
 function useQuickReply(id){
   const qr=_quickReplies.find(q=>q.id===id);
   if(!qr) return;
-  document.getElementById('msg-input').value=qr.contenido;
-  document.getElementById('msg-input').focus();
+  qr.usos=(qr.usos||0)+1;
+  sortQuickReplies();
+  renderQuickReplies();
+  const input=document.getElementById('msg-input');
+  const nuevoTexto=personalizarTexto(qr.contenido);
+  const match=trailingSlashMatch(input.value);
+  if(match){
+    // Reemplaza solo el "/filtro" que activó el menú, conservando lo anterior
+    input.value = input.value.slice(0, match.index) + nuevoTexto;
+  } else if(input.value.trim()){
+    // Ya hay texto (de otra respuesta rápida u otra cosa que escribiste): se agrega abajo
+    input.value = input.value.replace(/\s+$/,'') + '\n' + nuevoTexto;
+  } else {
+    input.value = nuevoTexto;
+  }
+  autoResizeMsgInput();
+  closeQRDropdown();
+  input.focus();
+  input.setSelectionRange(input.value.length, input.value.length);
 }
+
+function autoResizeMsgInput(){
+  const el=document.getElementById('msg-input');
+  el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,120)+'px';
+}
+
+function handleMsgInput(event){
+  autoResizeMsgInput();
+  const match=trailingSlashMatch(event.target.value);
+  if(match) openQRDropdown(match[1]);
+  else closeQRDropdown();
+}
+
+function openQRDropdown(filterText){
+  const el=document.getElementById('qr-dropdown');
+  const term=filterText.trim().toLowerCase();
+  const items=_quickReplies.filter(q=>!q.oculta && (!term || q.titulo.toLowerCase().includes(term)));
+  const filas = items.length
+    ? items.map(q=>`
+        <div class="qr-drop-item" onclick="useQuickReply('${q.id}')">
+          <div class="qr-drop-text">
+            <div class="qr-drop-title">${escHtml(q.titulo)}</div>
+            <div class="qr-drop-preview">${escHtml(personalizarTexto(q.contenido))}</div>
+          </div>
+          <button class="qr-drop-x" onclick="event.stopPropagation();hideQuickReply('${q.id}')" title="Ocultar de sugerencias (no se elimina)"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>`).join('')
+    : `<div class="qr-drop-empty">Sin coincidencias</div>`;
+  el.innerHTML = `<div class="qr-drop-add" onclick="showAddQuickReplyModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Respuesta rápida nueva</div><div class="qr-drop-list">${filas}</div>`;
+  el.classList.add('show');
+}
+
+function closeQRDropdown(){
+  document.getElementById('qr-dropdown').classList.remove('show');
+}
+
+function hideQuickReply(id){
+  const qr=_quickReplies.find(q=>q.id===id);
+  if(!qr) return;
+  qr.oculta=true;
+  renderQuickReplies();
+  const input=document.getElementById('msg-input');
+  openQRDropdown(input.value.startsWith('/') ? input.value.slice(1) : '');
+  showToast(`"${qr.titulo}" oculta de sugerencias (no se eliminó, puedes volver a activarla desde Config)`);
+}
+
+function showAddQuickReplyModal(){
+  closeQRDropdown();
+  document.getElementById('qr-modal-titulo').value='';
+  document.getElementById('qr-modal-contenido').value='';
+  document.getElementById('modal-qr').style.display='flex';
+  document.getElementById('qr-modal-titulo').focus();
+}
+
+function guardarQuickReplyDesdeModal(){
+  const titulo=document.getElementById('qr-modal-titulo').value.trim();
+  const contenido=document.getElementById('qr-modal-contenido').value.trim();
+  if(!titulo){ showToast('❌ Falta el título'); return; }
+  if(!contenido){ showToast('❌ Falta el contenido del mensaje'); return; }
+  const nueva={id:'qr'+Date.now(), titulo, contenido, usos:0, oculta:false};
+  _quickReplies.push(nueva);
+  sortQuickReplies();
+  renderQuickReplies();
+  closeModal('modal-qr');
+  showToast('✅ Respuesta rápida agregada');
+  useQuickReply(nueva.id); // de una vez la inserta en lo que estabas escribiendo
+}
+
+document.addEventListener('click', (e)=>{
+  const dd=document.getElementById('qr-dropdown');
+  const input=document.getElementById('msg-input');
+  if(dd && !dd.contains(e.target) && e.target!==input) dd.classList.remove('show');
+});
 
 // ── MOVE STAGE ────────────────────────────────────────────────
 async function moveStage(){
@@ -1066,9 +1268,9 @@ function renderProfile(){
       <div class="profile-field">
         <label>Tipo de cliente</label>
         <select id="pf-tipo" onchange="updateProfileField('tipo_cliente',this.value)">
-          <option value="usuario_final" ${l.tipo_cliente==='usuario_final'?'selected':''}>👤 Usuario Final</option>
-          <option value="mecanico" ${l.tipo_cliente==='mecanico'?'selected':''}>🔧 Mecánico</option>
-          <option value="refaccionaria" ${l.tipo_cliente==='refaccionaria'?'selected':''}>🏪 Refaccionaria</option>
+          <option value="usuario_final" ${l.tipo_cliente==='usuario_final'?'selected':''}>Usuario Final</option>
+          <option value="mecanico" ${l.tipo_cliente==='mecanico'?'selected':''}>Mecánico</option>
+          <option value="refaccionaria" ${l.tipo_cliente==='refaccionaria'?'selected':''}>Refaccionaria</option>
         </select>
       </div>
       <div class="profile-field">
@@ -1122,7 +1324,52 @@ function addEtiqueta(){ showToast('Próximamente: selector de etiquetas'); }
 
 // ── NEW LEAD MODAL ────────────────────────────────────────────
 let _nlTipo='usuario_final';
-function showNewLeadModal(){ document.getElementById('modal-new-lead').style.display='flex'; }
+
+// ── ASESOR EN SESIÓN Y REPARTO POR TURNOS ──────────────────────
+// _sessionAsesor simula "quién inició sesión" (el sandbox no tiene login
+// real). rol 'admin' ve el selector completo; cualquier otro rol se
+// autoasigna sin poder elegir. _rrIndex avanza el turno de reparto
+// parejo cada vez que se crea un lead.
+let _sessionAsesor = null;
+let _rrIndex = 0;
+
+function setSessionAsesor(id){
+  _sessionAsesor = _asesores.find(a=>a.id===id) || null;
+  renderAsesorField();
+}
+
+function nextAsesorRoundRobin(){
+  if(!_asesores.length) return null;
+  return _asesores[_rrIndex % _asesores.length];
+}
+
+// Avanza el turno para dejarlo justo después de quien recibió este lead
+// (aplica aunque un admin haya elegido manualmente a otro asesor).
+function avanzarTurnoAsesor(asesorId){
+  const idx=_asesores.findIndex(a=>a.id===asesorId);
+  if(idx>=0) _rrIndex=(idx+1)%_asesores.length;
+}
+
+function renderAsesorField(){
+  const select=document.getElementById('nl-asesor');
+  const auto=document.getElementById('nl-asesor-auto');
+  const esAdmin=_sessionAsesor?.rol==='admin';
+  if(esAdmin || !_sessionAsesor){
+    select.style.display='';
+    auto.style.display='none';
+    const sugerido=nextAsesorRoundRobin();
+    select.value=sugerido?sugerido.id:'';
+  } else {
+    select.style.display='none';
+    select.value=_sessionAsesor.id;
+    auto.style.display='block';
+    auto.textContent=`Se asignará a ti: ${_sessionAsesor.nombre} (eres el único asesor en esta sesión)`;
+  }
+}
+function showNewLeadModal(){
+  document.getElementById('modal-new-lead').style.display='flex';
+  renderAsesorField();
+}
 function closeModal(id){ document.getElementById(id).style.display='none'; }
 function selectTipo(el){
   document.querySelectorAll('.tipo-btn').forEach(b=>b.classList.remove('active'));
@@ -1153,6 +1400,7 @@ async function createLead(){
       etiquetas_lead:[]
     };
     _leadsAll.unshift(nuevo);
+    if(asesor) avanzarTurnoAsesor(asesor);
     closeModal('modal-new-lead');
     renderInbox();
     openLead(nuevo.id);
@@ -1169,6 +1417,7 @@ async function createLead(){
       vehiculo_info:vehiculo||null,
       etapa_id:etapaId||null
     })});
+    if(asesor) avanzarTurnoAsesor(asesor);
     closeModal('modal-new-lead');
     await loadLeads();
     openLead(lead.id);

@@ -52,6 +52,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 .btn-danger{background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.3);color:var(--red)}
 .btn-danger:hover{background:rgba(231,76,60,.2)}
 .btn-sm{padding:5px 12px;font-size:12px}
+.icon-btn{width:30px;height:30px;padding:0;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 
 /* QR LIST */
 .qr-list{display:flex;flex-direction:column;gap:8px}
@@ -107,38 +108,39 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 <div id="app">
   <nav id="sidenav">
     <div class="snav-logo">C</div>
-    <a href="index.html" class="snav-btn"><span>💬</span><span class="tooltip">Bandeja</span></a>
-    <a href="pipeline.html" class="snav-btn"><span>📊</span><span class="tooltip">Pipeline</span></a>
-    <a href="leads.html" class="snav-btn"><span>👥</span><span class="tooltip">Leads</span></a>
+    <a href="index.html" class="snav-btn"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span><span class="tooltip">Bandeja</span></a>
+    <a href="pipeline.html" class="snav-btn"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg></span><span class="tooltip">Pipeline</span></a>
+    <a href="leads.html" class="snav-btn"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="tooltip">Leads</span></a>
     <div class="snav-sep"></div>
-    <a href="config.html" class="snav-btn active"><span>⚙️</span><span class="tooltip">Config</span></a>
+    <a href="config.html" class="snav-btn active"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span><span class="tooltip">Config</span></a>
+    <a href="config.html#mensajes" class="snav-btn" onclick="showSection('mensajes',document.querySelector('.config-nav-item[onclick*=mensajes]'))"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span><span class="tooltip">Respuestas rápidas</span></a>
     <div class="snav-bottom">
-      <div class="snav-btn" id="btn-demo" onclick="toggleDemo()"><span>🎭</span><span class="tooltip">Demo</span></div>
-      <div class="snav-btn" id="btn-logout" onclick="logout()"><span>🚪</span><span class="tooltip">Salir</span></div>
+      <div class="snav-btn" id="btn-demo" onclick="toggleDemo()"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.5L4.5 19a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 9.5V3"/><path d="M7 15h10"/></svg></span><span class="tooltip">Demo</span></div>
+      <div class="snav-btn" id="btn-logout" onclick="logout()"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span><span class="tooltip">Salir</span></div>
     </div>
   </nav>
 
   <div id="main">
-    <div id="demo-banner" style="background:#7a2323;color:#fff">🧪 SANDBOX DE PRUEBAS — Esto NO es la página real, datos simulados</div>
+    <div id="demo-banner" style="background:#7a2323;color:#fff"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M9 3h6"/><path d="M10 3v6.5L4.5 19a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 9.5V3"/><path d="M7 15h10"/></svg> SANDBOX DE PRUEBAS — Esto NO es la página real, datos simulados</div>
     <div class="page-header">
-      <h1>⚙️ Configuración</h1>
+      <h1><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Configuración</h1>
     </div>
 
     <div class="config-layout">
       <div class="config-nav">
-        <div class="config-nav-item active" onclick="showSection('whatsapp',this)"><span class="icon">💬</span>WhatsApp API</div>
-        <div class="config-nav-item" onclick="showSection('asesores',this)"><span class="icon">👥</span>Asesores</div>
-        <div class="config-nav-item" onclick="showSection('etapas',this)"><span class="icon">📊</span>Etapas del embudo</div>
-        <div class="config-nav-item" onclick="showSection('mensajes',this)"><span class="icon">⚡</span>Mensajes rápidos</div>
-        <div class="config-nav-item" onclick="showSection('automatizaciones',this)"><span class="icon">🤖</span>Automatizaciones</div>
-        <div class="config-nav-item" onclick="showSection('empresa',this)"><span class="icon">🏪</span>Empresa</div>
+        <div class="config-nav-item active" onclick="showSection('whatsapp',this)"><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>WhatsApp API</div>
+        <div class="config-nav-item" onclick="showSection('asesores',this)"><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Asesores</div>
+        <div class="config-nav-item" onclick="showSection('etapas',this)"><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg></span>Etapas del embudo</div>
+        <div class="config-nav-item" onclick="showSection('mensajes',this)"><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>Mensajes rápidos</div>
+        <div class="config-nav-item" onclick="showSection('automatizaciones',this)"><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></span>Automatizaciones</div>
+        <div class="config-nav-item" onclick="showSection('empresa',this)"><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M3 9a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"/><path d="M4 9v10a1 1 0 0 0 1 1h4v-6h6v6h4a1 1 0 0 0 1-1V9"/></svg></span>Empresa</div>
       </div>
 
       <div class="config-content">
 
         <!-- WHATSAPP -->
         <div class="config-section active" id="sec-whatsapp">
-          <h2>💬 WhatsApp Business API</h2>
+          <h2><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> WhatsApp Business API</h2>
           <p class="config-desc">Configuración de la conexión con Meta Cloud API para enviar y recibir mensajes de WhatsApp.</p>
 
           <div class="config-card">
@@ -156,7 +158,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
           </div>
 
           <div class="config-card">
-            <h3>🔑 Credenciales Meta</h3>
+            <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg> Credenciales Meta</h3>
             <div class="form-group">
               <label>Phone Number ID</label>
               <input type="text" id="wa-phone-id" placeholder="Ej: 123456789012345">
@@ -176,21 +178,21 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
               <input type="text" id="wa-verify-token" placeholder="Ej: cremalleras_lr_2024_secret">
               <div class="hint">Cualquier string secreto. Lo usarás al configurar el webhook en Meta.</div>
             </div>
-            <button class="btn btn-primary" onclick="saveWAConfig()">💾 Guardar credenciales</button>
+            <button class="btn btn-primary" onclick="saveWAConfig()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Guardar credenciales</button>
           </div>
 
           <div class="config-card">
-            <h3>🌐 Configuración del Webhook</h3>
+            <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> Configuración del Webhook</h3>
             <p style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:12px">
               Meta necesita un endpoint HTTPS para enviarte los mensajes entrantes. Usaremos una <strong>Supabase Edge Function</strong> como webhook.
             </p>
             <div class="form-group">
               <label>URL del Webhook (Supabase Edge Function)</label>
               <input type="text" value="https://bgpugtgjbfseqwwcwpyd.supabase.co/functions/v1/whatsapp-webhook" readonly style="opacity:.7;font-size:11px">
-              <div class="hint">📌 Configura este URL en Meta App → WhatsApp → Configuración → Webhook</div>
+              <div class="hint">Configura este URL en Meta App → WhatsApp → Configuración → Webhook</div>
             </div>
             <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:8px">
-              <div style="font-size:11px;font-weight:700;color:var(--gold);margin-bottom:8px">📋 Pasos para activar el webhook:</div>
+              <div style="font-size:11px;font-weight:700;color:var(--gold);margin-bottom:8px;display:flex;align-items:center;gap:5px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Pasos para activar el webhook:</div>
               <ol style="font-size:12px;color:var(--text2);line-height:2;padding-left:18px">
                 <li>Ve a <strong>developers.facebook.com</strong> → Tu App</li>
                 <li>WhatsApp → Configuración → Webhook</li>
@@ -204,7 +206,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 
         <!-- ASESORES -->
         <div class="config-section" id="sec-asesores">
-          <h2>👥 Asesores</h2>
+          <h2><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Asesores</h2>
           <p class="config-desc">Gestiona el equipo de asesores que atienden los leads de Cremalleras LR.</p>
           <div class="config-card">
             <h3>Equipo actual <button class="btn btn-primary btn-sm" style="float:right" onclick="showAddAsesor()">＋ Agregar</button></h3>
@@ -233,7 +235,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 
         <!-- ETAPAS -->
         <div class="config-section" id="sec-etapas">
-          <h2>📊 Etapas del embudo</h2>
+          <h2><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg> Etapas del embudo</h2>
           <p class="config-desc">Define las etapas por las que pasan tus leads, desde el primer contacto hasta el cierre.</p>
           <div class="config-card">
             <h3>Pipeline actual</h3>
@@ -242,7 +244,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
             </div>
           </div>
           <div class="config-card" style="background:rgba(200,169,81,.04);border-color:rgba(200,169,81,.15)">
-            <h3 style="color:var(--gold)">💡 Tip: Protocolo Cremalleras LR</h3>
+            <h3 style="color:var(--gold)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7 3.5 3.5 0 0 1 1.5 2.8v.5h5v-.5a3.5 3.5 0 0 1 1.5-2.8A7 7 0 0 0 12 2z"/></svg> Tip: Protocolo Cremalleras LR</h3>
             <p style="font-size:12px;color:var(--text2);line-height:1.7">
               El embudo está diseñado según el protocolo de emprendimiento:<br>
               <strong>Pendiente</strong> → llegó un WA sin atender<br>
@@ -257,7 +259,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 
         <!-- MENSAJES RÁPIDOS -->
         <div class="config-section" id="sec-mensajes">
-          <h2>⚡ Mensajes Rápidos</h2>
+          <h2><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Mensajes Rápidos</h2>
           <p class="config-desc">Plantillas que tus asesores pueden usar con un clic para responder más rápido.</p>
           <div class="config-card">
             <h3>Plantillas activas <button class="btn btn-primary btn-sm" style="float:right" onclick="showAddQR()">＋ Nueva</button></h3>
@@ -270,18 +272,12 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
             <div class="form-group"><label>Título (corto) *</label><input type="text" id="qr-titulo" placeholder="Ej: Bienvenida Mecánico"></div>
             <div class="form-group">
               <label>Categoría</label>
-              <select id="qr-cat">
-                <option value="bienvenida">Bienvenida</option>
-                <option value="cotizacion">Cotización</option>
-                <option value="seguimiento">Seguimiento</option>
-                <option value="mecanico">Mecánico</option>
-                <option value="cierre">Cierre</option>
-              </select>
+              <select id="qr-cat" onchange="handleCategoriaChange(this)"></select>
             </div>
             <div class="form-group">
               <label>Contenido del mensaje *</label>
               <textarea id="qr-contenido" rows="4" placeholder="Escribe el mensaje..."></textarea>
-              <div class="hint">Puedes usar [VARIABLE] para campos que el asesor reemplazará manualmente</div>
+              <div class="hint">Escribe <b>[NOMBRE]</b> donde quieras que se rellene solo con el nombre del lead al usar la plantilla. Otros [CORCHETES] quedan como recordatorio para que el asesor los reemplace a mano.</div>
             </div>
             <div style="display:flex;gap:8px">
               <button class="btn btn-primary" onclick="saveQR()">Guardar</button>
@@ -292,7 +288,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 
         <!-- AUTOMATIZACIONES -->
         <div class="config-section" id="sec-automatizaciones">
-          <h2>🤖 Automatizaciones</h2>
+          <h2><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg> Automatizaciones</h2>
           <p class="config-desc">Disparadores automáticos para seguimiento de leads. Requiere n8n como motor de automatización.</p>
 
           <div class="config-card">
@@ -308,28 +304,28 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
             <h3>Automatizaciones configuradas</h3>
             <div class="toggle-row">
               <div class="toggle-info">
-                <div class="toggle-label">⏰ Seguimiento usuario final — 1 hora</div>
+                <div class="toggle-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Seguimiento usuario final — 1 hora</div>
                 <div class="toggle-desc">Si no hay respuesta en 60 min, enviar mensaje de seguimiento</div>
               </div>
               <button class="toggle on" onclick="this.classList.toggle('on')"></button>
             </div>
             <div class="toggle-row">
               <div class="toggle-info">
-                <div class="toggle-label">🔧 Seguimiento mecánico — 20 min</div>
+                <div class="toggle-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> Seguimiento mecánico — 20 min</div>
                 <div class="toggle-desc">Mecánicos reciben seguimiento más rápido (20 min sin respuesta)</div>
               </div>
               <button class="toggle on" onclick="this.classList.toggle('on')"></button>
             </div>
             <div class="toggle-row">
               <div class="toggle-info">
-                <div class="toggle-label">📅 Recordatorio de cita</div>
+                <div class="toggle-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Recordatorio de cita</div>
                 <div class="toggle-desc">1 hora antes de la cita agendada, enviar recordatorio</div>
               </div>
               <button class="toggle" onclick="this.classList.toggle('on')"></button>
             </div>
             <div class="toggle-row">
               <div class="toggle-info">
-                <div class="toggle-label">🌙 Mensaje fuera de horario</div>
+                <div class="toggle-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> Mensaje fuera de horario</div>
                 <div class="toggle-desc">Si escriben fuera de horario (8pm-8am), respuesta automática</div>
               </div>
               <button class="toggle" onclick="this.classList.toggle('on')"></button>
@@ -337,7 +333,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
           </div>
 
           <div class="config-card" style="background:rgba(52,152,219,.04);border-color:rgba(52,152,219,.2)">
-            <h3 style="color:var(--blue)">📌 Regla de 24 horas (Meta)</h3>
+            <h3 style="color:var(--blue)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Regla de 24 horas (Meta)</h3>
             <p style="font-size:12px;color:var(--text2);line-height:1.7">
               Después de que un cliente escribe, tienes <strong>24 horas</strong> para responder libremente.<br>
               Los seguimientos de 1h y 20min caen <strong>dentro</strong> de esa ventana ✅<br>
@@ -348,7 +344,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 
         <!-- EMPRESA -->
         <div class="config-section" id="sec-empresa">
-          <h2>🏪 Datos de la empresa</h2>
+          <h2><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M3 9l1-5h16l1 5"/><path d="M3 9a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"/><path d="M4 9v10a1 1 0 0 0 1 1h4v-6h6v6h4a1 1 0 0 0 1-1V9"/></svg> Datos de la empresa</h2>
           <p class="config-desc">Información general de Cremalleras LR en el sistema.</p>
           <div class="config-card">
             <h3>Información general</h3>
@@ -356,30 +352,35 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
             <div class="form-group"><label>Teléfono WhatsApp Business</label><input type="text" id="emp-wa" placeholder="+52 33 XXXX XXXX"></div>
             <div class="form-group"><label>Ciudad</label><input type="text" id="emp-ciudad" value="Guadalajara, Jalisco"></div>
             <div class="form-group">
+              <label>Ubicación del negocio (para compartir con clientes)</label>
+              <textarea id="emp-ubicacion" rows="2" placeholder="Dirección o link de Google Maps"></textarea>
+              <div class="hint">Esto es lo que se rellena solo cuando usas (UBI) o [UBI] en una respuesta rápida.</div>
+            </div>
+            <div class="form-group">
               <label>Color de marca</label>
               <input type="color" id="emp-color" value="#c8a951" style="width:60px;height:36px;padding:2px">
             </div>
-            <button class="btn btn-primary" onclick="showToast('✅ Guardado (demo)')">💾 Guardar</button>
+            <button class="btn btn-primary" onclick="guardarUbicacionEmpresa()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Guardar</button>
           </div>
 
           <div class="config-card">
-            <h3>🔗 Multi-empresa</h3>
+            <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Multi-empresa</h3>
             <p style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:12px">
               El sistema está preparado para gestionar múltiples empresas bajo una sola plataforma.
             </p>
             <div style="display:flex;flex-direction:column;gap:8px">
               <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px">
-                <span style="font-size:16px">🔧</span>
+                <span style="font-size:16px;display:flex"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
                 <div style="flex:1"><div style="font-size:13px;font-weight:700">Henry's Diagnostics</div><div style="font-size:11px;color:var(--text3)">Colima — Taller de diagnóstico</div></div>
                 <span style="font-size:10px;padding:2px 8px;background:rgba(149,165,166,.1);color:var(--text3);border-radius:6px">Próximamente</span>
               </div>
               <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:1px solid rgba(200,169,81,.2);border-radius:8px">
-                <span style="font-size:16px">🚗</span>
+                <span style="font-size:16px;display:flex"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14M5 17a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm14 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM5 17l1.5-6.5A2 2 0 0 1 8.4 9h7.2a2 2 0 0 1 1.9 1.5L19 17M5 17h14M9 9V6h6v3"/></svg></span>
                 <div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--gold)">Cremalleras LR</div><div style="font-size:11px;color:var(--text3)">Guadalajara — Activa</div></div>
                 <span style="font-size:10px;padding:2px 8px;background:rgba(200,169,81,.15);color:var(--gold);border-radius:6px;font-weight:600">Activa</span>
               </div>
               <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px">
-                <span style="font-size:16px">🏪</span>
+                <span style="font-size:16px;display:flex"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M3 9a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"/><path d="M4 9v10a1 1 0 0 0 1 1h4v-6h6v6h4a1 1 0 0 0 1-1V9"/></svg></span>
                 <div style="flex:1"><div style="font-size:13px;font-weight:700">La Refa Automotriz</div><div style="font-size:11px;color:var(--text3)">Colima — Refaccionaria</div></div>
                 <span style="font-size:10px;padding:2px 8px;background:rgba(149,165,166,.1);color:var(--text3);border-radius:6px">Próximamente</span>
               </div>
@@ -428,6 +429,23 @@ function loadCurrentSection(){
   if(id==='asesores')loadAsesores();
   if(id==='etapas')loadEtapas();
   if(id==='mensajes')loadQR();
+  if(id==='empresa')loadUbicacionEmpresa();
+}
+
+// Ubicación del negocio: se guarda local (mismo navegador) para que la
+// Bandeja pueda leerla al usar (UBI)/[UBI] en una respuesta rápida.
+const LS_KEY_UBICACION = 'henryleads_ubicacion_negocio';
+function loadUbicacionEmpresa(){
+  let val = localStorage.getItem(LS_KEY_UBICACION);
+  if(val===null){
+    val = 'Río Tizapán 1405, Col. Atlas, Guadalajara, Jalisco, CP 44870';
+    localStorage.setItem(LS_KEY_UBICACION, val);
+  }
+  document.getElementById('emp-ubicacion').value = val;
+}
+function guardarUbicacionEmpresa(){
+  localStorage.setItem(LS_KEY_UBICACION, document.getElementById('emp-ubicacion').value.trim());
+  showToast('✅ Guardado');
 }
 
 let _sandboxAsesoresExtra=[];
@@ -489,45 +507,159 @@ function renderEtapas(list){
     </div>`).join('');
 }
 
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// En sandbox, esta lista vive en memoria mientras no recargues la página
+// (mismo comportamiento que el resto del sandbox: no toca Supabase real).
+let _sandboxQR = null;
+function demoQRBase(){
+  return [
+    {id:'qr1',titulo:'Bienvenida',contenido:'¡Hola! Gracias por contactar a Cremalleras LR 🚗',categoria:'bienvenida',oculta:false},
+    {id:'qr2',titulo:'Datos vehículo',contenido:'Para cotizarte necesito: marca, modelo y año ¿me los compartes?',categoria:'bienvenida',oculta:false},
+    {id:'qr3',titulo:'Bienvenida Mecánico',contenido:'¡Hola colega! Como mecánico aliado tienes 5% de descuento 💪',categoria:'mecanico',oculta:false},
+    {id:'qr4',titulo:'Cotización lista',contenido:'Te comparto la cotización 👆 ¿Tienes alguna pregunta?',categoria:'cotizacion',oculta:false},
+    {id:'qr5',titulo:'Seguimiento 1h',contenido:'Hola, ¿pudiste ver la cotización? Estamos para cualquier duda 😊',categoria:'seguimiento',oculta:false},
+  ];
+}
+
 async function loadQR(){
   const el=document.getElementById('qr-list');
   if(_demo){
-    const list=[
-      {titulo:'Bienvenida',contenido:'¡Hola! Gracias por contactar a Cremalleras LR 🚗',categoria:'bienvenida'},
-      {titulo:'Datos vehículo',contenido:'Para cotizarte necesito: marca, modelo y año ¿me los compartes?',categoria:'bienvenida'},
-      {titulo:'Bienvenida Mecánico',contenido:'¡Hola colega! Como mecánico aliado tienes 5% de descuento 💪',categoria:'mecanico'},
-      {titulo:'Cotización lista',contenido:'Te comparto la cotización 👆 ¿Tienes alguna pregunta?',categoria:'cotizacion'},
-      {titulo:'Seguimiento 1h',contenido:'Hola, ¿pudiste ver la cotización? Estamos para cualquier duda 😊',categoria:'seguimiento'},
-    ];
-    renderQR(list);return;
+    if(!_sandboxQR) _sandboxQR=demoQRBase();
+    renderQR(_sandboxQR);
+    return;
   }
   try{const list=await sb(`lp_mensajes_rapidos?empresa_id=eq.${EMPRESA_ID}&activo=eq.true&order=orden.asc`);renderQR(list||[]);}
   catch(e){el.innerHTML='<div style="color:var(--red);font-size:12px">Error</div>';}
 }
 function renderQR(list){
   document.getElementById('qr-list').innerHTML=list.map(q=>`
-    <div class="qr-item">
+    <div class="qr-item" style="${q.oculta?'opacity:.5':''}">
       <div class="qr-body">
-        <div class="qr-titulo">${q.titulo}</div>
-        <div class="qr-contenido">${q.contenido}</div>
-        <span class="qr-cat">${q.categoria||'general'}</span>
+        <div class="qr-titulo">${escHtml(q.titulo)}${q.oculta?' <span class="qr-cat">oculta del chat</span>':''}</div>
+        <div class="qr-contenido">${escHtml(q.contenido)}</div>
+        <span class="qr-cat">${escHtml(q.categoria||'general')}</span>
       </div>
       <div class="qr-actions">
-        <button class="btn btn-ghost btn-sm">✏️</button>
-        <button class="btn btn-danger btn-sm">🗑</button>
+        <button class="btn btn-ghost btn-sm icon-btn" onclick="toggleHideQR('${q.id}')" title="${q.oculta?'Mostrar de nuevo en el chat':'Ocultar del chat (no se elimina)'}">${q.oculta
+          ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
+          : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.06 21.06 0 0 1 5.06-6.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.32 21.32 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'}</button>
+        <button class="btn btn-ghost btn-sm icon-btn" onclick="editQR('${q.id}')" title="Editar"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>
+        <button class="btn btn-danger btn-sm icon-btn" onclick="deleteQR('${q.id}')" title="Eliminar definitivamente"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button>
       </div>
     </div>`).join('');
 }
-function showAddQR(){document.getElementById('form-qr').style.display='block';}
+
+// Categorías de respuestas rápidas: hoy vienen tropicalizadas a Cremalleras
+// LR, pero cuando este sistema se comparta con otros negocios, cada quien
+// necesita las suyas según su giro (plomero, dentista, refacciones, etc.).
+// Las que agregue el usuario se guardan local, junto con las de fábrica.
+const LS_KEY_CATEGORIAS='henryleads_categorias_qr';
+const CATEGORIAS_DEFAULT=[
+  {value:'bienvenida',label:'Bienvenida'},
+  {value:'cotizacion',label:'Cotización'},
+  {value:'seguimiento',label:'Seguimiento'},
+  {value:'mecanico',label:'Mecánico'},
+  {value:'cierre',label:'Cierre'},
+];
+function cargarCategorias(){
+  let extra=[];
+  try{ extra=JSON.parse(localStorage.getItem(LS_KEY_CATEGORIAS)||'[]'); }catch(e){}
+  return [...CATEGORIAS_DEFAULT, ...extra];
+}
+function renderCategoriaOptions(selected){
+  const categorias=cargarCategorias();
+  const sel=document.getElementById('qr-cat');
+  sel.innerHTML=categorias.map(c=>`<option value="${escHtml(c.value)}">${escHtml(c.label)}</option>`).join('')
+    + '<option value="__nueva__">+ Nueva categoría…</option>';
+  sel.value = (selected && categorias.some(c=>c.value===selected)) ? selected : (categorias[0]?.value||'');
+}
+function handleCategoriaChange(sel){
+  if(sel.value!=='__nueva__') return;
+  const nombre=(prompt('Nombre de la nueva categoría (ej: Plomería, Dentista, Refacciones):')||'').trim();
+  if(!nombre){ renderCategoriaOptions(); return; }
+  const value=(nombre.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'')) || ('cat_'+Date.now());
+  const extra=cargarCategorias().filter(c=>!CATEGORIAS_DEFAULT.some(d=>d.value===c.value));
+  if(!extra.some(c=>c.value===value)){
+    extra.push({value,label:nombre});
+    localStorage.setItem(LS_KEY_CATEGORIAS, JSON.stringify(extra));
+  }
+  renderCategoriaOptions(value);
+}
+
+let _qrEditingId=null;
+function showAddQR(){
+  _qrEditingId=null;
+  document.getElementById('qr-titulo').value='';
+  document.getElementById('qr-contenido').value='';
+  renderCategoriaOptions('bienvenida');
+  document.querySelector('#form-qr h3').textContent='Nueva plantilla';
+  document.getElementById('form-qr').style.display='block';
+  document.getElementById('form-qr').scrollIntoView({behavior:'smooth',block:'center'});
+  document.getElementById('qr-titulo').focus();
+}
+function editQR(id){
+  const q=_sandboxQR.find(x=>x.id===id);
+  if(!q) return;
+  _qrEditingId=id;
+  document.getElementById('qr-titulo').value=q.titulo;
+  document.getElementById('qr-contenido').value=q.contenido;
+  renderCategoriaOptions(q.categoria||'bienvenida');
+  document.querySelector('#form-qr h3').textContent='Editar plantilla';
+  document.getElementById('form-qr').style.display='block';
+  document.getElementById('form-qr').scrollIntoView({behavior:'smooth',block:'center'});
+  document.getElementById('qr-titulo').focus();
+}
 async function saveQR(){
   const titulo=document.getElementById('qr-titulo').value.trim();
   const contenido=document.getElementById('qr-contenido').value.trim();
   if(!titulo||!contenido)return;
-  if(_demo){showToast('Plantilla guardada (demo)');document.getElementById('form-qr').style.display='none';return;}
+  const categoria=document.getElementById('qr-cat').value;
+  if(_demo){
+    if(_qrEditingId){
+      const q=_sandboxQR.find(x=>x.id===_qrEditingId);
+      if(q){ q.titulo=titulo; q.contenido=contenido; q.categoria=categoria; }
+      showToast('✅ Plantilla actualizada');
+    } else {
+      _sandboxQR.push({id:'qr'+Date.now(),titulo,contenido,categoria,oculta:false});
+      showToast('✅ Plantilla guardada');
+    }
+    document.getElementById('form-qr').style.display='none';
+    loadQR();
+    return;
+  }
   try{
-    await sb('lp_mensajes_rapidos',{method:'POST',body:JSON.stringify({empresa_id:EMPRESA_ID,titulo,contenido,categoria:document.getElementById('qr-cat').value})});
+    if(_qrEditingId){
+      await sb(`lp_mensajes_rapidos?id=eq.${_qrEditingId}`,{method:'PATCH',body:JSON.stringify({titulo,contenido,categoria})});
+    } else {
+      await sb('lp_mensajes_rapidos',{method:'POST',body:JSON.stringify({empresa_id:EMPRESA_ID,titulo,contenido,categoria})});
+    }
     document.getElementById('form-qr').style.display='none';loadQR();showToast('✅ Guardado');
   }catch(e){showToast('❌ '+e.message);}
+}
+async function toggleHideQR(id){
+  if(_demo){
+    const q=_sandboxQR.find(x=>x.id===id);
+    if(!q) return;
+    q.oculta=!q.oculta;
+    loadQR();
+    showToast(q.oculta?'Oculta del chat (no se eliminó)':'Visible de nuevo en el chat');
+    return;
+  }
+  try{ await sb(`lp_mensajes_rapidos?id=eq.${id}`,{method:'PATCH',body:JSON.stringify({oculta:true})}); loadQR(); }
+  catch(e){showToast('❌ '+e.message);}
+}
+async function deleteQR(id){
+  const q=(_sandboxQR||[]).find(x=>x.id===id);
+  if(!confirm(`¿Eliminar definitivamente "${q?q.titulo:'esta plantilla'}"? Esta acción no se puede deshacer. Si solo quieres quitarla del chat sin perderla, usa el ícono del ojo tachado para ocultarla en vez de eliminarla.`)) return;
+  if(_demo){
+    _sandboxQR=_sandboxQR.filter(x=>x.id!==id);
+    loadQR();
+    showToast('🗑 Plantilla eliminada');
+    return;
+  }
+  try{ await sb(`lp_mensajes_rapidos?id=eq.${id}`,{method:'DELETE'}); loadQR(); showToast('🗑 Eliminada'); }
+  catch(e){showToast('❌ '+e.message);}
 }
 
 function saveWAConfig(){
@@ -555,7 +687,13 @@ function showToast(msg){
 }
 
 if(_demo)document.getElementById('demo-banner').style.display='block';
-requireAuth().then(ok => { if(ok) loadCurrentSection(); });
+requireAuth().then(ok => {
+  if(!ok) return;
+  const hash = location.hash.replace('#','');
+  const nav = hash && document.querySelector(`.config-nav-item[onclick*="'${hash}'"]`);
+  if(nav) showSection(hash, nav);
+  else loadCurrentSection();
+});
 </script>
 </body>
 </html>
