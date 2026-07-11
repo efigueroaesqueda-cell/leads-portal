@@ -476,7 +476,7 @@ function demoLeads(){
     no_leidos:_sr(i*11,0,3)>2?_sr(i*17,1,9):0,
     ultimo_contacto:new Date(ahora - _sr(i*5,1,72)*3600000).toISOString(),
     preview:previews[i],
-    asesor:{nombre:['Luis R.','Karla M.','Diego V.'][_sr(i*9,0,2)]},
+    asesor:{nombre:['Luis R.','Karla M.','Diego V.'][i%3]},
     etiquetas_lead:i%3===0?[{etiqueta:{nombre:'Mecánico Alianza',color:'#27ae60'}}]:[]
   }));
 }
@@ -484,6 +484,7 @@ function demoLeads(){
 function demoMensajes(leadId){
   const idx = parseInt(leadId.split('-')[2]||'0');
   const now = Date.now();
+  const asesorNombre = ['Luis R.','Karla M.','Diego V.'][idx%3];
   const pares = [
     ['Hola, me interesa conocer sus precios para cremalleras', 'Claro! ¿Para qué vehículo necesitas?'],
     ['Es para un Tsuru 2012, dirección mecánica', '¡Perfecto! Tenemos stock disponible. Te mando cotización en un momento.'],
@@ -492,7 +493,7 @@ function demoMensajes(leadId){
   const msgs = [];
   pares.forEach(([ent,sal],i)=>{
     msgs.push({ id:`dm-${idx}-${i*2}`, lead_id:leadId, direccion:'entrante', contenido:ent, created_at:new Date(now-(pares.length-i)*7200000+1000).toISOString() });
-    msgs.push({ id:`dm-${idx}-${i*2+1}`, lead_id:leadId, direccion:'saliente', contenido:sal, asesor:{nombre:'Luis R.'}, created_at:new Date(now-(pares.length-i)*7200000+60000).toISOString() });
+    msgs.push({ id:`dm-${idx}-${i*2+1}`, lead_id:leadId, direccion:'saliente', contenido:sal, asesor:{nombre:asesorNombre}, created_at:new Date(now-(pares.length-i)*7200000+60000).toISOString() });
   });
   return msgs;
 }

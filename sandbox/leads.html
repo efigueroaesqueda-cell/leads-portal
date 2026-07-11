@@ -254,7 +254,7 @@ function demoLeads(){
     tipo_cliente:tipos[i],etapa:etapas[_sr(i*3,0,5)],
     vehiculo_info:vehiculos[i],no_leidos:_sr(i*11,0,4)>3?_sr(i*17,1,5):0,
     updated_at:new Date(now-_sr(i*5,1,72)*3600000).toISOString(),
-    asesor:{nombre:['Luis R.','Karla M.','Diego V.'][_sr(i*9,0,2)]},
+    asesor:{nombre:['Luis R.','Karla M.','Diego V.'][i%3]},
     notas:i%4===0?'Cliente interesado en precio especial':'',etiquetas_lead:[]
   }));}
 function demoEtapas(){return[{id:'et1',nombre:'Pendiente',color:'#888888'},{id:'et2',nombre:'Contestado',color:'#3498db'},{id:'et3',nombre:'Prospecto',color:'#9b59b6'},{id:'et4',nombre:'Cotizado',color:'#f39c12'},{id:'et5',nombre:'Agendado',color:'#1abc9c'},{id:'et6',nombre:'Cerrado',color:'#2ecc71'}];}

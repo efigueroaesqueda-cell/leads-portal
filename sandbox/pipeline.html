@@ -225,7 +225,7 @@ function demoLeads(){
     etapa:etapas[_sr(i*3,0,5)],
     no_leidos:_sr(i*11,0,4)>3?_sr(i*17,1,5):0,
     ultimo_contacto:new Date(Date.now()-_sr(i*5,1,48)*3600000).toISOString(),
-    asesor:{nombre:['Luis R.','Karla M.','Diego V.'][_sr(i*9,0,2)]},
+    asesor:{nombre:['Luis R.','Karla M.','Diego V.'][i%3]},
     vehiculo_info:['Tsuru 2012','Altima 2018','HiLux 2020','Aveo 2015','RAM 1500 2019','Corolla 2021'][_sr(i*19,0,5)],
     etiquetas_lead:[]
   }));}
