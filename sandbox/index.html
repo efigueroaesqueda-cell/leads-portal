@@ -1557,6 +1557,9 @@ function endTour(){
   document.getElementById('tour-tooltip').classList.remove('show');
   localStorage.setItem(LS_KEY_TOUR_VISTO,'1');
 }
+document.addEventListener('keydown', (e)=>{
+  if(e.key==='Escape' && document.getElementById('tour-tooltip').classList.contains('show')) endTour();
+});
 
 function showToast(msg, dur=3000){
   let t=document.getElementById('toast');
