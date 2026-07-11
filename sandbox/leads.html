@@ -347,7 +347,6 @@ let _tourIndex=0;
 
 function startTour(){
   _tourIndex=0;
-  document.getElementById('btn-tour').classList.remove('pulse-attention');
   document.getElementById('tour-backdrop').classList.add('show');
   document.getElementById('tour-tooltip').classList.add('show');
   showTourStep();
@@ -403,6 +402,7 @@ function endTour(){
   document.getElementById('tour-backdrop').classList.remove('show');
   document.getElementById('tour-highlight').classList.remove('show');
   document.getElementById('tour-tooltip').classList.remove('show');
+  document.getElementById('btn-tour').classList.remove('pulse-attention');
   localStorage.setItem(LS_KEY_TOUR_VISTO,'1');
 }
 document.addEventListener('keydown', (e)=>{
