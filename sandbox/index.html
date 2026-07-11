@@ -120,6 +120,31 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 .attach-option{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13px;color:var(--text);cursor:pointer;white-space:nowrap}
 .attach-option:hover{background:var(--bg4)}
 
+.pending-attach{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 14px;background:var(--bg3);border-bottom:1px solid var(--border)}
+.pending-attach-info{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);overflow:hidden}
+.pending-attach-info span:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pending-attach-cancel{width:24px;height:24px;border-radius:50%;background:var(--bg4);border:none;color:var(--text2);cursor:pointer;flex-shrink:0;font-size:12px}
+.pending-attach-cancel:hover{color:var(--red);background:rgba(231,76,60,.15)}
+
+.btn-mic{width:40px;height:40px;border-radius:12px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;gap:4px}
+.btn-mic:hover{color:var(--gold);border-color:var(--gold)}
+.btn-mic.recording{background:var(--red);border-color:var(--red);color:#fff;width:auto;padding:0 12px;animation:pulse-mic 1.2s infinite}
+#mic-timer{display:none;font-size:11px;font-weight:700}
+.btn-mic.recording #mic-timer{display:inline}
+@keyframes pulse-mic{0%,100%{opacity:1}50%{opacity:.6}}
+
+.msg-wrap{display:flex;align-items:center;gap:6px;position:relative}
+.msg-group[style*="flex-end"] .msg-wrap{flex-direction:row-reverse}
+.msg-menu-btn{opacity:0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text3);cursor:pointer;font-size:14px;flex-shrink:0;transition:opacity .15s}
+.msg-wrap:hover .msg-menu-btn{opacity:1}
+.msg-menu-btn:hover{background:var(--bg4);color:var(--text)}
+.msg-menu{display:none;position:absolute;top:24px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:6px;min-width:160px;box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:15;right:0}
+.msg-group[style*="flex-start"] .msg-menu{left:0;right:auto}
+.msg-menu.show{display:block}
+.msg-menu div{padding:8px 12px;border-radius:6px;font-size:12px;color:var(--text);cursor:pointer;white-space:nowrap}
+.msg-menu div:hover{background:var(--bg4)}
+.msg-eliminado{color:var(--text3);font-style:italic}
+
 /* LEAD PROFILE PANEL */
 #profile-panel{width:280px;min-width:280px;background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;height:100%;min-height:0;overflow:hidden}
 .profile-header{height:var(--header-h);border-bottom:1px solid var(--border);padding:0 14px;display:flex;align-items:center;justify-content:space-between}
@@ -287,19 +312,29 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
       <!-- Input area -->
       <div id="chat-input-area">
         <div class="quick-replies" id="quick-replies-bar"></div>
+        <div class="pending-attach" id="pending-attach" style="display:none">
+          <div class="pending-attach-info">
+            <span id="pending-attach-icon">📎</span>
+            <span id="pending-attach-name"></span>
+            <audio id="pending-attach-audio" controls style="display:none;height:32px;max-width:180px"></audio>
+          </div>
+          <button class="pending-attach-cancel" onclick="cancelAttach()" title="Quitar">✕</button>
+        </div>
         <div class="input-row">
           <div class="attach-wrap">
             <button class="btn-attach" onclick="toggleAttachMenu(event)" title="Adjuntar">＋</button>
             <div class="attach-menu" id="attach-menu">
               <div class="attach-option" onclick="attachFile('imagen')">📷 <span>Imagen</span></div>
               <div class="attach-option" onclick="attachFile('documento')">📄 <span>Documento</span></div>
-              <div class="attach-option" onclick="attachFile('audio')">🎤 <span>Audio</span></div>
             </div>
           </div>
           <textarea id="msg-input" placeholder="Escribe un mensaje..." rows="1"
             onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"
-            oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"></textarea>
-          <button class="btn-send" onclick="sendMessage()">➤</button>
+            oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px';updateSendMicVisibility()"></textarea>
+          <button class="btn-mic" id="btn-mic" onclick="toggleRecording()" title="Grabar audio">
+            <span id="mic-icon">🎤</span><span id="mic-timer">00:00</span>
+          </button>
+          <button class="btn-send" id="btn-send" onclick="sendMessage()" style="display:none">➤</button>
         </div>
       </div>
     </div>
@@ -648,6 +683,9 @@ async function openLead(id){
   _activeLead = _leadsAll.find(l=>l.id===id);
   if(!_activeLead) return;
 
+  cancelAttach();
+  if(_mediaRecorder && _mediaRecorder.state==='recording') _mediaRecorder.stop();
+
   // Update active state in inbox
   document.querySelectorAll('.conv-item').forEach(el=>{
     el.classList.toggle('active', el.onclick.toString().includes(`'${id}'`));
@@ -716,13 +754,48 @@ function renderMessages(){
       lastDate=d;
     }
     const ent=m.direccion==='entrante';
+    let bubbleContent;
+    if(m.eliminado){
+      bubbleContent = `<span class="msg-eliminado">🚫 Este mensaje fue eliminado</span>`;
+    } else if(m.tipo==='audio' && m.audioUrl){
+      bubbleContent = `<audio controls src="${m.audioUrl}" style="height:34px;max-width:220px"></audio>`;
+    } else {
+      bubbleContent = escHtml(m.contenido);
+    }
     html+=`<div class="msg-group" style="align-items:${ent?'flex-start':'flex-end'}">
       ${!ent&&m.asesor?.nombre?`<div class="msg-asesor">${m.asesor.nombre}</div>`:''}
-      <div class="msg-bubble msg-${m.direccion}">${escHtml(m.contenido)}</div>
+      <div class="msg-wrap">
+        <div class="msg-bubble msg-${m.direccion}">${bubbleContent}</div>
+        ${!m.eliminado?`<div class="msg-menu-btn" onclick="toggleMsgMenu(event,'${m.id}')">⋮</div>
+        <div class="msg-menu" id="msg-menu-${m.id}">
+          <div onclick="deleteMessage('${m.id}','mi')">Eliminar para mí</div>
+          ${!ent?`<div onclick="deleteMessage('${m.id}','todos')">Eliminar para todos</div>`:''}
+        </div>`:''}
+      </div>
       <div class="msg-time${ent?'':' right'}">${formatTime(m.created_at)}</div>
     </div>`;
   });
   el.innerHTML=html;
+}
+
+function toggleMsgMenu(e,id){
+  e.stopPropagation();
+  document.querySelectorAll('.msg-menu.show').forEach(el=>{ if(el.id!==`msg-menu-${id}`) el.classList.remove('show'); });
+  document.getElementById(`msg-menu-${id}`)?.classList.toggle('show');
+}
+document.addEventListener('click', ()=> document.querySelectorAll('.msg-menu.show').forEach(el=>el.classList.remove('show')));
+
+function deleteMessage(id, modo){
+  const idx=_mensajes.findIndex(m=>m.id===id);
+  if(idx===-1) return;
+  if(modo==='todos'){
+    _mensajes[idx].eliminado=true;
+    showToast('Eliminado para todos (simulado — WhatsApp no permite esto de verdad desde el negocio)');
+  } else {
+    _mensajes.splice(idx,1);
+    showToast('Eliminado para ti');
+  }
+  renderMessages();
 }
 
 function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
@@ -735,52 +808,143 @@ function toggleAttachMenu(e){
 }
 document.addEventListener('click', ()=> document.getElementById('attach-menu')?.classList.remove('show'));
 
+let _pendingAttachment = null; // { tipo, icon, name, url }
+
 function attachFile(tipo){
   document.getElementById('attach-menu').classList.remove('show');
   if(!_activeLead) return;
-  const accept = tipo==='imagen' ? 'image/*' : tipo==='audio' ? 'audio/*' : '*/*';
+  const accept = tipo==='imagen' ? 'image/*' : '*/*';
   const inp = document.createElement('input');
   inp.type='file'; inp.accept=accept;
   inp.onchange = ()=>{
     if(!inp.files[0]) return;
-    const icon = tipo==='imagen'?'📷':tipo==='audio'?'🎤':'📄';
-    const msg={
-      id:`local-${Date.now()}`,
-      lead_id:_activeLead.id,
-      direccion:'saliente',
-      contenido:`${icon} ${inp.files[0].name}`,
-      asesor:{nombre:'Luis R.'},
-      created_at:new Date().toISOString()
-    };
-    _mensajes.push(msg);
-    renderMessages();
-    scrollToBottom();
-    showToast('✅ Archivo agregado (simulado)');
+    const icon = tipo==='imagen'?'📷':'📄';
+    _pendingAttachment = { tipo, icon, name: inp.files[0].name, url:null };
+    showPendingAttach();
   };
   inp.click();
+}
+
+function showPendingAttach(){
+  const bar = document.getElementById('pending-attach');
+  const audioEl = document.getElementById('pending-attach-audio');
+  document.getElementById('pending-attach-icon').textContent = _pendingAttachment.icon;
+  if(_pendingAttachment.tipo==='audio'){
+    document.getElementById('pending-attach-name').style.display='none';
+    audioEl.src = _pendingAttachment.url;
+    audioEl.style.display='inline-block';
+  } else {
+    document.getElementById('pending-attach-name').style.display='inline';
+    document.getElementById('pending-attach-name').textContent = _pendingAttachment.name;
+    audioEl.style.display='none';
+  }
+  bar.style.display='flex';
+  updateSendMicVisibility();
+}
+
+function cancelAttach(){
+  _pendingAttachment = null;
+  document.getElementById('pending-attach').style.display='none';
+  updateSendMicVisibility();
+}
+
+function updateSendMicVisibility(){
+  const hasText = document.getElementById('msg-input').value.trim().length>0;
+  const hasPending = !!_pendingAttachment;
+  const recording = document.getElementById('btn-mic').classList.contains('recording');
+  document.getElementById('btn-mic').style.display = (hasText||hasPending) && !recording ? 'none' : 'flex';
+  document.getElementById('btn-send').style.display = (hasText||hasPending) ? 'flex' : 'none';
+}
+
+// ── GRABAR AUDIO ──────────────────────────────────────────────
+let _mediaRecorder=null, _recordedChunks=[], _recordTimer=null, _recordSeconds=0;
+
+async function toggleRecording(){
+  if(_mediaRecorder && _mediaRecorder.state==='recording'){
+    _mediaRecorder.stop();
+    return;
+  }
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    _recordedChunks=[];
+    _mediaRecorder = new MediaRecorder(stream);
+    _mediaRecorder.ondataavailable = e=>{ if(e.data.size>0) _recordedChunks.push(e.data); };
+    _mediaRecorder.onstop = ()=>{
+      stream.getTracks().forEach(t=>t.stop());
+      const blob = new Blob(_recordedChunks, {type:'audio/webm'});
+      const url = URL.createObjectURL(blob);
+      _pendingAttachment = { tipo:'audio', icon:'🎤', name:'Nota de voz', url };
+      stopRecordUI();
+      showPendingAttach();
+    };
+    _mediaRecorder.start();
+    startRecordUI();
+  }catch(err){
+    showToast('❌ No se pudo acceder al micrófono (revisa permisos del navegador)');
+  }
+}
+
+function startRecordUI(){
+  _recordSeconds=0;
+  document.getElementById('btn-mic').classList.add('recording');
+  document.getElementById('mic-icon').textContent='⏹';
+  _recordTimer = setInterval(()=>{
+    _recordSeconds++;
+    const m=String(Math.floor(_recordSeconds/60)).padStart(2,'0');
+    const s=String(_recordSeconds%60).padStart(2,'0');
+    document.getElementById('mic-timer').textContent=`${m}:${s}`;
+  },1000);
+}
+function stopRecordUI(){
+  clearInterval(_recordTimer);
+  document.getElementById('btn-mic').classList.remove('recording');
+  document.getElementById('mic-icon').textContent='🎤';
+  document.getElementById('mic-timer').textContent='00:00';
 }
 
 // ── SEND MESSAGE ──────────────────────────────────────────────
 async function sendMessage(){
   const input=document.getElementById('msg-input');
   const text=input.value.trim();
-  if(!text||!_activeLead) return;
+  if(!_activeLead) return;
+  if(!text && !_pendingAttachment) return;
+
+  if(_pendingAttachment){
+    const msg={
+      id:`local-${Date.now()}`,
+      lead_id:_activeLead.id,
+      direccion:'saliente',
+      contenido: _pendingAttachment.tipo==='audio' ? '🎤 Nota de voz' : `${_pendingAttachment.icon} ${_pendingAttachment.name}`,
+      tipo: _pendingAttachment.tipo,
+      audioUrl: _pendingAttachment.tipo==='audio' ? _pendingAttachment.url : null,
+      asesor:{nombre:'Luis R.'},
+      created_at:new Date().toISOString()
+    };
+    _mensajes.push(msg);
+    _pendingAttachment=null;
+    document.getElementById('pending-attach').style.display='none';
+    showToast('✅ Adjunto enviado (simulado)');
+  }
+
+  if(text){
+    const msg={
+      id:`local-${Date.now()+1}`,
+      lead_id:_activeLead.id,
+      direccion:'saliente',
+      contenido:text,
+      asesor:{nombre:'Luis R.'},
+      created_at:new Date().toISOString()
+    };
+    _mensajes.push(msg);
+  }
+
   input.value='';
   input.style.height='auto';
-
-  const msg={
-    id:`local-${Date.now()}`,
-    lead_id:_activeLead.id,
-    direccion:'saliente',
-    contenido:text,
-    asesor:{nombre:'Luis R.'},
-    created_at:new Date().toISOString()
-  };
-  _mensajes.push(msg);
   renderMessages();
   scrollToBottom();
+  updateSendMicVisibility();
 
-  if(!_demo){
+  if(!_demo && text){
     try{
       const res = await fetch(`${SUPABASE_URL}/functions/v1/whatsapp-send`, {
         method:'POST',
