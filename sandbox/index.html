@@ -193,6 +193,24 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 /* MODALS */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
 .modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:24px;width:460px;max-width:95vw}
+
+/* ── RECORRIDO GUIADO (PRODUCT TOUR) ──────────────────────────── */
+#tour-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300}
+#tour-backdrop.show{display:block}
+#tour-highlight{display:none;position:fixed;z-index:301;border:2px solid var(--gold);border-radius:10px;box-shadow:0 0 0 4000px rgba(0,0,0,.55);pointer-events:none;transition:all .25s ease}
+#tour-highlight.show{display:block}
+#tour-tooltip{display:none;position:fixed;z-index:302;background:var(--bg2);border:1px solid var(--gold);border-radius:12px;padding:16px;width:280px;box-shadow:0 12px 32px rgba(0,0,0,.5);transition:all .25s ease}
+#tour-tooltip.show{display:block}
+.tour-step-count{font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px}
+.tour-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px}
+.tour-text{font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:14px}
+.tour-actions{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tour-skip{font-size:11px;color:var(--text3);cursor:pointer;background:none;border:none;padding:0}
+.tour-skip:hover{color:var(--text2)}
+.tour-nav{display:flex;gap:6px}
+.tour-btn{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none}
+.tour-btn-prev{background:transparent;border:1px solid var(--border2);color:var(--text2)}
+.tour-btn-next{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#111}
 .modal h3{font-size:16px;font-weight:700;margin-bottom:16px;color:var(--text)}
 .modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end}
 .btn{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
@@ -271,6 +289,10 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
     </a>
 
     <div class="snav-bottom">
+      <div class="snav-btn" id="btn-tour" title="Recorrido por aplicación" onclick="startTour()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+        <span class="tooltip">Recorrido por aplicación</span>
+      </div>
       <div class="snav-btn" id="btn-demo" title="Modo Demo" onclick="toggleDemo()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.5L4.5 19a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 9.5V3"/><path d="M7 15h10"/></svg>
         <span class="tooltip">Demo</span>
@@ -429,6 +451,22 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('modal-qr')">Cancelar</button>
       <button class="btn btn-primary" onclick="guardarQuickReplyDesdeModal()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- RECORRIDO GUIADO -->
+<div id="tour-backdrop" onclick="endTour()"></div>
+<div id="tour-highlight"></div>
+<div id="tour-tooltip">
+  <div class="tour-step-count" id="tour-step-count"></div>
+  <div class="tour-title" id="tour-title"></div>
+  <div class="tour-text" id="tour-text"></div>
+  <div class="tour-actions">
+    <button class="tour-skip" onclick="endTour()">Saltar recorrido</button>
+    <div class="tour-nav">
+      <button class="tour-btn tour-btn-prev" id="tour-btn-prev" onclick="prevTourStep()">Atrás</button>
+      <button class="tour-btn tour-btn-next" id="tour-btn-next" onclick="nextTourStep()">Siguiente</button>
     </div>
   </div>
 </div>
@@ -624,6 +662,13 @@ async function init(){
   }
   // Demo auto-activate from URL
   if(_demo) document.getElementById('demo-banner').style.display='block';
+
+  // Recorrido guiado: automático la primera vez que alguien entra en este
+  // navegador. Después de verlo (o saltarlo), solo se puede volver a abrir
+  // a mano con el botón de la brújula en el menú lateral.
+  if(!localStorage.getItem(LS_KEY_TOUR_VISTO)){
+    setTimeout(startTour, 900);
+  }
 }
 
 async function loadLeads(){
@@ -1426,6 +1471,84 @@ async function createLead(){
 }
 
 // ── TOAST ─────────────────────────────────────────────────────
+// ── RECORRIDO GUIADO (PRODUCT TOUR) ────────────────────────────
+const LS_KEY_TOUR_VISTO='henryleads_tour_visto';
+const TOUR_STEPS=[
+  {selector:'#sidenav', title:'Menú principal', text:'Desde aquí te mueves entre Bandeja, Pipeline, Leads y Configuración. Este mismo botón de brújula vive abajo del todo, por si quieres repetir el recorrido después.', pos:'right'},
+  {selector:'.inbox-header', title:'Tu bandeja de conversaciones', text:'Aquí ves todos los chats de WhatsApp. El botón ＋ crea un lead nuevo a mano, sin esperar a que el cliente escriba primero.', pos:'bottom'},
+  {selector:'.inbox-filters', title:'Filtros rápidos', text:'Filtra por tipo de cliente (mecánico, refaccionaria, usuario) o solo los que no has leído.', pos:'bottom'},
+  {selector:'.conv-item', title:'Cada conversación', text:'Un clic aquí abre el chat completo con ese cliente.', pos:'right'},
+  {selector:'#quick-replies-bar', title:'Respuestas rápidas', text:'Un clic y mandas una respuesta ya armada — se personaliza sola con el nombre del cliente. Las más usadas se van al frente solas.', pos:'top'},
+  {selector:'#msg-input', title:'Escribe, o usa "/"', text:'Escribe tu mensaje aquí, o teclea "/" para elegir una respuesta rápida sin soltar el teclado — incluso puedes encadenar varias en un mismo mensaje.', pos:'top'},
+  {selector:'.btn-attach', title:'Adjuntar', text:'Manda imágenes, documentos o notas de voz desde aquí.', pos:'top'},
+  {selector:'[title="Perfil"]', title:'Ficha del cliente', text:'Aquí ves y editas los datos del lead: nombre, vehículo, etapa y asesor asignado.', pos:'left'},
+];
+let _tourIndex=0;
+
+function startTour(){
+  _tourIndex=0;
+  if(!_activeLead && _leadsAll && _leadsAll.length) openLead(_leadsAll[0].id);
+  document.getElementById('tour-backdrop').classList.add('show');
+  document.getElementById('tour-tooltip').classList.add('show');
+  showTourStep();
+}
+
+function showTourStep(){
+  const step=TOUR_STEPS[_tourIndex];
+  const el=document.querySelector(step.selector);
+  if(!el){
+    if(_tourIndex<TOUR_STEPS.length-1){ nextTourStep(); } else { endTour(); }
+    return;
+  }
+  document.getElementById('tour-step-count').textContent=`Paso ${_tourIndex+1} de ${TOUR_STEPS.length}`;
+  document.getElementById('tour-title').textContent=step.title;
+  document.getElementById('tour-text').textContent=step.text;
+  document.getElementById('tour-btn-prev').style.visibility=_tourIndex===0?'hidden':'visible';
+  document.getElementById('tour-btn-next').textContent=_tourIndex===TOUR_STEPS.length-1?'Terminar':'Siguiente';
+  el.scrollIntoView({block:'center', behavior:'smooth'});
+  positionTour(el, step);
+}
+
+function positionTour(el, step){
+  const r=el.getBoundingClientRect();
+  const hl=document.getElementById('tour-highlight');
+  hl.style.left=(r.left-6)+'px';
+  hl.style.top=(r.top-6)+'px';
+  hl.style.width=(r.width+12)+'px';
+  hl.style.height=(r.height+12)+'px';
+  hl.classList.add('show');
+
+  const tip=document.getElementById('tour-tooltip');
+  const tw=280, gap=14;
+  const th=tip.offsetHeight||160;
+  let left, top;
+  if(step.pos==='right'){ left=r.right+gap; top=r.top; }
+  else if(step.pos==='left'){ left=r.left-tw-gap; top=r.top; }
+  else if(step.pos==='bottom'){ left=r.left; top=r.bottom+gap; }
+  else { left=r.left; top=r.top-th-gap; }
+  left=Math.max(10, Math.min(left, window.innerWidth-tw-10));
+  top=Math.max(10, Math.min(top, window.innerHeight-th-10));
+  tip.style.left=left+'px';
+  tip.style.top=top+'px';
+}
+
+function nextTourStep(){
+  if(_tourIndex>=TOUR_STEPS.length-1){ endTour(); return; }
+  _tourIndex++;
+  showTourStep();
+}
+function prevTourStep(){
+  if(_tourIndex<=0) return;
+  _tourIndex--;
+  showTourStep();
+}
+function endTour(){
+  document.getElementById('tour-backdrop').classList.remove('show');
+  document.getElementById('tour-highlight').classList.remove('show');
+  document.getElementById('tour-tooltip').classList.remove('show');
+  localStorage.setItem(LS_KEY_TOUR_VISTO,'1');
+}
+
 function showToast(msg, dur=3000){
   let t=document.getElementById('toast');
   if(!t){ t=document.createElement('div'); t.id='toast';
