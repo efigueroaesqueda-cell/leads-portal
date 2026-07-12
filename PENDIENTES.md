@@ -3,6 +3,7 @@
 Cosas que quedaron anotadas para retomar más adelante, no urgentes hoy.
 
 - **Automatizaciones (seguimiento post-cotización, etc.):** decidido NO usar n8n — se construye directo en código (más simple y sin costo extra de suscripción). Falta diseñar la primera automatización real cuando Enrique esté listo.
+  - **Referencia encontrada (2026-07-12):** video de Carlos Eduardo Rueda Martell (facebook.com/share/v/1Z3r42cLHD, publicado 2026-06-26) mostrando n8n + Claude clasificando la intención de un mensaje entrante y actualizando automáticamente los Custom Fields de un contacto en GoHighLevel (CRM). Es el mismo patrón que necesitamos (clasificar intención → actualizar campo/etapa del lead), pero para HenryLeads iría 100% en código (webhook → función de clasificación en el backend propio → update a `lp_leads`), sin n8n ni GoHighLevel. Útil como referencia visual del flujo, no como receta a copiar tal cual.
 
 - **Chat interno de la empresa (confirmado como proyecto, sin construir aún).** Uso: cualquiera frente a una computadora de la empresa tiene acceso, 100% interno, no depende de WhatsApp/Meta. Debe incluir: texto, imágenes/documentos, notas de voz, reenviar mensajes entre chats, y chats grupales internos — todo esto es fácil de construir reutilizando lo que ya existe para el chat con clientes. Llamadas de voz/video quedan aparte, como fase futura distinta (tecnología distinta, WebRTC, no es un simple agregado). Falta sentarse a definir el alcance concreto antes de empezar.
 
