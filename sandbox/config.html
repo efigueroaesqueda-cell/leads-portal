@@ -4,10 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Configuración — Cremalleras LR</title>
+<script>(function(){try{document.documentElement.setAttribute('data-tema', localStorage.getItem('henryleads_tema')||'oscuro');}catch(e){}})();</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#0d0d0d;--bg2:#141414;--bg3:#1a1a1a;--bg4:#222;--border:#2a2a2a;--border2:#333;--gold:#c8a951;--gold2:#a07820;--text:#e8e8e8;--text2:#aaa;--text3:#666;--green:#2ecc71;--red:#e74c3c;--blue:#3498db;--header-h:56px;}
-html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+:root[data-tema="claro"]{--bg:#ffffff;--bg2:#f7f7f8;--bg3:#f0f0f2;--bg4:#e5e5e8;--border:#e4e4e7;--border2:#d4d4d9;--gold:#a97e2f;--gold2:#8a6425;--text:#18181b;--text2:#52525b;--text3:#8b8b93;}
+html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;transition:background .2s,color .2s}
 #app{display:flex;height:100vh;overflow:hidden}
 #sidenav{width:56px;min-width:56px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:4px}
 .snav-logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#111;margin-bottom:8px}
@@ -97,6 +99,10 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 .rol-badge{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:700}
 .rol-admin{background:rgba(200,169,81,.2);color:var(--gold)}
 .rol-asesor{background:rgba(52,152,219,.15);color:var(--blue)}
+.tema-opcion{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px;border-radius:12px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;font-size:13px;font-weight:600;transition:all .18s cubic-bezier(.4,0,.2,1)}
+.tema-opcion:hover{border-color:var(--gold);color:var(--gold)}
+.tema-opcion:active{transform:scale(.97)}
+.tema-opcion.activo{border-color:var(--gold);color:var(--gold);background:rgba(200,169,81,.1)}
 
 /* ETAPA LIST */
 .etapa-list{display:flex;flex-direction:column;gap:6px}
@@ -159,6 +165,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
         <div class="config-nav-item" onclick="showSection('mensajes',this)"><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>Mensajes rápidos</div>
         <div class="config-nav-item" onclick="showSection('automatizaciones',this)"><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></span>Automatizaciones</div>
         <div class="config-nav-item" onclick="showSection('empresa',this)"><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M3 9a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"/><path d="M4 9v10a1 1 0 0 0 1 1h4v-6h6v6h4a1 1 0 0 0 1-1V9"/></svg></span>Empresa</div>
+        <div class="config-nav-item" onclick="showSection('apariencia',this)"><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></span>Apariencia</div>
       </div>
 
       <div class="config-content">
@@ -413,6 +420,25 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
           </div>
         </div>
 
+        <!-- APARIENCIA -->
+        <div class="config-section" id="sec-apariencia">
+          <h2><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> Apariencia</h2>
+          <p class="config-desc">Elige cómo se ve el sistema para ti — se guarda solo en este navegador, cada quien puede elegir el suyo.</p>
+          <div class="config-card">
+            <h3>Tema</h3>
+            <div style="display:flex;gap:10px">
+              <button class="tema-opcion" id="tema-btn-oscuro" onclick="aplicarTema('oscuro')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                Oscuro
+              </button>
+              <button class="tema-opcion" id="tema-btn-claro" onclick="aplicarTema('claro')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                Claro
+              </button>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -471,6 +497,21 @@ function loadCurrentSection(){
   if(id==='etapas')loadEtapas();
   if(id==='mensajes')loadQR();
   if(id==='empresa')loadUbicacionEmpresa();
+  if(id==='apariencia')reflejarTemaActivo();
+}
+
+// Tema oscuro/claro: se guarda por navegador (cada quien elige el suyo),
+// y se aplica al instante en esta pantalla y en las demas al abrirlas.
+const LS_KEY_TEMA='henryleads_tema';
+function aplicarTema(tema){
+  document.documentElement.setAttribute('data-tema', tema);
+  localStorage.setItem(LS_KEY_TEMA, tema);
+  reflejarTemaActivo();
+}
+function reflejarTemaActivo(){
+  const actual = localStorage.getItem(LS_KEY_TEMA) || 'oscuro';
+  document.getElementById('tema-btn-oscuro')?.classList.toggle('activo', actual==='oscuro');
+  document.getElementById('tema-btn-claro')?.classList.toggle('activo', actual==='claro');
 }
 
 // Ubicación del negocio: se guarda local (mismo navegador) para que la

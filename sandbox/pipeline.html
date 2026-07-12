@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pipeline — Cremalleras LR</title>
+<script>(function(){try{document.documentElement.setAttribute('data-tema', localStorage.getItem('henryleads_tema')||'oscuro');}catch(e){}})();</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -14,7 +15,13 @@
   --green:#2ecc71;--red:#e74c3c;--blue:#3498db;--orange:#f39c12;
   --header-h:56px;
 }
-html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+:root[data-tema="claro"]{
+  --bg:#ffffff;--bg2:#f7f7f8;--bg3:#f0f0f2;--bg4:#e5e5e8;
+  --border:#e4e4e7;--border2:#d4d4d9;
+  --gold:#a97e2f;--gold2:#8a6425;
+  --text:#18181b;--text2:#52525b;--text3:#8b8b93;
+}
+html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;transition:background .2s,color .2s}
 #app{display:flex;height:100vh;overflow:hidden}
 
 /* SIDEBAR */
