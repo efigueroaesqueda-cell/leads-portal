@@ -113,6 +113,23 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 .msg-time{font-size:10px;color:var(--text3);margin-top:2px}
 .msg-time.right{text-align:right}
 .msg-asesor{font-size:10px;color:var(--gold);margin-bottom:2px}
+.msg-bubble-wrap{display:flex;align-items:flex-end;gap:4px}
+.msg-bubble-wrap.wrap-entrante{align-self:flex-start}
+.msg-bubble-wrap.wrap-saliente{align-self:flex-end;flex-direction:row-reverse}
+.msg-react-btn{opacity:0;flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1;cursor:pointer;transition:opacity .15s ease,transform .15s ease}
+.msg-bubble-wrap:hover .msg-react-btn{opacity:1}
+body.tour-force-react .msg-react-btn{opacity:1}
+.msg-react-btn:hover{transform:scale(1.2)}
+.msg-react-btn:active{transform:scale(1)}
+.msg-reaction-badge{align-self:flex-start;margin-top:-9px;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:1px 6px;font-size:12px;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.35);transition:transform .12s ease}
+.msg-reaction-badge:hover{transform:scale(1.08)}
+.msg-reaction-badge:active{transform:scale(.95)}
+.msg-reaction-badge.wrap-saliente{align-self:flex-end}
+.reaction-picker{display:none;position:fixed;background:var(--bg3);border:1px solid var(--border2);border-radius:22px;padding:5px 6px;gap:2px;box-shadow:0 8px 20px rgba(0,0,0,.4);z-index:30}
+.reaction-picker.show{display:flex}
+.reaction-picker-item{width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:17px;border-radius:50%;cursor:pointer;transition:transform .12s ease,background .12s ease}
+.reaction-picker-item:hover{background:var(--bg4);transform:scale(1.3)}
+.reaction-picker-item:active{transform:scale(1.05)}
 .date-divider{text-align:center;font-size:11px;color:var(--text3);padding:8px 0;position:relative}
 .date-divider::before{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:var(--border);z-index:0}
 .date-divider span{background:var(--bg);padding:0 12px;position:relative;z-index:1}
@@ -146,13 +163,19 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 .btn-send:active{transform:scale(.92)}
 .btn-send:disabled{opacity:.4;cursor:not-allowed;transform:none}
 .attach-wrap{position:relative;flex-shrink:0}
-.btn-attach{width:40px;height:40px;border-radius:12px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s cubic-bezier(.4,0,.2,1)}
+.btn-attach{width:40px;height:40px;border-radius:12px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s ease,border-color .15s ease,color .15s ease,transform .12s cubic-bezier(.4,0,.2,1)}
 .btn-attach:hover{color:var(--gold);border-color:var(--gold)}
 .btn-attach:active{transform:scale(.92)}
 .attach-menu{display:none;position:absolute;bottom:48px;left:0;background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:6px;min-width:150px;box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:20}
 .attach-menu.show{display:block}
 .attach-option{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13px;color:var(--text);cursor:pointer;white-space:nowrap}
 .attach-option:hover{background:var(--bg4)}
+
+.emoji-picker{display:none;position:absolute;bottom:48px;left:0;background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:10px;width:260px;box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:20}
+.emoji-picker.show{display:grid;grid-template-columns:repeat(8,1fr);gap:2px}
+.emoji-item{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;font-size:18px;cursor:pointer;transition:transform .12s ease,background .12s ease}
+.emoji-item:hover{background:var(--bg4);transform:scale(1.25)}
+.emoji-item:active{transform:scale(1.05)}
 
 .pending-attach-list{display:flex;flex-direction:column;gap:1px;max-height:160px;overflow-y:auto;background:var(--bg3);border-bottom:1px solid var(--border)}
 .pending-attach-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 14px}
@@ -248,7 +271,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 .tour-btn-next{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#111}
 .modal h3{font-size:16px;font-weight:700;margin-bottom:16px;color:var(--text)}
 .modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end}
-.btn{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .18s cubic-bezier(.4,0,.2,1)}
+.btn{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:box-shadow .18s ease,border-color .15s ease,color .15s ease,transform .12s cubic-bezier(.4,0,.2,1)}
 .btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#111}
 .btn-primary:hover{box-shadow:0 4px 16px rgba(200,169,81,.3)}
 .btn:active{transform:scale(.96)}
@@ -404,6 +427,12 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
               <div class="attach-option" onclick="attachFile('documento')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> <span>Documento</span></div>
             </div>
           </div>
+          <div class="attach-wrap">
+            <button class="btn-attach" onclick="toggleEmojiPicker(event)" title="Emojis">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+            </button>
+            <div class="emoji-picker" id="emoji-picker"></div>
+          </div>
           <div class="qr-dropdown" id="qr-dropdown"></div>
           <textarea id="msg-input" placeholder="Escribe un mensaje... (usa / para respuestas rápidas)" rows="1"
             onkeydown="handleMsgKeydown(event)"
@@ -497,6 +526,9 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
   <button class="lightbox-close" onclick="closeLightbox()" title="Cerrar">✕</button>
   <img id="lightbox-img" src="" alt="">
 </div>
+
+<!-- REACCIONES A MENSAJE -->
+<div class="reaction-picker" id="reaction-picker"></div>
 
 <!-- RECORRIDO GUIADO -->
 <div id="tour-backdrop" onclick="endTour()"></div>
@@ -909,9 +941,14 @@ function renderMessages(){
     else if(esImagen){ bubbleContent=`<img src="${m.attachUrl}" class="msg-img" alt="${escHtml(m.attachName||'imagen')}" onclick="openLightbox('${m.attachUrl}')">`; claseExtra=' msg-img-bubble'; }
     else if(esDocumento){ bubbleContent=`<a href="${m.attachUrl}" target="_blank" rel="noopener noreferrer" class="msg-doc-link"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>${escHtml(m.attachName||'documento')}</span></a>`; }
     else { bubbleContent=linkify(escHtml(m.contenido)); }
+    const wrapClase = ent?'wrap-entrante':'wrap-saliente';
     html+=`<div class="msg-group" style="align-items:${ent?'flex-start':'flex-end'}">
       ${!ent&&m.asesor?.nombre?`<div class="msg-asesor">${m.asesor.nombre}</div>`:''}
-      <div class="msg-bubble msg-${m.direccion}${claseExtra}">${bubbleContent}</div>
+      <div class="msg-bubble-wrap ${wrapClase}">
+        <div class="msg-bubble msg-${m.direccion}${claseExtra}">${bubbleContent}</div>
+        <button class="msg-react-btn" onclick="abrirReactionPicker(event,'${m.id}')" title="Reaccionar">🙂</button>
+      </div>
+      ${m.reaccion?`<div class="msg-reaction-badge ${wrapClase}" onclick="quitarReaccion('${m.id}')" title="Quitar reacción">${m.reaccion}</div>`:''}
       <div class="msg-time${ent?'':' right'}">${formatTime(m.created_at)}</div>
     </div>`;
   });
@@ -1006,6 +1043,52 @@ function toggleAttachMenu(e){
   document.getElementById('attach-menu').classList.toggle('show');
 }
 document.addEventListener('click', ()=> document.getElementById('attach-menu')?.classList.remove('show'));
+
+// ── SELECTOR DE EMOJIS ────────────────────────────────────────
+const EMOJIS_PICKER=['😀','😂','😊','😍','🥰','😘','😉','😅','🤔','😢','😮','😎','🙌','👏','👍','👎','🙏','💪','👌','✌️','❤️','🔥','🎉','✅','❌','⏰','📅','💰','🚗','🔧','📦','💯'];
+function toggleEmojiPicker(e){
+  e.stopPropagation();
+  const panel=document.getElementById('emoji-picker');
+  if(!panel.innerHTML) panel.innerHTML=EMOJIS_PICKER.map(em=>`<span class="emoji-item" onclick="insertarEmoji('${em}')">${em}</span>`).join('');
+  panel.classList.toggle('show');
+}
+function insertarEmoji(emoji){
+  const input=document.getElementById('msg-input');
+  const inicio=input.selectionStart, fin=input.selectionEnd;
+  input.value=input.value.slice(0,inicio)+emoji+input.value.slice(fin);
+  input.selectionStart=input.selectionEnd=inicio+emoji.length;
+  autoResizeMsgInput();
+  input.focus();
+}
+document.addEventListener('click', ()=> document.getElementById('emoji-picker')?.classList.remove('show'));
+
+// ── REACCIONES A MENSAJE ─────────────────────────────────────
+const REACCIONES_RAPIDAS=['👍','❤️','😂','😮','😢','🙏'];
+function abrirReactionPicker(e,msgId){
+  e.stopPropagation();
+  const panel=document.getElementById('reaction-picker');
+  panel.innerHTML=REACCIONES_RAPIDAS.map(em=>`<span class="reaction-picker-item" onclick="aplicarReaccion(event,'${msgId}','${em}')">${em}</span>`).join('');
+  const r=e.currentTarget.getBoundingClientRect();
+  panel.classList.add('show');
+  const pw=panel.offsetWidth;
+  let left=r.left+r.width/2-pw/2;
+  left=Math.max(6,Math.min(left,window.innerWidth-pw-6));
+  panel.style.left=`${left}px`;
+  panel.style.top=`${r.top-40}px`;
+}
+function aplicarReaccion(e,msgId,emoji){
+  e.stopPropagation();
+  const msg=_mensajes.find(m=>m.id===msgId);
+  if(msg) msg.reaccion = msg.reaccion===emoji ? null : emoji;
+  document.getElementById('reaction-picker').classList.remove('show');
+  renderMessages();
+}
+function quitarReaccion(msgId){
+  const msg=_mensajes.find(m=>m.id===msgId);
+  if(msg) msg.reaccion=null;
+  renderMessages();
+}
+document.addEventListener('click', ()=> document.getElementById('reaction-picker')?.classList.remove('show'));
 
 let _pendingAttachments = []; // [{ tipo, icon, name, url }]
 
@@ -1545,6 +1628,8 @@ const TOUR_STEPS=[
   {selector:'#quick-replies-bar', title:'Respuestas rápidas', text:'Un clic y mandas una respuesta ya armada — se personaliza sola con el nombre del cliente. Las más usadas se van al frente solas.', pos:'top'},
   {selector:'#msg-input', title:'Escribe, o usa "/"', text:'Escribe tu mensaje aquí, o teclea "/" para elegir una respuesta rápida sin soltar el teclado — incluso puedes encadenar varias en un mismo mensaje.', pos:'top'},
   {selector:'.btn-attach', title:'Adjuntar', text:'Manda imágenes, documentos o notas de voz desde aquí.', pos:'top'},
+  {selector:'[title="Emojis"]', title:'Emojis', text:'Agrega emojis a tu mensaje sin salir del teclado — clic aquí y elige el que quieras.', pos:'top'},
+  {selector:'.msg-react-btn', title:'Reaccionar a un mensaje', text:'Pasa el mouse sobre cualquier mensaje y aparece este botón — reacciona como en WhatsApp (👍❤️😂😮😢🙏). Toca la reacción de nuevo para quitarla.', pos:'top'},
   {selector:'[title="Perfil"]', title:'Ficha del cliente', text:'Aquí ves y editas los datos del lead: nombre, vehículo, etapa y asesor asignado.', pos:'left'},
 ];
 let _tourIndex=0;
@@ -1569,6 +1654,7 @@ function showTourStep(){
   document.getElementById('tour-text').textContent=step.text;
   document.getElementById('tour-btn-prev').style.visibility=_tourIndex===0?'hidden':'visible';
   document.getElementById('tour-btn-next').textContent=_tourIndex===TOUR_STEPS.length-1?'Terminar':'Siguiente';
+  document.body.classList.toggle('tour-force-react', step.selector==='.msg-react-btn');
   el.scrollIntoView({block:'center', behavior:'smooth'});
   positionTour(el, step);
 }
@@ -1611,6 +1697,7 @@ function endTour(){
   document.getElementById('tour-highlight').classList.remove('show');
   document.getElementById('tour-tooltip').classList.remove('show');
   document.getElementById('btn-tour').classList.remove('pulse-attention');
+  document.body.classList.remove('tour-force-react');
   localStorage.setItem(LS_KEY_TOUR_VISTO,'1');
 }
 function openLightbox(url){
@@ -1624,6 +1711,7 @@ function closeLightbox(){
 document.addEventListener('keydown', (e)=>{
   if(e.key!=='Escape') return;
   if(document.getElementById('lightbox-overlay').classList.contains('show')){ closeLightbox(); return; }
+  if(document.getElementById('reaction-picker').classList.contains('show')){ document.getElementById('reaction-picker').classList.remove('show'); return; }
   if(document.getElementById('tour-tooltip').classList.contains('show')){ endTour(); return; }
   const modalAbierto=[...document.querySelectorAll('.modal-overlay')].find(m=>m.style.display && m.style.display!=='none');
   if(modalAbierto){ closeModal(modalAbierto.id); return; }

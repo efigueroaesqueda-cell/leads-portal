@@ -14,3 +14,13 @@ Cosas que quedaron anotadas para retomar más adelante, no urgentes hoy.
   - **A (complemento):** además, un listado de esas notas en la ficha del lead; al hacer clic en una nota ahí, debe llevarte/saltar directo a ese punto exacto de la conversación en el chat.
 
 - **Investigación de competencia — EN CURSO (lanzada 2026-07-11) mientras Enrique descansa.** Agente en background investigando plataformas del mercado (LeadSeal, Kommo, Chatwoot, Wati, Leadsales, etc.) para traer ideas de features adoptables. Revisar resultado y presentárselo a Enrique en la próxima sesión.
+
+- **Transcripción de audio a texto (como WhatsApp) — pendiente, requiere servicio pagado.** No es simulable en el sandbox como los demás botones: necesita conectar una API real de voz-a-texto (tipo OpenAI/Google), que cobra por cada audio transcrito. No fingir con texto falso — es una función real a construir cuando se decida pagar ese servicio.
+
+- **Modo claro/oscuro — TERMINADO (2026-07-11).** Interruptor manual en Configuración → Apariencia, controlado 100% por el usuario (sin modo automático por hora). Aplicado en las 4 pantallas, guardado en `localStorage`.
+
+- **Reacciones a mensajes (estilo WhatsApp) — TERMINADO (2026-07-12), solo en Bandeja.** Botón "🙂" aparece al pasar el mouse sobre cualquier mensaje, abre un selector con 6 reacciones rápidas (👍❤️😂😮😢🙏); tocar la reacción de nuevo la quita. Agregado como paso nuevo en el recorrido guiado.
+
+- **Selector de emojis para redactar mensajes — TERMINADO (2026-07-12), solo en Bandeja.** Botón junto a Adjuntar, inserta el emoji en el punto del cursor. Agregado como paso nuevo en el recorrido guiado.
+
+- **Reenviar mensajes entre chats — pendiente, es la más compleja de las tres (emojis/reacciones/reenviar).** Falta definir el alcance concreto antes de construirla (a qué chats se puede reenviar, si se reenvía con o sin atribución al remitente original, límite de cuántos a la vez).
