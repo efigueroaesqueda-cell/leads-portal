@@ -395,7 +395,10 @@ function endTour(){
   localStorage.setItem(LS_KEY_TOUR_VISTO,'1');
 }
 document.addEventListener('keydown', (e)=>{
-  if(e.key==='Escape' && document.getElementById('tour-tooltip').classList.contains('show')) endTour();
+  if(e.key!=='Escape') return;
+  if(document.getElementById('tour-tooltip').classList.contains('show')){ endTour(); return; }
+  const modalAbierto=[...document.querySelectorAll('.modal-overlay')].find(m=>m.style.display && m.style.display!=='none');
+  if(modalAbierto) closeModal();
 });
 
 function renderStats(){

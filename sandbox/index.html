@@ -1137,6 +1137,17 @@ async function sendMessage(){
     _mensajes.push(msg);
   }
 
+  // Sube el reloj y la vista previa de la bandeja con lo que se acaba de
+  // mandar, y sube el lead al principio de la lista -- igual que WhatsApp real.
+  const ultimoEnviado = _mensajes[_mensajes.length-1];
+  if(ultimoEnviado && ultimoEnviado.lead_id===_activeLead.id){
+    _activeLead.ultimo_contacto = ultimoEnviado.created_at;
+    _activeLead.preview = ultimoEnviado.contenido;
+    const idx=_leadsAll.findIndex(l=>l.id===_activeLead.id);
+    if(idx>0){ const [l]=_leadsAll.splice(idx,1); _leadsAll.unshift(l); }
+    renderInbox();
+  }
+
   input.value='';
   input.style.height='auto';
   renderMessages();
@@ -1571,7 +1582,11 @@ function endTour(){
   localStorage.setItem(LS_KEY_TOUR_VISTO,'1');
 }
 document.addEventListener('keydown', (e)=>{
-  if(e.key==='Escape' && document.getElementById('tour-tooltip').classList.contains('show')) endTour();
+  if(e.key!=='Escape') return;
+  if(document.getElementById('tour-tooltip').classList.contains('show')){ endTour(); return; }
+  const modalAbierto=[...document.querySelectorAll('.modal-overlay')].find(m=>m.style.display && m.style.display!=='none');
+  if(modalAbierto){ closeModal(modalAbierto.id); return; }
+  if(_profileVisible){ toggleProfile(); return; }
 });
 
 function showToast(msg, dur=3000){
