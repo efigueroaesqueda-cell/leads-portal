@@ -215,6 +215,14 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 @keyframes modalIn{from{opacity:0;transform:scale(.95) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
 
 /* ── RECORRIDO GUIADO (PRODUCT TOUR) ──────────────────────────── */
+/* ── VISOR DE IMAGEN (LIGHTBOX) ─────────────────────────────── */
+#lightbox-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:400;align-items:center;justify-content:center;animation:fadeIn .18s ease}
+#lightbox-overlay.show{display:flex}
+#lightbox-img{max-width:90vw;max-height:90vh;border-radius:8px;box-shadow:0 12px 40px rgba(0,0,0,.6);cursor:zoom-out}
+.lightbox-close{position:fixed;top:20px;right:24px;width:38px;height:38px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.lightbox-close:hover{background:var(--bg4)}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
 #tour-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300}
 #tour-backdrop.show{display:block}
 #tour-highlight{display:none;position:fixed;z-index:301;border:2px solid var(--gold);border-radius:10px;box-shadow:0 0 0 4000px rgba(0,0,0,.55);pointer-events:none;transition:all .25s ease}
@@ -475,6 +483,12 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
       <button class="btn btn-primary" onclick="guardarQuickReplyDesdeModal()">Guardar</button>
     </div>
   </div>
+</div>
+
+<!-- VISOR DE IMAGEN (LIGHTBOX) -->
+<div id="lightbox-overlay" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()" title="Cerrar">✕</button>
+  <img id="lightbox-img" src="" alt="">
 </div>
 
 <!-- RECORRIDO GUIADO -->
@@ -885,7 +899,7 @@ function renderMessages(){
     const esDocumento = m.tipo==='documento' && m.attachUrl;
     let bubbleContent, claseExtra='';
     if(esAudio){ bubbleContent=audioPlayerHTML(m.audioUrl); claseExtra=' msg-audio-bubble'; }
-    else if(esImagen){ bubbleContent=`<a href="${m.attachUrl}" target="_blank" rel="noopener noreferrer"><img src="${m.attachUrl}" class="msg-img" alt="${escHtml(m.attachName||'imagen')}"></a>`; claseExtra=' msg-img-bubble'; }
+    else if(esImagen){ bubbleContent=`<img src="${m.attachUrl}" class="msg-img" alt="${escHtml(m.attachName||'imagen')}" onclick="openLightbox('${m.attachUrl}')">`; claseExtra=' msg-img-bubble'; }
     else if(esDocumento){ bubbleContent=`<a href="${m.attachUrl}" target="_blank" rel="noopener noreferrer" class="msg-doc-link"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>${escHtml(m.attachName||'documento')}</span></a>`; }
     else { bubbleContent=linkify(escHtml(m.contenido)); }
     html+=`<div class="msg-group" style="align-items:${ent?'flex-start':'flex-end'}">
@@ -1592,8 +1606,17 @@ function endTour(){
   document.getElementById('btn-tour').classList.remove('pulse-attention');
   localStorage.setItem(LS_KEY_TOUR_VISTO,'1');
 }
+function openLightbox(url){
+  document.getElementById('lightbox-img').src=url;
+  document.getElementById('lightbox-overlay').classList.add('show');
+}
+function closeLightbox(){
+  document.getElementById('lightbox-overlay').classList.remove('show');
+}
+
 document.addEventListener('keydown', (e)=>{
   if(e.key!=='Escape') return;
+  if(document.getElementById('lightbox-overlay').classList.contains('show')){ closeLightbox(); return; }
   if(document.getElementById('tour-tooltip').classList.contains('show')){ endTour(); return; }
   const modalAbierto=[...document.querySelectorAll('.modal-overlay')].find(m=>m.style.display && m.style.display!=='none');
   if(modalAbierto){ closeModal(modalAbierto.id); return; }
