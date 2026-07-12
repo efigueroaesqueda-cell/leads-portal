@@ -766,10 +766,11 @@ function saveWAConfig(){
 const LS_KEY_TOUR_VISTO='henryleads_tour_visto_config';
 const TOUR_STEPS=[
   {selector:'#sidenav', title:'Menú principal', text:'Desde aquí te mueves entre Bandeja, Pipeline, Leads y Configuración. Este mismo botón de brújula vive abajo del todo, por si quieres repetir el recorrido después.', pos:'right'},
-  {selector:'.config-nav', title:'Secciones de Configuración', text:'Aquí ajustas cada parte del sistema: conexión de WhatsApp, tu equipo, las etapas del embudo, respuestas rápidas, automatizaciones y los datos de la empresa.', pos:'right'},
+  {selector:'.config-nav', title:'Secciones de Configuración', text:'Aquí ajustas cada parte del sistema: conexión de WhatsApp, tu equipo, las etapas del embudo, respuestas rápidas, automatizaciones, apariencia y los datos de la empresa.', pos:'right'},
   {selector:'#sec-whatsapp .config-card', title:'Conexión con WhatsApp', text:'Aquí están las credenciales que conectan el sistema con tu número de WhatsApp Business.', pos:'left', section:'whatsapp'},
   {selector:'#qr-list', title:'Respuestas rápidas', text:'Todas las plantillas que tus asesores usan en el chat viven aquí — puedes agregar, editar, ocultar o eliminar cualquiera.', pos:'top', section:'mensajes'},
   {selector:'#emp-ubicacion', title:'Ubicación del negocio', text:'Lo que escribas aquí es justo lo que se rellena solo cuando alguien usa (UBI) en una respuesta rápida.', pos:'top', section:'empresa'},
+  {selector:'#sec-apariencia .config-card', title:'Modo claro u oscuro', text:'Cada quien elige cómo se ve el sistema en su propia computadora — se guarda solo, no afecta a los demás.', pos:'top', section:'apariencia'},
 ];
 let _tourIndex=0;
 
