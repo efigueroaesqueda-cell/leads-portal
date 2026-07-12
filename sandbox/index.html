@@ -184,6 +184,18 @@ body.tour-force-react .msg-react-btn,body.tour-force-react .msg-fwd-btn{opacity:
 .icon-badge{width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .icon-badge-img{background:linear-gradient(135deg,#4facfe,#3498db)}
 .icon-badge-doc{background:linear-gradient(135deg,#f7b733,#e67e22)}
+.icon-badge-nota{background:linear-gradient(135deg,#f2c14e,#d4a017)}
+.nota-aviso{background:rgba(242,193,78,.12);border:1px solid rgba(242,193,78,.35);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--text2);margin-bottom:12px}
+.nota-interna{align-self:center;width:88%;max-width:420px;background:rgba(242,193,78,.1);border:1px dashed rgba(212,160,23,.5);border-radius:10px;padding:8px 12px;margin:2px 0;transition:background .5s ease}
+.nota-interna.nota-flash{background:rgba(242,193,78,.35)}
+.nota-interna-header{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#d4a017;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.nota-interna-texto{font-size:13px;color:var(--text);white-space:pre-wrap;word-break:break-word;line-height:1.4}
+.nota-interna-time{font-size:10px;color:var(--text3);margin-top:4px;text-align:right}
+.pf-nota-item{padding:8px 10px;border-radius:8px;background:rgba(242,193,78,.08);border:1px solid rgba(212,160,23,.25);cursor:pointer;margin-bottom:6px;transition:background .16s ease,transform .14s cubic-bezier(.4,0,.2,1)}
+.pf-nota-item:hover{background:rgba(242,193,78,.16)}
+.pf-nota-item:active{transform:scale(.98)}
+.pf-nota-texto{font-size:12px;color:var(--text);line-height:1.4}
+.pf-nota-meta{font-size:10px;color:var(--text3);margin-top:3px}
 .fwd-lista{max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;margin:4px 0 14px}
 .fwd-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;border:1px solid transparent;transition:background .16s ease,border-color .16s ease,transform .12s cubic-bezier(.4,0,.2,1)}
 .fwd-item:hover{background:var(--bg3)}
@@ -458,6 +470,7 @@ body.tour-force-react .msg-react-btn,body.tour-force-react .msg-fwd-btn{opacity:
             <div class="attach-menu" id="attach-menu">
               <div class="attach-option" onclick="attachFile('imagen')"><span class="icon-badge icon-badge-img"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span> <span>Imagen</span></div>
               <div class="attach-option" onclick="attachFile('documento')"><span class="icon-badge icon-badge-doc"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span> <span>Documento</span></div>
+              <div class="attach-option" onclick="toggleAttachMenu(event);abrirModalNota()"><span class="icon-badge icon-badge-nota"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 0 0-5 5c0 3 2 4.5 2 7h6c0-2.5 2-4 2-7a5 5 0 0 0-5-5z"/><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="21" x2="14" y2="21"/></svg></span> <span>Nota interna</span></div>
             </div>
           </div>
           <div class="attach-wrap">
@@ -565,6 +578,21 @@ body.tour-force-react .msg-react-btn,body.tour-force-react .msg-fwd-btn{opacity:
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('modal-reenviar')">Cancelar</button>
       <button class="btn btn-primary" id="fwd-confirmar" onclick="confirmarReenvio()" disabled>Reenviar</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTA INTERNA -->
+<div class="modal-overlay" id="modal-nota" style="display:none" onclick="if(event.target===this)closeModal('modal-nota')">
+  <div class="modal">
+    <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M12 2a5 5 0 0 0-5 5c0 3 2 4.5 2 7h6c0-2.5 2-4 2-7a5 5 0 0 0-5-5z"/><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="21" x2="14" y2="21"/></svg> Nota interna</h3>
+    <div class="nota-aviso">📌 Solo la ve tu equipo — nunca se envía al cliente ni se manda por WhatsApp.</div>
+    <div class="form-group">
+      <textarea id="nota-texto" rows="4" placeholder="Ej: Cliente pidió que le llamemos después de las 6pm..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-nota')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarNotaInterna()">Guardar nota</button>
     </div>
   </div>
 </div>
@@ -982,6 +1010,14 @@ function renderMessages(){
       html+=`<div class="date-divider"><span>${d}</span></div>`;
       lastDate=d;
     }
+    if(m.direccion==='nota'){
+      html+=`<div class="nota-interna" id="note-${m.id}">
+        <div class="nota-interna-header"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 0 0-5 5c0 3 2 4.5 2 7h6c0-2.5 2-4 2-7a5 5 0 0 0-5-5z"/><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="21" x2="14" y2="21"/></svg> Nota interna · ${escHtml(m.autor||'')}</div>
+        <div class="nota-interna-texto">${linkify(escHtml(m.contenido))}</div>
+        <div class="nota-interna-time">${formatTime(m.created_at)}</div>
+      </div>`;
+      return;
+    }
     const ent=m.direccion==='entrante';
     const esAudio = m.tipo==='audio' && m.audioUrl;
     const esImagen = m.tipo==='imagen' && m.attachUrl;
@@ -1076,6 +1112,34 @@ function confirmarReenvio(){
   renderInbox();
   showToast(`↪ Reenviado a ${_fwdSeleccion.size} chat${_fwdSeleccion.size>1?'s':''}`);
   closeModal('modal-reenviar');
+}
+
+// ── NOTAS INTERNAS ────────────────────────────────────────────
+function abrirModalNota(){
+  if(!_activeLead) return;
+  document.getElementById('nota-texto').value='';
+  document.getElementById('modal-nota').style.display='flex';
+  document.getElementById('nota-texto').focus();
+}
+function guardarNotaInterna(){
+  if(!_activeLead) return;
+  const texto=document.getElementById('nota-texto').value.trim();
+  if(!texto) return;
+  const nota={
+    id:`nota-${Date.now()}`,
+    lead_id:_activeLead.id,
+    direccion:'nota',
+    contenido:texto,
+    autor:_sessionAsesor?.nombre || 'Luis R.',
+    created_at:new Date().toISOString()
+  };
+  if(!_mensajesPorLead[_activeLead.id]) _mensajesPorLead[_activeLead.id]=demoMensajes(_activeLead.id);
+  _mensajesPorLead[_activeLead.id].push(nota);
+  closeModal('modal-nota');
+  renderMessages();
+  scrollToBottom();
+  renderProfile();
+  showToast('📌 Nota interna guardada');
 }
 
 // ── REPRODUCTOR DE AUDIO PROPIO (con volumen vertical) ────────
@@ -1605,7 +1669,28 @@ function renderProfile(){
         <span class="add-etiqueta" onclick="addEtiqueta()">＋ Agregar</span>
       </div>
     </div>
+
+    <div class="profile-section">
+      <h4>Notas internas <span style="font-weight:400;text-transform:none;letter-spacing:0">(el cliente no las ve)</span></h4>
+      <div id="pf-notas-lista">${renderListaNotasInternas()}</div>
+      <button class="btn btn-ghost" style="width:100%;margin-top:6px;font-size:12px;padding:8px" onclick="abrirModalNota()">📌 Agregar nota interna</button>
+    </div>
   `;
+}
+function renderListaNotasInternas(){
+  const notas=(_mensajes||[]).filter(m=>m.direccion==='nota');
+  if(!notas.length) return `<div style="font-size:12px;color:var(--text3);padding:6px 0">Sin notas todavía.</div>`;
+  return notas.map(n=>`<div class="pf-nota-item" onclick="irANotaEnChat('${n.id}')">
+    <div class="pf-nota-texto">${escHtml(n.contenido.length>70?n.contenido.slice(0,70)+'…':n.contenido)}</div>
+    <div class="pf-nota-meta">${escHtml(n.autor||'')} · ${formatTime(n.created_at)}</div>
+  </div>`).join('');
+}
+function irANotaEnChat(notaId){
+  toggleProfile();
+  setTimeout(()=>{
+    const el=document.getElementById(`note-${notaId}`);
+    if(el){ el.scrollIntoView({block:'center',behavior:'smooth'}); el.classList.add('nota-flash'); setTimeout(()=>el.classList.remove('nota-flash'),1400); }
+  }, 250);
 }
 
 let _profileChanges={};
