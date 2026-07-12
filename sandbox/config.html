@@ -4,11 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Configuración — Cremalleras LR</title>
-<script>(function(){try{document.documentElement.setAttribute('data-tema', localStorage.getItem('henryleads_tema')||'oscuro');}catch(e){}})();</script>
+<script>(function(){try{
+  var t=localStorage.getItem('henryleads_tema')||'oscuro';
+  if(t==='auto'){var h=new Date().getHours();t=(h>=7&&h<19)?'claro':'oscuro';}
+  document.documentElement.setAttribute('data-tema', t);
+}catch(e){}})();</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#0d0d0d;--bg2:#141414;--bg3:#1a1a1a;--bg4:#222;--border:#2a2a2a;--border2:#333;--gold:#c8a951;--gold2:#a07820;--text:#e8e8e8;--text2:#aaa;--text3:#666;--green:#2ecc71;--red:#e74c3c;--blue:#3498db;--header-h:56px;}
-:root[data-tema="claro"]{--bg:#ffffff;--bg2:#f7f7f8;--bg3:#f0f0f2;--bg4:#e5e5e8;--border:#e4e4e7;--border2:#d4d4d9;--gold:#a97e2f;--gold2:#8a6425;--text:#18181b;--text2:#52525b;--text3:#8b8b93;}
+:root[data-tema="claro"]{--bg:#ffffff;--bg2:#f7f7f8;--bg3:#f0f0f2;--bg4:#e5e5e8;--border:#c9c9d1;--border2:#a8a8b3;--gold:#a97e2f;--gold2:#8a6425;--text:#18181b;--text2:#52525b;--text3:#71717a;}
 html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;transition:background .2s,color .2s}
 #app{display:flex;height:100vh;overflow:hidden}
 #sidenav{width:56px;min-width:56px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:4px}
@@ -51,8 +55,9 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 /* CONFIG LAYOUT */
 .config-layout{flex:1;display:flex;overflow:hidden}
 .config-nav{width:220px;min-width:220px;background:var(--bg2);border-right:1px solid var(--border);padding:16px 12px;display:flex;flex-direction:column;gap:4px;overflow-y:auto}
-.config-nav-item{padding:9px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);display:flex;align-items:center;gap:10px;transition:all .18s cubic-bezier(.4,0,.2,1)}
+.config-nav-item{padding:9px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);display:flex;align-items:center;gap:10px;transition:background .2s ease,color .2s ease,transform .16s cubic-bezier(.4,0,.2,1)}
 .config-nav-item:hover{background:var(--bg3);color:var(--text)}
+.config-nav-item:active{transform:scale(.97)}
 .config-nav-item.active{background:rgba(200,169,81,.1);color:var(--gold);font-weight:600}
 .config-nav-item .icon{font-size:16px;width:20px;text-align:center}
 .config-content{flex:1;overflow-y:auto;padding:24px}
@@ -99,7 +104,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 .rol-badge{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:700}
 .rol-admin{background:rgba(200,169,81,.2);color:var(--gold)}
 .rol-asesor{background:rgba(52,152,219,.15);color:var(--blue)}
-.tema-opcion{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px;border-radius:12px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;font-size:13px;font-weight:600;transition:all .18s cubic-bezier(.4,0,.2,1)}
+.tema-opcion{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px;border-radius:12px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;font-size:13px;font-weight:600;transition:border-color .15s ease,color .15s ease,background .15s ease,transform .12s cubic-bezier(.4,0,.2,1)}
 .tema-opcion:hover{border-color:var(--gold);color:var(--gold)}
 .tema-opcion:active{transform:scale(.97)}
 .tema-opcion.activo{border-color:var(--gold);color:var(--gold);background:rgba(200,169,81,.1)}
@@ -435,7 +440,12 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
                 Claro
               </button>
+              <button class="tema-opcion" id="tema-btn-auto" onclick="aplicarTema('auto')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a7 7 0 0 0 0 14 7 7 0 0 0 0 6 10 10 0 0 1 0-20z" fill="currentColor" stroke="none"/></svg>
+                Automático
+              </button>
             </div>
+            <p class="config-desc" id="tema-auto-hint" style="margin-top:10px"></p>
           </div>
         </div>
 
@@ -503,8 +513,9 @@ function loadCurrentSection(){
 // Tema oscuro/claro: se guarda por navegador (cada quien elige el suyo),
 // y se aplica al instante en esta pantalla y en las demas al abrirlas.
 const LS_KEY_TEMA='henryleads_tema';
+function temaPorHorario(){ const h=new Date().getHours(); return (h>=7&&h<19) ? 'claro' : 'oscuro'; }
 function aplicarTema(tema){
-  document.documentElement.setAttribute('data-tema', tema);
+  document.documentElement.setAttribute('data-tema', tema==='auto' ? temaPorHorario() : tema);
   localStorage.setItem(LS_KEY_TEMA, tema);
   reflejarTemaActivo();
 }
@@ -512,6 +523,11 @@ function reflejarTemaActivo(){
   const actual = localStorage.getItem(LS_KEY_TEMA) || 'oscuro';
   document.getElementById('tema-btn-oscuro')?.classList.toggle('activo', actual==='oscuro');
   document.getElementById('tema-btn-claro')?.classList.toggle('activo', actual==='claro');
+  document.getElementById('tema-btn-auto')?.classList.toggle('activo', actual==='auto');
+  const hint=document.getElementById('tema-auto-hint');
+  if(hint) hint.textContent = actual==='auto'
+    ? `Automático activo — claro de 7am a 7pm, oscuro el resto del día (ahorita: ${temaPorHorario()}).`
+    : '';
 }
 
 // Ubicación del negocio: se guarda local (mismo navegador) para que la
@@ -770,7 +786,7 @@ const TOUR_STEPS=[
   {selector:'#sec-whatsapp .config-card', title:'Conexión con WhatsApp', text:'Aquí están las credenciales que conectan el sistema con tu número de WhatsApp Business.', pos:'left', section:'whatsapp'},
   {selector:'#qr-list', title:'Respuestas rápidas', text:'Todas las plantillas que tus asesores usan en el chat viven aquí — puedes agregar, editar, ocultar o eliminar cualquiera.', pos:'top', section:'mensajes'},
   {selector:'#emp-ubicacion', title:'Ubicación del negocio', text:'Lo que escribas aquí es justo lo que se rellena solo cuando alguien usa (UBI) en una respuesta rápida.', pos:'top', section:'empresa'},
-  {selector:'#sec-apariencia .config-card', title:'Modo claro u oscuro', text:'Cada quien elige cómo se ve el sistema en su propia computadora — se guarda solo, no afecta a los demás.', pos:'top', section:'apariencia'},
+  {selector:'#sec-apariencia .config-card', title:'Modo claro, oscuro o automático', text:'Cada quien elige cómo se ve el sistema en su propia computadora — se guarda solo, no afecta a los demás. "Automático" cambia solo según la hora: claro de día, oscuro de noche, para no dañar la vista.', pos:'top', section:'apariencia'},
 ];
 let _tourIndex=0;
 
@@ -861,6 +877,13 @@ requireAuth().then(ok => {
     setTimeout(startTour, 900);
   }
 });
+
+// ── TEMA AUTOMÁTICO POR HORARIO ─────────────────────────────
+setInterval(()=>{
+  if((localStorage.getItem(LS_KEY_TEMA)||'oscuro')!=='auto') return;
+  const h=new Date().getHours();
+  document.documentElement.setAttribute('data-tema', (h>=7&&h<19)?'claro':'oscuro');
+}, 5*60*1000);
 </script>
 </body>
 </html>
