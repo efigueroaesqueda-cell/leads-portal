@@ -56,6 +56,7 @@ html,body{height:100%;overflow:hidden;overscroll-behavior-x:none;font-family:'Se
 .inbox-header h2{font-size:14px;font-weight:700;color:var(--text);flex:1}
 .btn-icon{width:28px;height:28px;border-radius:8px;background:var(--bg4);border:1px solid var(--border2);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .18s cubic-bezier(.4,0,.2,1)}
 .btn-icon:hover{color:var(--text);border-color:var(--border2)}
+.btn-icon.active{background:rgba(212,160,23,.18);border-color:#d4a017;color:#d4a017}
 .btn-icon:active{transform:scale(.92)}
 .inbox-search{padding:8px 10px;border-bottom:1px solid var(--border);flex-shrink:0}
 .inbox-search input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 10px;color:var(--text);font-size:12.5px;outline:none}
@@ -90,7 +91,7 @@ html,body{height:100%;overflow:hidden;overscroll-behavior-x:none;font-family:'Se
 .conv-item.active{background:rgba(200,169,81,.07);border-left:2px solid var(--gold)}
 .conv-avatar-wrap{position:relative;flex-shrink:0}
 .conv-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;color:#111}
-.nota-indicador{position:absolute;bottom:-3px;right:-3px;width:16px;height:16px;border-radius:50%;background:#d4a017;border:2px solid var(--bg2);display:flex;align-items:center;justify-content:center;font-size:8px;line-height:1}
+.nota-indicador{position:absolute;bottom:-4px;right:-4px;width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#f2c14e,#d4a017);border:2.5px solid var(--bg2);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,.35)}
 .conv-body{flex:1;min-width:0}
 .conv-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;gap:6px}
 .conv-name{font-size:12.5px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
@@ -449,6 +450,7 @@ body.tour-force-react .msg-react-btn,body.tour-force-react .msg-fwd-btn{opacity:
   <div id="inbox-panel">
     <div class="inbox-header">
       <h2>Bandeja</h2>
+      <div class="btn-icon" id="btn-filtro-notas" onclick="toggleFiltroNotas()" title="Ver solo chats con notas internas, más recientes primero"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 0 0-5 5c0 3 2 4.5 2 7h6c0-2.5 2-4 2-7a5 5 0 0 0-5-5z"/><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="21" x2="14" y2="21"/></svg></div>
       <div class="btn-icon" onclick="showNewLeadModal()" title="Nuevo lead">＋</div>
       <div class="btn-icon" id="btn-refresh" onclick="loadLeads()" title="Actualizar">↻</div>
     </div>
@@ -480,7 +482,7 @@ body.tour-force-react .msg-react-btn,body.tour-force-react .msg-fwd-btn{opacity:
       <div id="chat-header">
         <div class="conv-avatar-wrap" id="ch-avatar-wrap">
           <div class="conv-avatar" id="ch-avatar" style="width:36px;height:36px;font-size:14px;background:#888"></div>
-          <span class="nota-indicador" id="ch-nota-indicador" style="display:none" title="Este lead tiene notas internas">📌</span>
+          <span class="nota-indicador" id="ch-nota-indicador" style="display:none" title="Este lead tiene notas internas"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 0 0-5 5c0 3 2 4.5 2 7h6c0-2.5 2-4 2-7a5 5 0 0 0-5-5z"/><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="21" x2="14" y2="21"/></svg></span>
         </div>
         <div class="chat-lead-info" onclick="toggleProfile()" title="Ver perfil, compartido y notas internas">
           <div class="chat-lead-name" id="ch-name">—</div>
@@ -641,7 +643,7 @@ body.tour-force-react .msg-react-btn,body.tour-force-react .msg-fwd-btn{opacity:
 <div class="modal-overlay" id="modal-nota" style="display:none" onclick="if(event.target===this)closeModal('modal-nota')">
   <div class="modal">
     <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M12 2a5 5 0 0 0-5 5c0 3 2 4.5 2 7h6c0-2.5 2-4 2-7a5 5 0 0 0-5-5z"/><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="21" x2="14" y2="21"/></svg> Nota interna</h3>
-    <div class="nota-aviso">📌 Solo la ve tu equipo — nunca se envía al cliente ni se manda por WhatsApp.</div>
+    <div class="nota-aviso">📌 Solo la ve tu equipo — nunca se envía al cliente ni se manda por WhatsApp.<br>Se va a guardar sobre <strong id="nota-modal-cliente">—</strong>.</div>
     <div class="form-group">
       <textarea id="nota-texto" rows="4" placeholder="Ej: Cliente pidió que le llamemos después de las 6pm..."></textarea>
     </div>
@@ -730,41 +732,253 @@ async function sb(path, options={}){
 
 // ── DEMO DATA ─────────────────────────────────────────────────
 function _sr(seed, min, max){ let s=seed*1664525+1013904223; s=s&0xffffffff; return min+Math.abs(s)%(max-min+1); }
+
+// 45 casos de ejemplo, cada uno con su propia conversación (no un solo
+// guion repetido) para que se vea variado al navegar o buscar.
+const CASOS_DEMO=[
+  {nombre:'Carlos Hdz', tipo:'usuario_final', conv:[
+    ['Buenas tardes, me interesa la cremallera del Tsuru 2012','¡Claro! ¿Es mecánica o hidráulica la que trae?'],
+    ['Es mecánica, se siente muy dura al girar','Eso es típico de cremallera desgastada. Tenemos stock, te cotizo ahorita.'],
+    ['Gracias, ¿cuánto tiempo tienen de garantía?','Toda nuestra línea lleva 6 meses de garantía o 10,000 km, lo que ocurra primero 💪'],
+  ]},
+  {nombre:'María López', tipo:'usuario_final', conv:[
+    ['Buenas, ¿cuánto cuesta la dirección electroasistida del Altima?','¿De qué año es tu Altima? El precio varía según el modelo.'],
+    ['Es un 2016, se prende la luz de dirección asistida en el tablero','Esa señal casi siempre es el motor eléctrico de la cremallera. Te paso precio y tiempo de entrega.'],
+    ['Va, ¿la puedo pagar en dos partes?','Sí, con anticipo del 50% apartamos la pieza 👍'],
+  ]},
+  {nombre:'Roberto Vega', tipo:'mecanico', conv:[
+    ['Jefe, necesito la cremallera de una Hilux doble cabina, urgente','¿Qué año? Para confirmarte si la tenemos en stock ahora mismo.'],
+    ['2019, el cliente la trae en el taller esperando','Sí la tenemos, en 20 min te la puede recoger cualquiera de tu equipo.'],
+    ['Va perfecto, ahorita mando a alguien por ella','Ahí te esperamos 💪'],
+  ]},
+  {nombre:'Ana Flores', tipo:'refaccionaria', conv:[
+    ['Buenos días, ¿manejan precios de mayoreo en cremalleras Nissan?','¡Buenos días! Sí, a partir de 5 piezas ya entras a precio de mayoreo.'],
+    ['¿Cuánto sería por 8 piezas surtidas (Tsuru, Sentra, Versa)?','Te armo la cotización mixta ahorita mismo, dame unos minutos.'],
+    ['Perfecto, aquí espero','Lista tu cotización, te la mando por aquí 📋'],
+  ]},
+  {nombre:'Luis Torres', tipo:'mecanico', conv:[
+    ['¿Tienen bomba de dirección para RAM 1500?','Sí manejamos. ¿Es hidráulica tradicional o eléctrica asistida?'],
+    ['Hidráulica, modelo 2015','Esa la tenemos en stock, nueva y remanufacturada. ¿Cuál te conviene más?'],
+    ['La remanufacturada, para no pegarle tan caro al cliente','Buena decisión, trae garantía de 3 meses igual 👍'],
+  ]},
+  {nombre:'Pedro Ruiz', tipo:'usuario_final', conv:[
+    ['Vi su anuncio en Facebook, necesito una cotización','¡Con gusto! ¿Para qué carro y qué pieza necesitas?'],
+    ['Es una camioneta, no sé bien qué tiene mal, se va de lado al frenar','Eso puede ser terminal o rótula desgastada, no necesariamente cremallera. Te recomiendo traerla para revisión sin costo.'],
+    ['Va, ¿qué días atienden?','Lunes a sábado de 9 a 6, te esperamos 🔧'],
+  ]},
+  {nombre:'Diana Castro', tipo:'usuario_final', conv:[
+    ['Hola, ¿qué garantía tienen sus cremalleras?','Toda nuestra línea lleva 6 meses de garantía o 10,000 km, lo que ocurra primero.'],
+    ['¿Y si se descompone antes de eso qué hago?','La traes con tu ticket y la revisamos sin costo, si es defecto de fábrica se repone.'],
+    ['Perfecto, entonces sí me interesa','¡Qué bueno! ¿Para qué vehículo la necesitas?'],
+  ]},
+  {nombre:'Miguel Ángel', tipo:'mecanico', conv:[
+    ['Mi cliente necesita cremallera para un Aveo, ¿qué tienen?','Tenemos nueva y semi-nueva revisada. ¿Qué presupuesto maneja tu cliente?'],
+    ['Prefiere la más económica, nada más que funcione bien','La semi-nueva está probada y con garantía de 2 meses, es buena opción de precio.'],
+    ['Va, mándame precio por WhatsApp','Enseguida te lo mando con fotos de la pieza 📸'],
+  ]},
+  {nombre:'José Martínez', tipo:'refaccionaria', conv:[
+    ['Tengo un pedido grande para esta semana, ¿manejan crédito?','Para clientes frecuentes sí manejamos crédito a 15 días, ¿ya nos habías comprado antes?'],
+    ['Sí, les compré hace 2 meses como 6 piezas','Déjame verificar tu historial y te confirmo el crédito en un momento.'],
+    ['Va, quedo al pendiente','Listo, ya quedaste aprobado para crédito a 15 días ✅'],
+  ]},
+  {nombre:'Elena García', tipo:'usuario_final', conv:[
+    ['Hola, llevo 3 días sin dirección en mi carro 😅 urge','¡Uy, entiendo la urgencia! ¿Qué carro es y qué se siente al manejar?'],
+    ['Un Spark 2017, está muy dura la dirección y truena','Eso suena a cremallera o terminal dañada. Tráelo y te la revisamos hoy mismo sin costo.'],
+    ['¿A qué hora puedo llegar?','Ahorita mismo si gustas, aquí te esperamos 🚗'],
+  ]},
+  {nombre:'Fernando Ríos', tipo:'usuario_final', conv:[
+    ['Me recomendaron con ustedes, ¿son confiables?','¡Gracias por la confianza! Llevamos años en el ramo, con garantía por escrito en todas las piezas.'],
+    ['¿Tienen alguna reseña o referencia que me puedas compartir?','Claro, te paso el link de nuestras reseñas en Google 👍'],
+    ['Va, las voy a checar','Cualquier duda que tengas, aquí seguimos 😊'],
+  ]},
+  {nombre:'Claudia Mora', tipo:'usuario_final', conv:[
+    ['La pieza que me mandaron no es la correcta','Disculpa la molestia, ¿me confirmas el número de pedido para revisar qué pasó?'],
+    ['Es el pedido #4521, pedí para Jetta y me llegó de otro carro','Ya lo vi, fue error nuestro. Te la cambiamos sin costo, ¿cuándo la puedes traer?'],
+    ['Mañana en la mañana','Perfecto, ahí te esperamos con la pieza correcta ya apartada 🙏'],
+  ]},
+  {nombre:'Jorge Soto', tipo:'usuario_final', conv:[
+    ['Sí me interesa la cremallera, ¿cuándo tienen disponibilidad?','La tenemos en stock ahorita mismo, disponible para hoy.'],
+    ['Ah perfecto, ¿hasta qué hora puedo pasar?','Cerramos a las 6pm, si gustas te la apartamos para que no se venda.'],
+    ['Sí, apártamela por favor','Quedó apartada a tu nombre 👍'],
+  ]},
+  {nombre:'Patricia Núñez', tipo:'refaccionaria', conv:[
+    ['Necesito 10 piezas de cremallera Pointer, ¿precio especial?','Por volumen de 10 piezas sí manejamos descuento, déjame calcularte el precio.'],
+    ['¿Y tiempo de entrega si no las tienen todas en stock?','Tenemos 7 en stock, las otras 3 llegan en 2 días hábiles.'],
+    ['Me parece bien, vamos con eso','Te armo la orden completa y te confirmo por aquí 📦'],
+  ]},
+  {nombre:'Andrés Villa', tipo:'mecanico', conv:[
+    ['Un colega me pasó su número, trabajo en un taller aquí en GDL','¡Bienvenido! ¿Ya trabajas seguido con refacciones de dirección?'],
+    ['Sí, cada semana necesito varias piezas','Perfecto, te doy de alta como mecánico aliado, tienes 5% de descuento en toda la línea 💪'],
+    ['Va, ¿cómo le hago para los pedidos?','Nada más me escribes por aquí con lo que necesites y te cotizo al toque'],
+  ]},
+  {nombre:'Ricardo Sánchez', tipo:'mecanico', conv:[
+    ['Buenas, traigo un Jetta A4 2015 con fuga de aceite en el motor','¿La fuga es constante o solo cuando arrancas frío?'],
+    ['Constante, deja mancha diario en el piso','Puede ser retén del cigüeñal o tapa de válvulas. Tráelo para diagnóstico, sin costo.'],
+    ['Va, lo llevo mañana temprano','Perfecto, ahí te esperamos 🔧'],
+  ]},
+  {nombre:'Verónica Ramos', tipo:'usuario_final', conv:[
+    ['Hola, mi Aveo no enciende, creo que es la batería','¿Al girar la llave prende el tablero o no hace nada?'],
+    ['Prende el tablero pero no truena el motor','Suena a batería baja o terminales sucias. Podemos revisarla y cambiarla si es necesario.'],
+    ['¿Cuánto cuesta una batería nueva?','Depende de la marca, desde $1,800 hasta $2,600 con garantía de un año'],
+  ]},
+  {nombre:'Alejandro Cruz', tipo:'mecanico', conv:[
+    ['Traigo una Hilux 2019 con ruido en la suspensión delantera','¿El ruido es al pasar topes o también en piso parejo?'],
+    ['Nada más en topes y baches','Seguramente son la tornillería o los bujes de suspensión. Te la reviso hoy si la traes.'],
+    ['Va para allá en un rato','Ahí la esperamos 👍'],
+  ]},
+  {nombre:'Gabriela Ortiz', tipo:'usuario_final', conv:[
+    ['Buenas tardes, el aire de mi Versa ya no enfría','¿Sale aire pero tibio, o no sale nada de aire?'],
+    ['Sale aire pero tibio, antes sí enfriaba bien','Puede ser falta de gas refrigerante o el compresor. Te hacemos diagnóstico de AC por $250, se descuenta si reparas con nosotros.'],
+    ['Va, ¿en cuánto tiempo lo revisan?','En unos 30-40 minutos ya te decimos qué tiene'],
+  ]},
+  {nombre:'Sergio Medina', tipo:'refaccionaria', conv:[
+    ['Buen día, necesito cotización de balatas al mayoreo','¡Buen día! ¿Para qué línea de vehículos, americanos, japoneses o mixtos?'],
+    ['Mixto, los que más se venden: Nissan, Chevrolet y Toyota','Te armo un paquete surtido con las líneas más rotativas, dame un momento.'],
+    ['Perfecto, aquí espero tu lista','Ya está, te la mando con precios por pieza y por caja 📋'],
+  ]},
+  {nombre:'Lupita Herrera', tipo:'usuario_final', conv:[
+    ['Se me prendió el check engine en mi CRV, ¿qué puede ser?','Puede ser desde algo sencillo hasta algo mayor, lo mejor es escanearla para saber el código exacto.'],
+    ['¿Cuánto cuesta el escaneo?','El diagnóstico con escáner cuesta $300, se descuenta del total si reparas aquí.'],
+    ['Va, la llevo mañana','Perfecto, con gusto te esperamos 🚗'],
+  ]},
+  {nombre:'Óscar Delgado', tipo:'mecanico', conv:[
+    ['Tengo una Ranger 2020 con fallas eléctricas intermitentes','¿Qué se le apaga o falla exactamente?'],
+    ['A veces se apagan las luces del tablero solas','Eso hay que rastrearlo con escáner y multímetro, puede ser tierra floja o corto en el arnés.'],
+    ['¿Cuánto tiempo se lleva ese diagnóstico?','Entre 1 y 2 horas normalmente, te avisamos en cuanto encontremos la falla'],
+  ]},
+  {nombre:'Mónica Reyes', tipo:'usuario_final', conv:[
+    ['Mi Mazda 3 vibra el volante cuando freno fuerte','Eso casi siempre es disco de freno alabeado por el calor. ¿Hace cuánto no les das servicio?'],
+    ['Como un año, no recuerdo bien','Te recomiendo revisión de discos y balatas, si están muy desgastados hay que rectificar o cambiar.'],
+    ['Va, ¿me dan cita para esta semana?','Claro, ¿qué día te queda mejor?'],
+  ]},
+  {nombre:'Iván Salazar', tipo:'usuario_final', conv:[
+    ['¿Cada cuánto se cambia la banda de tiempo de un Kia Rio?','Normalmente cada 60,000 a 100,000 km dependiendo el modelo, ¿cuántos km trae el tuyo?'],
+    ['Va en 95,000 km, nunca se la han cambiado','Te recomiendo cambiarla pronto, si se rompe puede dañar el motor. Mejor prevenir.'],
+    ['Va, ¿cuánto cuesta el servicio completo?','Con banda, tensores y bomba de agua ronda los $3,500, todo con garantía'],
+  ]},
+  {nombre:'Beatriz Cano', tipo:'refaccionaria', conv:[
+    ['Buenas, necesito cotización de alternadores varias marcas','¡Buenas! ¿Nuevos, remanufacturados o ambos tipos?'],
+    ['Remanufacturados, es lo que más se vende en mi zona','Perfecto, te armo el catálogo con las marcas que más rotan por acá'],
+    ['Excelente, mándamelo por aquí','Ahí te lo mando en un momento con fotos y precios 📸'],
+  ]},
+  {nombre:'Raúl Ponce', tipo:'usuario_final', conv:[
+    ['Mi Sentra se está calentando mucho, el clima marca casi al tope','¿Ya revisaste el nivel de refrigerante? Puede ser fuga o el termostato.'],
+    ['No traigo casi nada de refrigerante, se debe estar saliendo','Puede ser manguera, radiador o bomba de agua. No lo sigas manejando así, se puede dañar el motor.'],
+    ['Ya lo apagué, ¿lo puedo llevar en grúa?','Sí, mejor así. Aquí lo revisamos en cuanto llegue 🚨'],
+  ]},
+  {nombre:'Silvia Aguilar', tipo:'mecanico', conv:[
+    ['Traigo un Spark 2020 con el clutch patinando','¿Ya notas olor a quemado al acelerar o solo se siente que no jala?'],
+    ['Sí, huele medio a quemado','Eso confirma que el disco de clutch ya está muy gastado, hay que cambiar el kit completo.'],
+    ['¿Manejan el kit completo con garantía?','Sí, kit de clutch con garantía de 6 meses, te cotizo mano de obra incluida'],
+  ]},
+  {nombre:'Tomás Vargas', tipo:'usuario_final', conv:[
+    ['Mi Vento hace un ruido feo cuando doy vuelta despacio','Eso suena a rótula o terminal de dirección desgastada. ¿Es un tronido o más bien un rechinido?'],
+    ['Es como un tronido seco','Sí, típico de rótula floja. Es peligroso dejarla así, mejor revisarla pronto.'],
+    ['Va, ¿la puedo llevar hoy en la tarde?','Claro, aquí te esperamos para revisarla 🔧'],
+  ]},
+  {nombre:'Norma Chávez', tipo:'usuario_final', conv:[
+    ['Hola, ya me toca el servicio de los 10,000 km de mi Accent','¡Perfecto! Ese servicio incluye cambio de aceite, filtros y revisión general de 21 puntos.'],
+    ['¿Cuánto cuesta y cuánto tiempo se lleva?','Ronda los $1,200 con aceite sintético, y se lleva aproximadamente 1 hora'],
+    ['Va, ¿necesito cita?','No es necesario, puedes venir directo de lunes a sábado 👍'],
+  ]},
+  {nombre:'Emilio Rangel', tipo:'usuario_final', conv:[
+    ['Mi RAM 2500 está tirando refrigerante, creo que es el radiador','¿Ves la fuga por abajo del radiador o por alguna manguera?'],
+    ['Por abajo, hace un charquito verde','Sí, seguramente el radiador ya se perforó. Hay que cambiarlo, en camionetas grandes es más común con el tiempo.'],
+    ['¿Tienen el radiador en stock?','Para RAM 2500 normalmente sí, déjame confirmarte el modelo exacto'],
+  ]},
+  {nombre:'Cecilia Duarte', tipo:'mecanico', conv:[
+    ['Traigo un Corolla con check engine, el escáner marca sensor de oxígeno','¿Ya revisaste si es el sensor de antes o después del catalizador?'],
+    ['El escáner marca banco 1 sensor 1','Ese es el más común de fallar. Tenemos el sensor original y genérico, ¿cuál prefieres para tu cliente?'],
+    ['El original, mejor no arriesgar','Buena decisión, te cotizo con instalación incluida'],
+  ]},
+  {nombre:'Arturo Bermúdez', tipo:'usuario_final', conv:[
+    ['Mi Fiesta no prende, nada más hace clic clic','Eso suena a motor de arranque o batería muy baja. ¿Las luces del tablero encienden bien?'],
+    ['Sí encienden normal','Entonces probablemente es el motor de arranque. Lo podemos revisar y cambiar si es necesario.'],
+    ['¿Se puede el mismo día?','Sí, si lo traes en la mañana normalmente te lo entregamos en la tarde 🔧'],
+  ]},
+  {nombre:'Yolanda Peña', tipo:'usuario_final', conv:[
+    ['¿Cuánto cuesta cambio de balatas traseras para un March?','Depende si son de disco o tambor, ¿sabes cuál trae el tuyo?'],
+    ['Creo que son de tambor, no estoy segura','No hay problema, en cuanto lo veamos te confirmamos y cotizamos correcto.'],
+    ['Va, paso mañana en la mañana','Perfecto, ahí te esperamos 😊'],
+  ]},
+  {nombre:'Gustavo Rivas', tipo:'refaccionaria', conv:[
+    ['Buenas, ando surtiendo inventario de bombas de agua, ¿qué manejan?','Manejamos las líneas más comunes: Nissan, Chevrolet, VW y Toyota principalmente.'],
+    ['¿Tienen precio especial si compro por caja?','Sí, por caja cerrada de 10 piezas manejamos mejor precio unitario'],
+    ['Me interesa, mándame la lista completa','Ahí te la mando con todas las referencias y precios 📋'],
+  ]},
+  {nombre:'Marisol Contreras', tipo:'usuario_final', conv:[
+    ['Se me encendieron varias luces en el tablero de repente','¿Recuerdas cuáles luces son exactamente? Eso nos ayuda a saber qué tan urgente es.'],
+    ['Una de batería y otra como de motor','La de batería puede ser el alternador, mejor no sigas manejando mucho así. Tráelo para escanearlo.'],
+    ['Voy para allá ahorita','Perfecto, aquí te esperamos para revisarlo 🚗'],
+  ]},
+  {nombre:'Héctor Zamora', tipo:'mecanico', conv:[
+    ['Traigo un Attitude que se va de lado al soltar el volante','Eso es típico de necesitar alineación y balanceo, o algún componente de dirección desgastado.'],
+    ['¿Manejan alineación computarizada?','Sí, tenemos alineadora computarizada 3D, muy precisa'],
+    ['Va, ¿cuánto cuesta el servicio?','Alineación y balanceo de las 4 llantas ronda los $600'],
+  ]},
+  {nombre:'Adriana Solís', tipo:'usuario_final', conv:[
+    ['Veo unas gotitas rojas debajo de mi CX-5','Eso suena a fuga de líquido de transmisión automática. ¿Notas que cambie mal las velocidades?'],
+    ['La verdad sí, a veces da un jaloncito raro','Mejor revisarlo pronto, las fugas de transmisión no se deben dejar pasar. Tráela para diagnóstico.'],
+    ['¿Cuánto cuesta el diagnóstico?','El diagnóstico de transmisión no tiene costo si reparas con nosotros'],
+  ]},
+  {nombre:'Rodrigo Fuentes', tipo:'usuario_final', conv:[
+    ['¿Cada cuánto se hace afinación mayor a un Onix?','Normalmente cada 40,000 km o si notas que jala menos o gasta más gasolina.'],
+    ['Va en 38,000 km, creo que ya le toca','Perfecto, la afinación mayor incluye bujías, filtros y limpieza de inyectores.'],
+    ['¿Cuánto cuesta aproximadamente?','Ronda los $2,200 dependiendo las piezas que necesite, te confirmamos exacto al revisarlo'],
+  ]},
+  {nombre:'Teresa Nava', tipo:'mecanico', conv:[
+    ['Necesito amortiguadores traseros para un Altima 2015, para un cliente','¿Los quiere originales o de línea económica?'],
+    ['De línea económica pero que aguanten bien','Tenemos una marca muy buena calidad-precio, con garantía de 6 meses'],
+    ['Va, mándame precio por el par','Te lo mando ahorita con todo y garantía por escrito'],
+  ]},
+  {nombre:'Julián Escobar', tipo:'usuario_final', conv:[
+    ['Mi Yaris está sonando muy fuerte el escape, como que se rompió algo','Puede ser el mofle perforado o alguna abrazadera suelta. ¿El ruido es constante o solo al acelerar?'],
+    ['Constante, hasta se escucha feo al ralentí','Suena a mofle. Tráelo y lo revisamos, normalmente es una reparación rápida.'],
+    ['¿Se puede el mismo día?','Sí, mofles normalmente se resuelven en un par de horas 🔧'],
+  ]},
+  {nombre:'Rosa Elena Camacho', tipo:'usuario_final', conv:[
+    ['Mi Gol a veces no quiere engranar bien la velocidad','¿Es estándar o automático tu Gol?'],
+    ['Es estándar','Puede ser el clutch, la caja o algún cable o varilla de cambios. Hay que revisarlo para saber exacto.'],
+    ['Va, ¿cuánto cuesta el diagnóstico?','El diagnóstico de caja manual no tiene costo si decides reparar con nosotros'],
+  ]},
+  {nombre:'Ignacio Barrera', tipo:'refaccionaria', conv:[
+    ['Buen día, necesito cotización de kits de clutch varias marcas','¡Buen día! ¿Para qué líneas principalmente, autos chicos o camionetas también?'],
+    ['Principalmente autos chicos: Aveo, Spark, March, Versa','Perfecto, esas son de las líneas que más rotamos, te armo el paquete con precios especiales'],
+    ['Excelente, espero tu cotización','Te la mando en un momento con todo el detalle 📋'],
+  ]},
+  {nombre:'Leticia Montes', tipo:'usuario_final', conv:[
+    ['Voy a salir de viaje largo y quiero que revisen mi Forte antes','¡Muy buena decisión! Hacemos una revisión completa: frenos, llantas, niveles, batería y suspensión.'],
+    ['¿Cuánto cuesta esa revisión?','La revisión pre-viaje cuesta $350, y si necesita algo te lo indicamos antes de reparar'],
+    ['Va, ¿cuándo me pueden atender?','Puedes venir cuando gustes, entre más pronto mejor para que te dé tiempo si necesita algo'],
+  ]},
+  {nombre:'Federico Guzmán', tipo:'mecanico', conv:[
+    ['Traigo una RAM 1500 con una falla intermitente, a veces se apaga sola','Esas fallas intermitentes son de las más difíciles, pero con escáner y monitoreo en carretera las encontramos.'],
+    ['¿Cuánto tiempo se llevan normalmente?','Puede ser desde 1 día hasta varios si la falla no se repite fácil, pero no cobramos por día de diagnóstico'],
+    ['Va, la dejo entonces','Perfecto, en cuanto encontremos algo te aviso de inmediato'],
+  ]},
+  {nombre:'Ximena Robles', tipo:'usuario_final', conv:[
+    ['Mi Altima se siente como que pierde potencia de repente','Puede ser filtro de gasolina tapado o bomba de gasolina débil. ¿Hace cuánto no le dan servicio de combustible?'],
+    ['La verdad nunca se lo he hecho','Te recomiendo cambio de filtro de gasolina, es mantenimiento preventivo importante.'],
+    ['Va, ¿cuánto cuesta?','El servicio de filtro de gasolina ronda los $800, incluye mano de obra'],
+  ]},
+];
+
 function demoLeads(){
-  const nombres=['Carlos Hdz','María López','Roberto Vega','Ana Flores','Luis Torres',
-    'Pedro Ruiz','Diana Castro','Miguel Ángel','José Martínez','Elena García',
-    'Fernando Ríos','Claudia Mora','Jorge Soto','Patricia Núñez','Andrés Villa'];
-  const tipos=['usuario_final','usuario_final','mecanico','refaccionaria','mecanico','usuario_final','usuario_final','mecanico','refaccionaria','usuario_final','usuario_final','mecanico','usuario_final','refaccionaria','mecanico'];
-  const previews=[
-    'Buenas tardes, me interesa la cremallera del Tsuru',
-    'Cuánto cuesta la dirección electroasistida Altima?',
-    'Jefe necesito la cremallera Hylux doble cabina urgente',
-    'Buenos días, precios mayoreo cremalleras Nissan?',
-    '¿Tienen bomba de dirección para RAM 1500?',
-    'Vi su anuncio, necesito cotización',
-    'Qué garantía tienen sus cremalleras?',
-    'Cliente mío necesita cremallera Aveo, qué tienen?',
-    'Pedido grande para esta semana, ¿me dan crédito?',
-    'Hola, llevo 3 días sin dirección 😅 urge',
-    'Me recomendaron con ustedes, ¿son confiables?',
-    'La pieza que me mandaron no es la correcta',
-    'Sí me interesa, ¿cuándo tienen disponibilidad?',
-    '10 piezas cremallera Pointer, ¿precio especial?',
-    'Colega me pasó su número, trabajo en taller'];
   const etapas_keys=['Pendiente','Contestado','Prospecto','Cotizado','Agendado','Cerrado'];
   const ahora = Date.now();
-  return nombres.map((n,i)=>({
+  const conNotas=[0,2,5,17,24,36];
+  return CASOS_DEMO.map((c,i)=>({
     id:`demo-lead-${i}`,
-    nombre:n,
+    nombre:c.nombre,
     telefono:`+52 33 ${_sr(i*7,1000,9999)} ${_sr(i*13,1000,9999)}`,
-    tipo_cliente:tipos[i],
+    tipo_cliente:c.tipo,
     etapa:{nombre:etapas_keys[_sr(i*3,0,5)],color:['#888','#3498db','#9b59b6','#f39c12','#1abc9c','#2ecc71'][_sr(i*3,0,5)]},
     no_leidos:_sr(i*11,0,3)>2?_sr(i*17,1,9):0,
     ultimo_contacto:new Date(ahora - _sr(i*5,1,72)*3600000).toISOString(),
-    preview:previews[i],
+    preview:c.conv[0][0],
     asesor:{nombre:['Luis R.','Karla M.','Diego V.'][i%3]},
     etiquetas_lead:i%3===0?[{etiqueta:{nombre:'Mecánico Alianza',color:'#27ae60'}}]:[],
-    tieneNotas:[0,2,5].includes(i)
+    tieneNotas:conNotas.includes(i)
   }));
 }
 
@@ -772,11 +986,7 @@ function demoMensajes(leadId){
   const idx = parseInt(leadId.split('-')[2]||'0');
   const now = Date.now();
   const asesorNombre = ['Luis R.','Karla M.','Diego V.'][idx%3];
-  const pares = [
-    ['Hola, me interesa conocer sus precios para cremalleras', 'Claro! ¿Para qué vehículo necesitas?'],
-    ['Es para un Tsuru 2012, dirección mecánica', '¡Perfecto! Tenemos stock disponible. Te mando cotización en un momento.'],
-    ['Gracias, ¿cuánto tiempo tienen de garantía?', 'Toda nuestra línea lleva 6 meses de garantía o 10,000 km, lo que ocurra primero 💪'],
-  ];
+  const pares = (CASOS_DEMO[idx] || CASOS_DEMO[0]).conv;
   const msgs = [];
   pares.forEach(([ent,sal],i)=>{
     msgs.push({ id:`dm-${idx}-${i*2}`, lead_id:leadId, direccion:'entrante', contenido:ent, created_at:new Date(now-(pares.length-i)*7200000+1000).toISOString() });
@@ -788,7 +998,10 @@ function demoMensajes(leadId){
     0:[{texto:'Cliente pidió que le llamemos después de las 6pm, trabaja hasta tarde.', autor:'Luis R.', haceMin:95}],
     2:[{texto:'Ojo: es cliente recurrente, ya compró con nosotros en 2025 — darle prioridad.', autor:'Karla M.', haceMin:130},
        {texto:'Pidió factura con RFC, falta que la mande.', autor:'Karla M.', haceMin:20}],
-    5:[{texto:'Precio especial autorizado por mayoreo (10 piezas) — ya lo aprobó Enrique.', autor:'Diego V.', haceMin:60}],
+    5:[{texto:'Prometió traer la camioneta este viernes para revisión — anotar en agenda.', autor:'Diego V.', haceMin:60}],
+    17:[{texto:'Es mecánico de confianza, siempre paga puntual — darle trato preferencial.', autor:'Karla M.', haceMin:80}],
+    24:[{texto:'Pidió que le mandemos el catálogo también por correo, no solo WhatsApp.', autor:'Luis R.', haceMin:45}],
+    36:[{texto:'Cliente algo molesta por la demora de un diagnóstico anterior — tener paciencia y dar buen seguimiento.', autor:'Diego V.', haceMin:150}],
   };
   (NOTAS_EJEMPLO[idx]||[]).forEach((n,i)=>{
     msgs.push({ id:`demo-nota-${idx}-${i}`, lead_id:leadId, direccion:'nota', contenido:n.texto, autor:n.autor, created_at:new Date(now-n.haceMin*60000).toISOString() });
@@ -1046,7 +1259,23 @@ function getFilteredLeads(){
       return msgs.some(m=>(m.contenido||'').toLowerCase().includes(_search));
     });
   }
+  if(_filtroSoloNotas){
+    list = list.filter(l=>l.tieneNotas)
+      .slice()
+      .sort((a,b)=>ultimaNotaTs(b)-ultimaNotaTs(a));
+  }
   return list;
+}
+let _filtroSoloNotas=false;
+function ultimaNotaTs(l){
+  const msgs = _mensajesPorLead[l.id] || (_demo ? (_mensajesPorLead[l.id]=demoMensajes(l.id)) : []);
+  const notas = msgs.filter(m=>m.direccion==='nota');
+  return notas.length ? Math.max(...notas.map(n=>new Date(n.created_at).getTime())) : 0;
+}
+function toggleFiltroNotas(){
+  _filtroSoloNotas=!_filtroSoloNotas;
+  document.getElementById('btn-filtro-notas').classList.toggle('active', _filtroSoloNotas);
+  renderInbox();
 }
 
 function tipoClass(t){ return t==='mecanico'?'tipo-mecanico':t==='refaccionaria'?'tipo-refaccionaria':'tipo-usuario'; }
@@ -1089,7 +1318,7 @@ function renderInbox(){
     <div class="conv-item${isActive?' active':''}" onclick="openLead('${l.id}')">
       <div class="conv-avatar-wrap">
         <div class="conv-avatar" style="background:${col}">${ini}</div>
-        ${l.tieneNotas?'<span class="nota-indicador" title="Tiene notas internas">📌</span>':''}
+        ${l.tieneNotas?'<span class="nota-indicador" title="Tiene notas internas"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 0 0-5 5c0 3 2 4.5 2 7h6c0-2.5 2-4 2-7a5 5 0 0 0-5-5z"/><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="21" x2="14" y2="21"/></svg></span>':''}
       </div>
       <div class="conv-body">
         <div class="conv-top">
@@ -1189,7 +1418,7 @@ function renderMessages(){
     }
     if(m.direccion==='nota'){
       html+=`<div class="nota-interna" id="note-${m.id}">
-        <div class="nota-interna-header"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 0 0-5 5c0 3 2 4.5 2 7h6c0-2.5 2-4 2-7a5 5 0 0 0-5-5z"/><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="21" x2="14" y2="21"/></svg> Nota interna · ${escHtml(m.autor||'')}</div>
+        <div class="nota-interna-header"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 0 0-5 5c0 3 2 4.5 2 7h6c0-2.5 2-4 2-7a5 5 0 0 0-5-5z"/><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="21" x2="14" y2="21"/></svg> Nota interna sobre ${escHtml(_activeLead.nombre||_activeLead.telefono||'')} · ${escHtml(m.autor||'')}</div>
         <div class="nota-interna-texto">${linkify(escHtml(m.contenido))}</div>
         <div class="nota-interna-time">${formatTime(m.created_at)}</div>
       </div>`;
@@ -1338,6 +1567,7 @@ function irAResultadoBusqueda(){
 function abrirModalNota(){
   if(!_activeLead) return;
   document.getElementById('nota-texto').value='';
+  document.getElementById('nota-modal-cliente').textContent=_activeLead.nombre||_activeLead.telefono||'este cliente';
   document.getElementById('modal-nota').style.display='flex';
   document.getElementById('nota-texto').focus();
 }
@@ -2072,6 +2302,7 @@ const LS_KEY_TOUR_VISTO='henryleads_tour_visto';
 const TOUR_STEPS=[
   {selector:'#sidenav', title:'Menú principal', text:'Desde aquí te mueves entre Bandeja, Pipeline, Leads y Configuración. Este mismo botón de brújula vive abajo del todo, por si quieres repetir el recorrido después.', pos:'right'},
   {selector:'.inbox-header', title:'Tu bandeja de conversaciones', text:'Aquí ves todos los chats de WhatsApp. El botón ＋ crea un lead nuevo a mano, sin esperar a que el cliente escriba primero.', pos:'bottom'},
+  {selector:'#btn-filtro-notas', title:'Chats con notas internas', text:'Muestra solo los chats que tienen una nota interna, ordenados del más reciente al más viejo. Vuelve a tocarlo para quitar el filtro.', pos:'bottom'},
   {selector:'#search-input', title:'Buscar en toda la bandeja', text:'Busca por nombre o teléfono, o escribe una palabra clave — también busca dentro de las conversaciones, para encontrar con quién se habló de cierto tema.', pos:'bottom'},
   {selector:'.inbox-filters', title:'Filtros rápidos', text:'Filtra por tipo de cliente o solo los que no has leído. Puedes renombrar cada filtro (✎ al pasar el mouse), arrastrarlos para acomodarlos como quieras, y agregar más con el botón ＋ (por etapa del embudo).', pos:'bottom'},
   {selector:'.conv-item', title:'Cada conversación', text:'Un clic aquí abre el chat completo con ese cliente.', pos:'right'},
