@@ -25,7 +25,7 @@
   --gold:#a97e2f;--gold2:#8a6425;
   --text:#18181b;--text2:#52525b;--text3:#71717a;
 }
-html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;transition:background .2s,color .2s}
+html,body{height:100%;overflow:hidden;overscroll-behavior-x:none;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;transition:background .2s,color .2s}
 #app{display:flex;height:100vh;overflow:hidden}
 
 /* SIDEBAR */
@@ -59,7 +59,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 .tour-btn-next{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#111}
 .snav-sep{width:30px;height:1px;background:var(--border);margin:4px 0}
 .snav-bottom{margin-top:auto}
-.tooltip{position:absolute;left:60px;top:50%;transform:translateY(-50%);background:#222;border:1px solid var(--border2);padding:4px 10px;border-radius:6px;font-size:11px;color:var(--text);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:50}
+.tooltip{position:absolute;left:60px;top:50%;transform:translateY(-50%);background:#222;border:1px solid #3a3a3a;padding:4px 10px;border-radius:6px;font-size:11px;color:#f0f0f0;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:50}
 .snav-btn:hover .tooltip{opacity:1}
 
 /* MAIN */

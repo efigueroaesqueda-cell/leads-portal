@@ -25,7 +25,7 @@
   --gold:#a97e2f;--gold2:#8a6425;
   --text:#18181b;--text2:#52525b;--text3:#71717a;
 }
-html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;transition:background .2s,color .2s}
+html,body{height:100%;overflow:hidden;overscroll-behavior-x:none;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;transition:background .2s,color .2s}
 #app{display:flex;height:100vh;overflow:hidden}
 
 /* SIDEBAR */
@@ -59,7 +59,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 .tour-btn-next{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#111}
 .snav-sep{width:30px;height:1px;background:var(--border);margin:4px 0}
 .snav-bottom{margin-top:auto}
-.tooltip{position:absolute;left:60px;top:50%;transform:translateY(-50%);background:#222;border:1px solid var(--border2);padding:4px 10px;border-radius:6px;font-size:11px;color:var(--text);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:50}
+.tooltip{position:absolute;left:60px;top:50%;transform:translateY(-50%);background:#222;border:1px solid #3a3a3a;padding:4px 10px;border-radius:6px;font-size:11px;color:#f0f0f0;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:50}
 .snav-btn:hover .tooltip{opacity:1}
 
 /* MAIN */
@@ -67,8 +67,13 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 
 /* HEADER */
 .page-header{height:var(--header-h);border-bottom:1px solid var(--border);background:var(--bg2);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0}
-.page-header h1{font-size:16px;font-weight:700;flex:1}
-.header-stats{display:flex;gap:16px}
+.page-header h1{font-size:16px;font-weight:700;flex:0 0 auto;white-space:nowrap}
+.pipeline-search-wrap{flex:1;display:flex;justify-content:center;align-items:center;gap:6px;position:relative;color:var(--text3)}
+.pipeline-search-wrap svg{position:absolute;left:calc(50% - 145px);pointer-events:none}
+#pipeline-search{width:100%;max-width:280px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:7px 12px 7px 30px;color:var(--text);font-size:13px;outline:none;transition:border-color .18s ease}
+#pipeline-search:focus{border-color:var(--gold)}
+#pipeline-search::placeholder{color:var(--text3)}
+.header-stats{display:flex;gap:16px;flex-shrink:0}
 .stat{text-align:center}
 .stat-num{font-size:18px;font-weight:800;color:var(--gold)}
 .stat-label{font-size:10px;color:var(--text3)}
@@ -177,6 +182,10 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
     <!-- HEADER -->
     <div class="page-header">
       <h1><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg> Pipeline de Ventas</h1>
+      <div class="pipeline-search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="pipeline-search" placeholder="Buscar por nombre o teléfono..." oninput="setPipelineSearch(this.value)">
+      </div>
       <div class="header-stats">
         <div class="stat"><div class="stat-num" id="stat-total">—</div><div class="stat-label">Total</div></div>
         <div class="stat"><div class="stat-num" id="stat-abiertos" style="color:var(--blue)">—</div><div class="stat-label">Abiertos</div></div>
@@ -342,6 +351,7 @@ const LS_KEY_TOUR_VISTO='henryleads_tour_visto_pipeline';
 const TOUR_STEPS=[
   {selector:'#sidenav', title:'Menú principal', text:'Desde aquí te mueves entre Bandeja, Pipeline, Leads y Configuración. Este mismo botón de brújula vive abajo del todo, por si quieres repetir el recorrido después.', pos:'right'},
   {selector:'.page-header', title:'Resumen de tu pipeline', text:'De un vistazo ves cuántos leads tienes en total, cuántos siguen abiertos y cuántos cerraste hoy.', pos:'bottom'},
+  {selector:'#pipeline-search', title:'Buscar un lead', text:'Escribe el nombre o teléfono de un cliente para encontrarlo directo, sin importar en qué etapa del embudo esté.', pos:'bottom'},
   {selector:'.filters-bar', title:'Filtros', text:'Filtra por tipo de cliente o por asesor para ver solo lo que te interesa.', pos:'bottom'},
   {selector:'.kanban-col', title:'Cada columna es una etapa', text:'Puedes arrastrar un lead entre columnas para mover su etapa — o crear tus propios embudos con el botón "＋ Nuevo embudo" al final.', pos:'right'},
   {selector:'.lead-card', title:'La tarjeta de un lead', text:'Un clic aquí abre su ficha completa: mover etapa, cambiar asesor y notas rápidas.', pos:'right'},
@@ -428,11 +438,17 @@ function setTipo(t,el){
   renderKanban();
 }
 
+let _pipelineSearch='';
+function setPipelineSearch(val){
+  _pipelineSearch=val.trim().toLowerCase();
+  renderKanban();
+}
 function getFilteredLeads(){
   let list=_leads;
   if(_tipoFilter!=='todos')list=list.filter(l=>l.tipo_cliente===_tipoFilter);
   const asesor=document.getElementById('filter-asesor')?.value;
   if(asesor)list=list.filter(l=>l.asesor?.nombre===asesor);
+  if(_pipelineSearch) list=list.filter(l=>(l.nombre||'').toLowerCase().includes(_pipelineSearch)||(l.telefono||'').includes(_pipelineSearch));
   return list;
 }
 
@@ -763,6 +779,29 @@ setInterval(()=>{
   const h=new Date().getHours();
   document.documentElement.setAttribute('data-tema', (h>=7&&h<19)?'claro':'oscuro');
 }, 5*60*1000);
+
+// ── GESTO DE 2 DEDOS: de Pipeline a Bandeja (y nada más allá) ──
+(function(){
+  let tsx=null, tsy=null;
+  document.addEventListener('touchstart', e=>{
+    tsx = e.touches.length===2 ? e.touches[0].clientX : null;
+    tsy = e.touches.length===2 ? e.touches[0].clientY : null;
+  }, {passive:true});
+  document.addEventListener('touchend', e=>{
+    if(tsx===null) return;
+    const dx=e.changedTouches[0].clientX-tsx, dy=Math.abs(e.changedTouches[0].clientY-tsy);
+    if(dx>80 && Math.abs(dx)>dy*1.5) location.href='index.html';
+    tsx=null;
+  }, {passive:true});
+  let wAccum=0, wTimer=null;
+  document.addEventListener('wheel', e=>{
+    if(Math.abs(e.deltaX)<Math.abs(e.deltaY)) return;
+    wAccum+=e.deltaX;
+    clearTimeout(wTimer);
+    wTimer=setTimeout(()=>wAccum=0, 300);
+    if(wAccum<-120){ location.href='index.html'; wAccum=0; }
+  }, {passive:true});
+})();
 
 if(_demo)document.getElementById('demo-banner').style.display='block';
 requireAuth().then(ok => { if(ok){ init(); attachChipDrag(); } });

@@ -13,7 +13,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#0d0d0d;--bg2:#141414;--bg3:#1a1a1a;--bg4:#222;--border:#2a2a2a;--border2:#333;--gold:#c8a951;--gold2:#a07820;--text:#e8e8e8;--text2:#aaa;--text3:#666;--green:#2ecc71;--red:#e74c3c;--blue:#3498db;--header-h:56px;}
 :root[data-tema="claro"]{--bg:#ffffff;--bg2:#f7f7f8;--bg3:#f0f0f2;--bg4:#e5e5e8;--border:#c9c9d1;--border2:#a8a8b3;--gold:#a97e2f;--gold2:#8a6425;--text:#18181b;--text2:#52525b;--text3:#71717a;}
-html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;transition:background .2s,color .2s}
+html,body{height:100%;overflow:hidden;overscroll-behavior-x:none;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;transition:background .2s,color .2s}
 #app{display:flex;height:100vh;overflow:hidden}
 #sidenav{width:56px;min-width:56px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:4px}
 .snav-logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#111;margin-bottom:8px}
@@ -45,7 +45,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 .tour-btn-next{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#111}
 .snav-sep{width:30px;height:1px;background:var(--border);margin:4px 0}
 .snav-bottom{margin-top:auto}
-.tooltip{position:absolute;left:60px;top:50%;transform:translateY(-50%);background:#222;border:1px solid var(--border2);padding:4px 10px;border-radius:6px;font-size:11px;color:var(--text);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:50}
+.tooltip{position:absolute;left:60px;top:50%;transform:translateY(-50%);background:#222;border:1px solid #3a3a3a;padding:4px 10px;border-radius:6px;font-size:11px;color:#f0f0f0;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:50}
 .snav-btn:hover .tooltip{opacity:1}
 
 #main{flex:1;display:flex;flex-direction:column;overflow:hidden}
@@ -109,6 +109,11 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 .tema-opcion:hover{border-color:var(--gold);color:var(--gold)}
 .tema-opcion:active{transform:scale(.97)}
 .tema-opcion.activo{border-color:var(--gold);color:var(--gold);background:rgba(200,169,81,.1)}
+.fondo-chat-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.fondo-swatch{aspect-ratio:1;border-radius:10px;cursor:pointer;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.7);transition:transform .14s cubic-bezier(.4,0,.2,1),border-color .16s ease}
+.fondo-swatch:hover{transform:scale(1.06)}
+.fondo-swatch:active{transform:scale(.94)}
+.fondo-swatch.activo{border-color:var(--gold);box-shadow:0 0 0 2px rgba(200,169,81,.3)}
 
 /* ETAPA LIST */
 .etapa-list{display:flex;flex-direction:column;gap:6px}
@@ -398,11 +403,14 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
             <h3>Información general</h3>
             <div class="form-group"><label>Nombre de la empresa</label><input type="text" id="emp-nombre" value="Cremalleras LR"></div>
             <div class="form-group"><label>Teléfono WhatsApp Business</label><input type="text" id="emp-wa" placeholder="+52 33 XXXX XXXX"></div>
-            <div class="form-group"><label>Ciudad</label><input type="text" id="emp-ciudad" value="Guadalajara, Jalisco"></div>
             <div class="form-group">
               <label>Ubicación del negocio (para compartir con clientes)</label>
-              <textarea id="emp-ubicacion" rows="2" placeholder="Dirección o link de Google Maps"></textarea>
-              <div class="hint">Esto es lo que se rellena solo cuando usas (UBI) o [UBI] en una respuesta rápida.</div>
+              <textarea id="emp-ubicacion" rows="2" placeholder="Dirección completa, ej: Río Tizapán 1405, Col. Atlas, Guadalajara, Jalisco, CP 44870"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Link de Google Maps (opcional)</label>
+              <input type="text" id="emp-ubicacion-maps" placeholder="https://maps.app.goo.gl/...">
+              <div class="hint">Si lo agregas, (UBI) o [UBI] en una respuesta rápida manda la dirección y el link juntos.</div>
             </div>
             <div class="form-group">
               <label>Color de marca</label>
@@ -457,6 +465,19 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
               </button>
             </div>
             <p class="config-desc" id="tema-auto-hint" style="margin-top:10px"></p>
+          </div>
+
+          <div class="config-card">
+            <h3>Fondo del chat</h3>
+            <p class="config-desc" style="margin-bottom:10px">Solo cambia el fondo detrás de los mensajes en la Bandeja — nunca afecta la legibilidad del texto.</p>
+            <div class="fondo-chat-grid" id="fondo-chat-grid"></div>
+            <div style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap">
+              <label class="btn btn-ghost btn-sm" style="cursor:pointer">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Subir mi imagen
+                <input type="file" accept="image/*" onchange="subirFondoChatPersonalizado(this)" style="display:none">
+              </label>
+              <button class="btn btn-ghost btn-sm" onclick="aplicarFondoChat('')">Quitar fondo</button>
+            </div>
           </div>
         </div>
 
@@ -518,7 +539,7 @@ function loadCurrentSection(){
   if(id==='etapas')loadEtapas();
   if(id==='mensajes')loadQR();
   if(id==='empresa')loadUbicacionEmpresa();
-  if(id==='apariencia')reflejarTemaActivo();
+  if(id==='apariencia'){ reflejarTemaActivo(); renderFondoChatGrid(); }
 }
 
 // Tema oscuro/claro: se guarda por navegador (cada quien elige el suyo),
@@ -541,9 +562,53 @@ function reflejarTemaActivo(){
     : '';
 }
 
+// ── FONDO DEL CHAT ──────────────────────────────────────────────
+const LS_KEY_FONDO_CHAT='henryleads_fondo_chat';
+const FONDOS_CHAT_PRESETS=[
+  {nombre:'Ninguno', css:''},
+  {nombre:'Dorado suave', css:'radial-gradient(circle at 20% 20%, rgba(200,169,81,.25), transparent 50%), radial-gradient(circle at 80% 80%, rgba(160,120,32,.2), transparent 50%)'},
+  {nombre:'Atardecer', css:'linear-gradient(135deg, #2d1b3d, #6b2d5c, #a8456b)'},
+  {nombre:'Océano', css:'linear-gradient(135deg, #0f2027, #203a43, #2c5364)'},
+  {nombre:'Aurora', css:'linear-gradient(135deg, #1a2980, #26d0ce)'},
+  {nombre:'Menta', css:'linear-gradient(135deg, #134e5e, #71b280)'},
+];
+function cargarFondoChatGuardado(){
+  try{ return JSON.parse(localStorage.getItem(LS_KEY_FONDO_CHAT)||'null') || {type:'preset', value:''}; }
+  catch(e){ return {type:'preset', value:''}; }
+}
+function renderFondoChatGrid(){
+  const el=document.getElementById('fondo-chat-grid');
+  if(!el) return;
+  const actual=cargarFondoChatGuardado();
+  el.innerHTML=FONDOS_CHAT_PRESETS.map(f=>`
+    <div class="fondo-swatch${actual.type==='preset'&&actual.value===f.css?' activo':''}" style="background:${f.css||'var(--bg3)'}" onclick='aplicarFondoChat(${JSON.stringify(f.css)})' title="${escHtml(f.nombre)}">
+      ${!f.css?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>':''}
+    </div>
+  `).join('');
+}
+function aplicarFondoChat(css){
+  localStorage.setItem(LS_KEY_FONDO_CHAT, JSON.stringify({type:'preset', value:css}));
+  renderFondoChatGrid();
+  showToast('✅ Fondo de chat actualizado');
+}
+function subirFondoChatPersonalizado(input){
+  const file=input.files[0];
+  if(!file) return;
+  if(!file.type.startsWith('image/')){ showToast('❌ Selecciona una imagen'); return; }
+  if(file.size > 3*1024*1024){ showToast('❌ La imagen es muy pesada (máx 3MB)'); return; }
+  const reader=new FileReader();
+  reader.onload=()=>{
+    localStorage.setItem(LS_KEY_FONDO_CHAT, JSON.stringify({type:'custom', value:reader.result}));
+    renderFondoChatGrid();
+    showToast('✅ Fondo personalizado guardado');
+  };
+  reader.readAsDataURL(file);
+}
+
 // Ubicación del negocio: se guarda local (mismo navegador) para que la
 // Bandeja pueda leerla al usar (UBI)/[UBI] en una respuesta rápida.
 const LS_KEY_UBICACION = 'henryleads_ubicacion_negocio';
+const LS_KEY_UBICACION_MAPS = 'henryleads_ubicacion_maps';
 function loadUbicacionEmpresa(){
   let val = localStorage.getItem(LS_KEY_UBICACION);
   if(val===null){
@@ -551,9 +616,11 @@ function loadUbicacionEmpresa(){
     localStorage.setItem(LS_KEY_UBICACION, val);
   }
   document.getElementById('emp-ubicacion').value = val;
+  document.getElementById('emp-ubicacion-maps').value = localStorage.getItem(LS_KEY_UBICACION_MAPS) || '';
 }
 function guardarUbicacionEmpresa(){
   localStorage.setItem(LS_KEY_UBICACION, document.getElementById('emp-ubicacion').value.trim());
+  localStorage.setItem(LS_KEY_UBICACION_MAPS, document.getElementById('emp-ubicacion-maps').value.trim());
   showToast('✅ Guardado');
 }
 
@@ -818,8 +885,9 @@ const TOUR_STEPS=[
   {selector:'.config-nav', title:'Secciones de Configuración', text:'Aquí ajustas cada parte del sistema: conexión de WhatsApp, tu equipo, las etapas del embudo, respuestas rápidas, automatizaciones, apariencia y los datos de la empresa.', pos:'right'},
   {selector:'#sec-whatsapp .config-card', title:'Conexión con WhatsApp', text:'Aquí están las credenciales que conectan el sistema con tu número de WhatsApp Business.', pos:'left', section:'whatsapp'},
   {selector:'#qr-list', title:'Respuestas rápidas', text:'Todas las plantillas que tus asesores usan en el chat viven aquí — puedes agregar, editar, ocultar o eliminar cualquiera.', pos:'top', section:'mensajes'},
-  {selector:'#emp-ubicacion', title:'Ubicación del negocio', text:'Lo que escribas aquí es justo lo que se rellena solo cuando alguien usa (UBI) en una respuesta rápida.', pos:'top', section:'empresa'},
+  {selector:'#emp-ubicacion', title:'Ubicación del negocio', text:'Lo que escribas aquí (y el link de Google Maps de abajo, si lo agregas) es justo lo que se rellena solo cuando alguien usa (UBI) en una respuesta rápida.', pos:'top', section:'empresa'},
   {selector:'#sec-apariencia .config-card', title:'Modo claro, oscuro o automático', text:'Cada quien elige cómo se ve el sistema en su propia computadora — se guarda solo, no afecta a los demás. "Automático" cambia solo según la hora: claro de día, oscuro de noche, para no dañar la vista.', pos:'top', section:'apariencia'},
+  {selector:'#fondo-chat-grid', title:'Fondo del chat', text:'Elige un fondo bonito para atrás de los mensajes en la Bandeja, o sube tu propia imagen — nunca afecta la legibilidad del texto.', pos:'top', section:'apariencia'},
 ];
 let _tourIndex=0;
 
