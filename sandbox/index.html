@@ -1129,6 +1129,13 @@ async function init(){
     setTimeout(startTour, 900);
   }
 
+  // Si venimos de otra pantalla con ?lead=ID en la URL (por ejemplo el
+  // botón "Ir al chat" del Pipeline o de Leads), abrimos ese chat directo.
+  try{
+    const leadParam = new URLSearchParams(location.search).get('lead');
+    if(leadParam && _leadsAll.some(l=>l.id===leadParam)) openLead(leadParam);
+  }catch(e){}
+
   // En móvil se arranca mostrando la lista de conversaciones (que es una
   // capa encima); al abrir un chat se oculta, y el botón de "atrás" del
   // header la vuelve a mostrar. En escritorio esta clase no hace nada.
@@ -1169,9 +1176,13 @@ function subscribeRealtime(){
 }
 
 // ── RENDER INBOX ──────────────────────────────────────────────
+// Normaliza texto para búsqueda: minúsculas y SIN acentos, para que
+// "hector" encuentre "Héctor" y al revés.
+function _norm(s){ return String(s==null?'':s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
+
 let _search='';
 function filterLeads(){
-  _search = document.getElementById('search-input').value.toLowerCase();
+  _search = _norm(document.getElementById('search-input').value);
   renderInbox();
 }
 
@@ -1278,12 +1289,13 @@ function getFilteredLeads(){
     else if(chip.tipo==='etapa') list = list.filter(l=>l.etapa?.nombre===chip.valor);
   }
   if(_search){
+    const s = _search.replace(/\s/g,'');
     list = list.filter(l=>{
-      if((l.nombre||'').toLowerCase().includes(_search)) return true;
-      if((l.telefono||'').includes(_search)) return true;
+      if(_norm(l.nombre).includes(_search)) return true;
+      if((l.telefono||'').replace(/\s/g,'').includes(s)) return true;
       if(!_demo) return false;
       const msgs = _mensajesPorLead[l.id] || (_mensajesPorLead[l.id]=demoMensajes(l.id));
-      return msgs.some(m=>(m.contenido||'').toLowerCase().includes(_search));
+      return msgs.some(m=>_norm(m.contenido).includes(_search));
     });
   }
   if(_filtroSoloNotas){
@@ -1568,11 +1580,11 @@ function cerrarBusquedaChat(){
 }
 function buscarEnChat(q){
   document.querySelectorAll('#chat-messages .msg-search-match, #chat-messages .msg-search-active').forEach(el=>el.classList.remove('msg-search-match','msg-search-active'));
-  const term=q.trim().toLowerCase();
+  const term=_norm(q.trim());
   const countEl=document.getElementById('chat-search-count');
   if(!term){ _chatSearchMatches=[]; _chatSearchIndex=-1; countEl.textContent=''; return; }
   const bubbles=[...document.querySelectorAll('#chat-messages .msg-bubble')];
-  _chatSearchMatches=bubbles.filter(b=>b.textContent.toLowerCase().includes(term));
+  _chatSearchMatches=bubbles.filter(b=>_norm(b.textContent).includes(term));
   _chatSearchMatches.forEach(b=>b.classList.add('msg-search-match'));
   _chatSearchIndex=_chatSearchMatches.length?0:-1;
   countEl.textContent=_chatSearchMatches.length?`${_chatSearchIndex+1}/${_chatSearchMatches.length}`:'Sin resultados';

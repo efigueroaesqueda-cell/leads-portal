@@ -447,8 +447,10 @@ document.addEventListener('keydown', (e)=>{
   if(modalAbierto) closeModal(modalAbierto.id);
 });
 
+function _norm(s){ return String(s==null?'':s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
 function applyFilters(){
-  const q=document.getElementById('search').value.toLowerCase();
+  const q=_norm(document.getElementById('search').value);
+  const qTel=q.replace(/\s/g,'');
   const etapa=document.getElementById('f-etapa').value;
   const tipo=document.getElementById('f-tipo').value;
   const asesor=document.getElementById('f-asesor').value;
@@ -456,7 +458,7 @@ function applyFilters(){
     if(etapa&&(l.etapa?.nombre||'')!==etapa)return false;
     if(tipo&&l.tipo_cliente!==tipo)return false;
     if(asesor&&(l.asesor?.nombre||'')!==asesor)return false;
-    if(q&&!((l.nombre||'').toLowerCase().includes(q)||(l.telefono||'').includes(q)||(l.vehiculo_info||'').toLowerCase().includes(q)))return false;
+    if(q&&!(_norm(l.nombre).includes(q)||(l.telefono||'').replace(/\s/g,'').includes(qTel)||_norm(l.vehiculo_info).includes(q)))return false;
     return true;
   });
   // Sort

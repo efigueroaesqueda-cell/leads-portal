@@ -69,9 +69,10 @@ html,body{height:100%;overflow:hidden;overscroll-behavior-x:none;font-family:'Se
 /* HEADER */
 .page-header{height:var(--header-h);border-bottom:1px solid var(--border);background:var(--bg2);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0}
 .page-header h1{font-size:16px;font-weight:700;flex:0 0 auto;white-space:nowrap}
-.pipeline-search-wrap{flex:1;display:flex;justify-content:center;align-items:center;gap:6px;position:relative;color:var(--text3)}
-.pipeline-search-wrap svg{position:absolute;left:calc(50% - 145px);pointer-events:none}
-#pipeline-search{width:100%;max-width:280px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:7px 12px 7px 30px;color:var(--text);font-size:13px;outline:none;transition:border-color .18s ease}
+.pipeline-search-wrap{flex:1;display:flex;justify-content:center;align-items:center}
+.pipeline-search-box{position:relative;width:100%;max-width:360px;color:var(--text3)}
+.pipeline-search-box svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);pointer-events:none}
+#pipeline-search{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:7px 12px 7px 32px;color:var(--text);font-size:13px;outline:none;transition:border-color .18s ease}
 #pipeline-search:focus{border-color:var(--gold)}
 #pipeline-search::placeholder{color:var(--text3)}
 .header-stats{display:flex;gap:16px;flex-shrink:0}
@@ -187,8 +188,10 @@ html,body{height:100%;overflow:hidden;overscroll-behavior-x:none;font-family:'Se
     <div class="page-header">
       <h1><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg> Pipeline de Ventas</h1>
       <div class="pipeline-search-wrap">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="pipeline-search" placeholder="Buscar por nombre o teléfono..." oninput="setPipelineSearch(this.value)">
+        <div class="pipeline-search-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="pipeline-search" placeholder="Buscar por nombre o teléfono..." oninput="setPipelineSearch(this.value)" onkeydown="if(event.key==='Escape'){this.value='';setPipelineSearch('');}">
+        </div>
       </div>
       <div class="header-stats">
         <div class="stat"><div class="stat-num" id="stat-total">—</div><div class="stat-label">Total</div></div>
@@ -372,7 +375,7 @@ const LS_KEY_TOUR_VISTO='henryleads_tour_visto_pipeline';
 const TOUR_STEPS=[
   {selector:'#sidenav', title:'Menú principal', text:'Desde aquí te mueves entre Bandeja, Pipeline, Leads y Configuración. Este mismo botón de brújula vive abajo del todo, por si quieres repetir el recorrido después.', pos:'right'},
   {selector:'.page-header', title:'Resumen de tu pipeline', text:'De un vistazo ves cuántos leads tienes en total, cuántos siguen abiertos y cuántos cerraste hoy.', pos:'bottom'},
-  {selector:'#pipeline-search', title:'Buscar un lead', text:'Escribe el nombre o teléfono de un cliente para encontrarlo directo, sin importar en qué etapa del embudo esté.', pos:'bottom'},
+  {selector:'#pipeline-search', title:'Buscar un lead', text:'Escribe el nombre o teléfono de un cliente y el tablero deja a la vista solo el embudo donde está — así no lo pierdes entre las columnas. Presiona Esc o abre el lead para volver a ver todo.', pos:'bottom'},
   {selector:'.filters-bar', title:'Filtros', text:'Filtra por tipo de cliente o por asesor para ver solo lo que te interesa.', pos:'bottom'},
   {selector:'.kanban-col', title:'Cada columna es una etapa', text:'Puedes arrastrar un lead entre columnas para mover su etapa — o crear tus propios embudos con el botón "＋ Nuevo embudo" al final.', pos:'right'},
   {selector:'.lead-card', title:'La tarjeta de un lead', text:'Un clic aquí abre su ficha completa: mover etapa, cambiar asesor y notas rápidas.', pos:'right'},
@@ -459,9 +462,13 @@ function setTipo(t,el){
   renderKanban();
 }
 
+// Normaliza texto para búsqueda: minúsculas y SIN acentos, para que
+// "hector" encuentre "Héctor" y viceversa.
+function _norm(s){ return String(s==null?'':s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
+
 let _pipelineSearch='';
 function setPipelineSearch(val){
-  _pipelineSearch=val.trim().toLowerCase();
+  _pipelineSearch=_norm(val.trim());
   renderKanban();
 }
 function getFilteredLeads(){
@@ -469,7 +476,7 @@ function getFilteredLeads(){
   if(_tipoFilter!=='todos')list=list.filter(l=>l.tipo_cliente===_tipoFilter);
   const asesor=document.getElementById('filter-asesor')?.value;
   if(asesor)list=list.filter(l=>l.asesor?.nombre===asesor);
-  if(_pipelineSearch) list=list.filter(l=>(l.nombre||'').toLowerCase().includes(_pipelineSearch)||(l.telefono||'').includes(_pipelineSearch));
+  if(_pipelineSearch) list=list.filter(l=>_norm(l.nombre).includes(_pipelineSearch)||(l.telefono||'').replace(/\s/g,'').includes(_pipelineSearch.replace(/\s/g,'')));
   return list;
 }
 
@@ -488,9 +495,15 @@ function renderKanban(){
   const list=getFilteredLeads();
   const kanban=document.getElementById('kanban');
   kanban.innerHTML='';
+  const buscando = !!_pipelineSearch;
+  // Cuando buscas, solo mostramos el/los embudo(s) donde SÍ cae el lead que
+  // buscas — así no tienes que barrer todas las columnas para encontrarlo.
+  let columnasMostradas=0;
   _etapas.forEach(etapa=>{
     const leads=list.filter(l=>(l.etapa?.nombre||'Pendiente')===etapa.nombre)
       .sort((a,b)=> new Date(a.ultimo_contacto||0) - new Date(b.ultimo_contacto||0));
+    if(buscando && leads.length===0) return; // ocultar embudos sin coincidencias
+    columnasMostradas++;
     const col=document.createElement('div');
     col.className='kanban-col';
     col.dataset.etapaId=etapa.id;
@@ -508,6 +521,14 @@ function renderKanban(){
     `;
     kanban.appendChild(col);
   });
+  if(buscando){
+    // Al buscar no mostramos el botón de "nuevo embudo"; y si no hubo
+    // coincidencias en ningún embudo, lo avisamos.
+    if(columnasMostradas===0){
+      kanban.innerHTML=`<div style="margin:40px auto;text-align:center;color:var(--text3)">Ningún lead coincide con "<strong>${escHtml(document.getElementById('pipeline-search').value)}</strong>".<br><small>Presiona Esc para volver a ver todos los embudos.</small></div>`;
+    }
+    return;
+  }
   const addCol=document.createElement('div');
   addCol.className='kanban-col-add';
   addCol.innerHTML=`<button class="btn-add-etapa" onclick="promptNewEtapa()">＋ Nuevo embudo</button>`;
@@ -753,6 +774,9 @@ function attachChipDrag(){
 function openLeadModal(id){
   _selectedLead=_leads.find(l=>l.id===id);
   if(!_selectedLead)return;
+  // Al abrir el lead que buscabas, la búsqueda se limpia y el tablero
+  // vuelve a mostrar todos los embudos detrás del modal.
+  if(_pipelineSearch){ _pipelineSearch=''; const si=document.getElementById('pipeline-search'); if(si) si.value=''; renderKanban(); }
   const l=_selectedLead;
   const col=avatarColor(l.nombre||l.telefono||'?');
   document.getElementById('ml-avatar').style.background=col;
