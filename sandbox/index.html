@@ -61,11 +61,23 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 .inbox-search input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:7px 12px;color:var(--text);font-size:13px;outline:none}
 .inbox-search input:focus{border-color:var(--gold)}
 .inbox-search input::placeholder{color:var(--text3)}
-.inbox-filters{padding:8px 12px;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:6px;flex-shrink:0}
-.filter-chip{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;border:1px solid var(--border2);background:transparent;color:var(--text2);transition:all .18s cubic-bezier(.4,0,.2,1)}
+.inbox-filters{padding:8px 12px;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:6px;flex-shrink:0;position:relative}
+.filter-chip{padding:4px 8px 4px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:grab;white-space:nowrap;border:1px solid var(--border2);background:transparent;color:var(--text2);transition:border-color .18s ease,color .18s ease,background .18s ease,transform .14s cubic-bezier(.4,0,.2,1);display:inline-flex;align-items:center;gap:4px}
 .filter-chip:hover{border-color:var(--gold);color:var(--gold)}
-.filter-chip:active{transform:scale(.94)}
+.filter-chip:active{transform:scale(.94);cursor:grabbing}
 .filter-chip.active{background:rgba(200,169,81,.15);border-color:var(--gold);color:var(--gold)}
+.filter-chip.dragging-chip{opacity:.4}
+.filter-chip .fc-edit,.filter-chip .fc-del{opacity:0;font-size:10px;line-height:1;border-radius:50%;width:14px;height:14px;display:flex;align-items:center;justify-content:center;transition:opacity .15s ease,background .15s ease}
+.filter-chip:hover .fc-edit,.filter-chip:hover .fc-del{opacity:.6}
+.filter-chip .fc-edit:hover,.filter-chip .fc-del:hover{opacity:1;background:rgba(255,255,255,.12)}
+.filter-chip-add{width:22px;height:22px;border-radius:50%;border:1px dashed var(--border2);background:transparent;color:var(--text3);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .18s ease,color .18s ease,transform .14s cubic-bezier(.4,0,.2,1)}
+.filter-chip-add:hover{border-color:var(--gold);color:var(--gold)}
+.filter-chip-add:active{transform:scale(.9)}
+.filtro-add-dropdown{display:none;position:absolute;top:100%;left:12px;margin-top:4px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:6px;min-width:200px;box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:25}
+.filtro-add-dropdown.show{display:block}
+.filtro-add-item{padding:7px 10px;border-radius:7px;font-size:12px;cursor:pointer;color:var(--text)}
+.filtro-add-item:hover{background:var(--bg4)}
+.filtro-add-empty{padding:8px 10px;font-size:11px;color:var(--text3);max-width:220px}
 .inbox-list{flex:1;overflow-y:auto}
 .inbox-list::-webkit-scrollbar{width:4px}
 .inbox-list::-webkit-scrollbar-track{background:transparent}
@@ -420,11 +432,9 @@ body.tour-force-react .msg-react-btn,body.tour-force-react .msg-fwd-btn{opacity:
       <input type="text" id="search-input" placeholder="Buscar por nombre o teléfono..." oninput="filterLeads()">
     </div>
     <div class="inbox-filters">
-      <span class="filter-chip active" data-filter="todos" onclick="setFilter('todos',this)">Todos</span>
-      <span class="filter-chip" data-filter="sin_leer" onclick="setFilter('sin_leer',this)">Sin leer</span>
-      <span class="filter-chip" data-filter="mecanico" onclick="setFilter('mecanico',this)">Mecánicos</span>
-      <span class="filter-chip" data-filter="refaccionaria" onclick="setFilter('refaccionaria',this)">Refaccionarias</span>
-      <span class="filter-chip" data-filter="usuario_final" onclick="setFilter('usuario_final',this)">Usuarios</span>
+      <div id="filtros-chips-lista" style="display:contents"></div>
+      <button class="filter-chip-add" onclick="abrirAgregarFiltro(event)" title="Agregar filtro">＋</button>
+      <div class="filtro-add-dropdown" id="filtro-add-dropdown"></div>
     </div>
     <div class="inbox-list" id="inbox-list">
       <div class="loading"><div class="spinner"></div><span>Cargando...</span></div>
@@ -784,6 +794,8 @@ async function init(){
       await loadLeads();
     }
     sortQuickReplies();
+    cargarFiltrosChips();
+    renderFiltrosChips();
 
     // Populate selects
     const nlAsesor = document.getElementById('nl-asesor');
@@ -862,17 +874,108 @@ function filterLeads(){
   renderInbox();
 }
 
-function setFilter(f, el){
-  _filterActive = f;
-  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
-  el.classList.add('active');
+// ── FILTROS DE BANDEJA (editables, reordenables, ampliables) ───
+const LS_KEY_FILTROS='henryleads_filtros_bandeja';
+function filtrosDefault(){
+  return [
+    {id:'todos', tipo:'especial', valor:'todos', label:'Todos'},
+    {id:'sin_leer', tipo:'especial', valor:'sin_leer', label:'Sin leer'},
+    {id:'mecanico', tipo:'tipo_cliente', valor:'mecanico', label:'Mecánicos'},
+    {id:'refaccionaria', tipo:'tipo_cliente', valor:'refaccionaria', label:'Refaccionarias'},
+    {id:'usuario_final', tipo:'tipo_cliente', valor:'usuario_final', label:'Usuarios'},
+  ];
+}
+let _filtrosChips = [];
+function cargarFiltrosChips(){
+  try{
+    const guardado = JSON.parse(localStorage.getItem(LS_KEY_FILTROS)||'null');
+    _filtrosChips = (guardado && guardado.length) ? guardado : filtrosDefault();
+  }catch(e){ _filtrosChips = filtrosDefault(); }
+}
+function guardarFiltrosChips(){ localStorage.setItem(LS_KEY_FILTROS, JSON.stringify(_filtrosChips)); }
+
+function renderFiltrosChips(){
+  const el=document.getElementById('filtros-chips-lista');
+  if(!el) return;
+  el.innerHTML = _filtrosChips.map(f=>{
+    const esQuitable = f.tipo==='etapa';
+    return `<span class="filter-chip${_filterActive===f.id?' active':''}" draggable="true"
+      ondragstart="fcDragStart(event,'${f.id}')" ondragover="fcDragOver(event)" ondrop="fcDrop(event,'${f.id}')" ondragend="fcDragEnd(event)"
+      onclick="setFilterChip('${f.id}')">
+      <span class="fc-label">${escHtml(f.label)}</span>
+      <span class="fc-edit" onclick="event.stopPropagation();renombrarFiltroChip('${f.id}')" title="Renombrar">✎</span>
+      ${esQuitable?`<span class="fc-del" onclick="event.stopPropagation();eliminarFiltroChip('${f.id}')" title="Quitar">×</span>`:''}
+    </span>`;
+  }).join('');
+}
+function setFilterChip(id){
+  _filterActive = id;
+  renderFiltrosChips();
   renderInbox();
 }
+function renombrarFiltroChip(id){
+  const f=_filtrosChips.find(x=>x.id===id);
+  if(!f) return;
+  const nuevo=(prompt('Nuevo nombre para este filtro:', f.label)||'').trim();
+  if(!nuevo) return;
+  f.label=nuevo;
+  guardarFiltrosChips();
+  renderFiltrosChips();
+}
+function eliminarFiltroChip(id){
+  const f=_filtrosChips.find(x=>x.id===id);
+  if(!f) return;
+  if(!confirm(`¿Quitar el filtro "${f.label}"? Lo puedes volver a agregar después con el botón ＋.`)) return;
+  _filtrosChips=_filtrosChips.filter(x=>x.id!==id);
+  if(_filterActive===id) _filterActive='todos';
+  guardarFiltrosChips();
+  renderFiltrosChips();
+  renderInbox();
+}
+function abrirAgregarFiltro(e){
+  e.stopPropagation();
+  const dd=document.getElementById('filtro-add-dropdown');
+  const yaAgregadas=new Set(_filtrosChips.filter(f=>f.tipo==='etapa').map(f=>f.valor));
+  const disponibles=(_etapas||[]).filter(et=>!yaAgregadas.has(et.nombre));
+  dd.innerHTML = disponibles.length
+    ? disponibles.map(et=>`<div class="filtro-add-item" onclick="agregarFiltroEtapa('${et.nombre.replace(/'/g,"\\'")}')">${et.icono||''} ${escHtml(et.nombre)}</div>`).join('')
+    : `<div class="filtro-add-empty">Ya agregaste todas las etapas del embudo. Para más filtros personalizados, primero necesitamos construir las etiquetas.</div>`;
+  dd.classList.toggle('show');
+}
+function agregarFiltroEtapa(nombreEtapa){
+  const id='etapa_'+nombreEtapa.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'_');
+  if(_filtrosChips.some(f=>f.id===id)) return;
+  _filtrosChips.push({id, tipo:'etapa', valor:nombreEtapa, label:nombreEtapa});
+  guardarFiltrosChips();
+  document.getElementById('filtro-add-dropdown').classList.remove('show');
+  renderFiltrosChips();
+}
+document.addEventListener('click', ()=> document.getElementById('filtro-add-dropdown')?.classList.remove('show'));
+
+let _fcDragId=null;
+function fcDragStart(e,id){ _fcDragId=id; e.dataTransfer.effectAllowed='move'; e.currentTarget.classList.add('dragging-chip'); }
+function fcDragOver(e){ e.preventDefault(); }
+function fcDrop(e,targetId){
+  e.preventDefault();
+  if(!_fcDragId || _fcDragId===targetId) return;
+  const fromIdx=_filtrosChips.findIndex(f=>f.id===_fcDragId);
+  const toIdx=_filtrosChips.findIndex(f=>f.id===targetId);
+  if(fromIdx<0||toIdx<0) return;
+  const [moved]=_filtrosChips.splice(fromIdx,1);
+  _filtrosChips.splice(toIdx,0,moved);
+  guardarFiltrosChips();
+  renderFiltrosChips();
+}
+function fcDragEnd(e){ e.currentTarget.classList.remove('dragging-chip'); _fcDragId=null; }
 
 function getFilteredLeads(){
   let list = _leadsAll;
-  if(_filterActive==='sin_leer') list = list.filter(l=>(l.no_leidos||0)>0);
-  else if(_filterActive!=='todos') list = list.filter(l=>l.tipo_cliente===_filterActive);
+  const chip = _filtrosChips.find(f=>f.id===_filterActive);
+  if(chip){
+    if(chip.tipo==='especial' && chip.valor==='sin_leer') list = list.filter(l=>(l.no_leidos||0)>0);
+    else if(chip.tipo==='tipo_cliente') list = list.filter(l=>l.tipo_cliente===chip.valor);
+    else if(chip.tipo==='etapa') list = list.filter(l=>l.etapa?.nombre===chip.valor);
+  }
   if(_search) list = list.filter(l=>(l.nombre||'').toLowerCase().includes(_search)||(l.telefono||'').includes(_search));
   return list;
 }
@@ -1830,7 +1933,7 @@ const LS_KEY_TOUR_VISTO='henryleads_tour_visto';
 const TOUR_STEPS=[
   {selector:'#sidenav', title:'Menú principal', text:'Desde aquí te mueves entre Bandeja, Pipeline, Leads y Configuración. Este mismo botón de brújula vive abajo del todo, por si quieres repetir el recorrido después.', pos:'right'},
   {selector:'.inbox-header', title:'Tu bandeja de conversaciones', text:'Aquí ves todos los chats de WhatsApp. El botón ＋ crea un lead nuevo a mano, sin esperar a que el cliente escriba primero.', pos:'bottom'},
-  {selector:'.inbox-filters', title:'Filtros rápidos', text:'Filtra por tipo de cliente (mecánico, refaccionaria, usuario) o solo los que no has leído.', pos:'bottom'},
+  {selector:'.inbox-filters', title:'Filtros rápidos', text:'Filtra por tipo de cliente o solo los que no has leído. Puedes renombrar cada filtro (✎ al pasar el mouse), arrastrarlos para acomodarlos como quieras, y agregar más con el botón ＋ (por etapa del embudo).', pos:'bottom'},
   {selector:'.conv-item', title:'Cada conversación', text:'Un clic aquí abre el chat completo con ese cliente.', pos:'right'},
   {selector:'#quick-replies-bar', title:'Respuestas rápidas', text:'Un clic y mandas una respuesta ya armada — se personaliza sola con el nombre del cliente. Las más usadas se van al frente solas.', pos:'top'},
   {selector:'#msg-input', title:'Escribe, o usa "/"', text:'Escribe tu mensaje aquí, o teclea "/" para elegir una respuesta rápida sin soltar el teclado — incluso puedes encadenar varias en un mismo mensaje.', pos:'top'},
