@@ -92,6 +92,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 .qr-titulo{font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px}
 .qr-contenido{font-size:12px;color:var(--text2);line-height:1.45}
 .qr-cat{font-size:10px;padding:2px 8px;border-radius:10px;background:var(--bg4);color:var(--text3);margin-top:4px;display:inline-block}
+.qr-cat.qr-privacidad{margin-left:6px}
 .qr-actions{display:flex;flex-direction:column;gap:4px}
 
 /* ASESOR LIST */
@@ -316,6 +317,17 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
               <textarea id="qr-contenido" rows="4" placeholder="Escribe el mensaje..."></textarea>
               <div class="hint">Escribe <b>[NOMBRE]</b> donde quieras que se rellene solo con el nombre del lead al usar la plantilla. Otros [CORCHETES] quedan como recordatorio para que el asesor los reemplace a mano.</div>
             </div>
+            <div class="form-group">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="document.getElementById('qr-compartida').click()">
+                <input type="checkbox" id="qr-compartida" checked onchange="toggleQrCreadorField(this)" style="width:auto;accent-color:var(--gold)">
+                Compartir con todo el equipo
+              </label>
+              <div class="hint">Si la desmarcas, solo la ve quien la creó — útil para atajos personales que todavía no quieres estandarizar para todos.</div>
+            </div>
+            <div class="form-group" id="qr-creador-wrap" style="display:none">
+              <label>¿De quién es esta plantilla privada?</label>
+              <select id="qr-creador"></select>
+            </div>
             <div style="display:flex;gap:8px">
               <button class="btn btn-primary" onclick="saveQR()">Guardar</button>
               <button class="btn btn-ghost" onclick="document.getElementById('form-qr').style.display='none'">Cancelar</button>
@@ -326,19 +338,18 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
         <!-- AUTOMATIZACIONES -->
         <div class="config-section" id="sec-automatizaciones">
           <h2><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg> Automatizaciones</h2>
-          <p class="config-desc">Disparadores automáticos para seguimiento de leads. Requiere n8n como motor de automatización.</p>
+          <p class="config-desc">Disparadores automáticos para seguimiento de leads. Se construyen directo en código, sin depender de n8n ni de otro motor externo (más simple y sin costo extra de suscripción).</p>
 
           <div class="config-card">
-            <h3>Estado del motor</h3>
-            <span class="status-badge status-warn"><span class="dot"></span>n8n pendiente de configurar</span>
+            <h3>Estado</h3>
+            <span class="status-badge status-warn"><span class="dot"></span>En diseño, todavía sin construir</span>
             <p style="font-size:12px;color:var(--text2);margin-top:12px;line-height:1.6">
-              n8n es el motor que dispara los mensajes automáticos. Puedes instalarlo gratis en tu servidor o usar n8n Cloud ($20/mes).
-              Alternativa gratuita: <strong>Make (Integromat)</strong> o <strong>Zapier</strong>.
+              Los ejemplos de abajo son ilustrativos de lo que se puede automatizar — todavía no están conectados a nada real, es la primera automatización pendiente de diseñar y construir.
             </p>
           </div>
 
           <div class="config-card">
-            <h3>Automatizaciones configuradas</h3>
+            <h3>Ejemplos de lo que se podría automatizar</h3>
             <div class="toggle-row">
               <div class="toggle-info">
                 <div class="toggle-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Seguimiento usuario final — 1 hora</div>
@@ -547,11 +558,13 @@ function guardarUbicacionEmpresa(){
 }
 
 let _sandboxAsesoresExtra=[];
+function listaAsesoresSandbox(){
+  return [{nombre:'Luis R.',rol:'admin'},{nombre:'Karla M.',rol:'asesor'},{nombre:'Diego V.',rol:'asesor'},..._sandboxAsesoresExtra];
+}
 async function loadAsesores(){
   const el=document.getElementById('asesor-list');
   if(_demo){
-    const list=[{nombre:'Luis R.',rol:'admin'},{nombre:'Karla M.',rol:'asesor'},{nombre:'Diego V.',rol:'asesor'},..._sandboxAsesoresExtra];
-    renderAsesores(list);return;
+    renderAsesores(listaAsesoresSandbox());return;
   }
   try{const list=await sb(`lp_asesores?empresa_id=eq.${EMPRESA_ID}&activo=eq.true&order=nombre.asc`);renderAsesores(list||[]);}
   catch(e){el.innerHTML='<div style="color:var(--red);font-size:12px">Error al cargar</div>';}
@@ -612,11 +625,11 @@ function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
 let _sandboxQR = null;
 function demoQRBase(){
   return [
-    {id:'qr1',titulo:'Bienvenida',contenido:'¡Hola! Gracias por contactar a Cremalleras LR 🚗',categoria:'bienvenida',oculta:false},
-    {id:'qr2',titulo:'Datos vehículo',contenido:'Para cotizarte necesito: marca, modelo y año ¿me los compartes?',categoria:'bienvenida',oculta:false},
-    {id:'qr3',titulo:'Bienvenida Mecánico',contenido:'¡Hola colega! Como mecánico aliado tienes 5% de descuento 💪',categoria:'mecanico',oculta:false},
-    {id:'qr4',titulo:'Cotización lista',contenido:'Te comparto la cotización 👆 ¿Tienes alguna pregunta?',categoria:'cotizacion',oculta:false},
-    {id:'qr5',titulo:'Seguimiento 1h',contenido:'Hola, ¿pudiste ver la cotización? Estamos para cualquier duda 😊',categoria:'seguimiento',oculta:false},
+    {id:'qr1',titulo:'Bienvenida',contenido:'¡Hola! Gracias por contactar a Cremalleras LR 🚗',categoria:'bienvenida',oculta:false,compartida:true,creadaPor:null},
+    {id:'qr2',titulo:'Datos vehículo',contenido:'Para cotizarte necesito: marca, modelo y año ¿me los compartes?',categoria:'bienvenida',oculta:false,compartida:true,creadaPor:null},
+    {id:'qr3',titulo:'Bienvenida Mecánico',contenido:'¡Hola colega! Como mecánico aliado tienes 5% de descuento 💪',categoria:'mecanico',oculta:false,compartida:true,creadaPor:null},
+    {id:'qr4',titulo:'Cotización lista',contenido:'Te comparto la cotización 👆 ¿Tienes alguna pregunta?',categoria:'cotizacion',oculta:false,compartida:true,creadaPor:null},
+    {id:'qr5',titulo:'Seguimiento 1h',contenido:'Hola, ¿pudiste ver la cotización? Estamos para cualquier duda 😊',categoria:'seguimiento',oculta:false,compartida:true,creadaPor:null},
   ];
 }
 
@@ -637,6 +650,7 @@ function renderQR(list){
         <div class="qr-titulo">${escHtml(q.titulo)}${q.oculta?' <span class="qr-cat">oculta del chat</span>':''}</div>
         <div class="qr-contenido">${escHtml(q.contenido)}</div>
         <span class="qr-cat">${escHtml(q.categoria||'general')}</span>
+        <span class="qr-cat qr-privacidad">${q.compartida===false ? `🔒 Privada de ${escHtml(q.creadaPor||'?')}` : '👥 Compartida con el equipo'}</span>
       </div>
       <div class="qr-actions">
         <button class="btn btn-ghost btn-sm icon-btn" onclick="toggleHideQR('${q.id}')" title="${q.oculta?'Mostrar de nuevo en el chat':'Ocultar del chat (no se elimina)'}">${q.oculta
@@ -685,12 +699,25 @@ function handleCategoriaChange(sel){
   renderCategoriaOptions(value);
 }
 
+function renderQrCreadorOptions(selected){
+  const sel=document.getElementById('qr-creador');
+  const asesores=listaAsesoresSandbox();
+  sel.innerHTML=asesores.map(a=>`<option value="${escHtml(a.nombre)}">${escHtml(a.nombre)}</option>`).join('');
+  sel.value = (selected && asesores.some(a=>a.nombre===selected)) ? selected : (asesores[0]?.nombre||'');
+}
+function toggleQrCreadorField(chk){
+  document.getElementById('qr-creador-wrap').style.display = chk.checked ? 'none' : 'block';
+  if(!chk.checked) renderQrCreadorOptions();
+}
+
 let _qrEditingId=null;
 function showAddQR(){
   _qrEditingId=null;
   document.getElementById('qr-titulo').value='';
   document.getElementById('qr-contenido').value='';
   renderCategoriaOptions('bienvenida');
+  document.getElementById('qr-compartida').checked=true;
+  document.getElementById('qr-creador-wrap').style.display='none';
   document.querySelector('#form-qr h3').textContent='Nueva plantilla';
   document.getElementById('form-qr').style.display='block';
   document.getElementById('form-qr').scrollIntoView({behavior:'smooth',block:'center'});
@@ -703,6 +730,10 @@ function editQR(id){
   document.getElementById('qr-titulo').value=q.titulo;
   document.getElementById('qr-contenido').value=q.contenido;
   renderCategoriaOptions(q.categoria||'bienvenida');
+  const esCompartida = q.compartida!==false;
+  document.getElementById('qr-compartida').checked=esCompartida;
+  document.getElementById('qr-creador-wrap').style.display = esCompartida ? 'none' : 'block';
+  if(!esCompartida) renderQrCreadorOptions(q.creadaPor);
   document.querySelector('#form-qr h3').textContent='Editar plantilla';
   document.getElementById('form-qr').style.display='block';
   document.getElementById('form-qr').scrollIntoView({behavior:'smooth',block:'center'});
@@ -713,13 +744,15 @@ async function saveQR(){
   const contenido=document.getElementById('qr-contenido').value.trim();
   if(!titulo||!contenido)return;
   const categoria=document.getElementById('qr-cat').value;
+  const compartida=document.getElementById('qr-compartida').checked;
+  const creadaPor=compartida ? null : document.getElementById('qr-creador').value;
   if(_demo){
     if(_qrEditingId){
       const q=_sandboxQR.find(x=>x.id===_qrEditingId);
-      if(q){ q.titulo=titulo; q.contenido=contenido; q.categoria=categoria; }
+      if(q){ q.titulo=titulo; q.contenido=contenido; q.categoria=categoria; q.compartida=compartida; q.creadaPor=creadaPor; }
       showToast('✅ Plantilla actualizada');
     } else {
-      _sandboxQR.push({id:'qr'+Date.now(),titulo,contenido,categoria,oculta:false});
+      _sandboxQR.push({id:'qr'+Date.now(),titulo,contenido,categoria,oculta:false,compartida,creadaPor});
       showToast('✅ Plantilla guardada');
     }
     document.getElementById('form-qr').style.display='none';

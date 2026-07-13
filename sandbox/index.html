@@ -570,6 +570,13 @@ body.tour-force-react .msg-react-btn,body.tour-force-react .msg-fwd-btn{opacity:
       <textarea id="qr-modal-contenido" rows="4" placeholder="Escribe el mensaje completo..."></textarea>
       <div class="hint">Usa [NOMBRE] o (nombre) para el nombre del lead, y [UBI] o (ubi) para la ubicación del negocio — se rellenan solos.</div>
     </div>
+    <div class="form-group">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="document.getElementById('qr-modal-compartida').click()">
+        <input type="checkbox" id="qr-modal-compartida" style="width:auto;accent-color:var(--gold)">
+        Compartir con todo el equipo
+      </label>
+      <div class="hint">Si la dejas sin marcar, solo tú la ves — útil para tus atajos personales.</div>
+    </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('modal-qr')">Cancelar</button>
       <button class="btn btn-primary" onclick="guardarQuickReplyDesdeModal()">Guardar</button>
@@ -741,12 +748,15 @@ function demoMensajes(leadId){
 
 function demoQuickReplies(){
   return [
-    {id:'qr1',titulo:'Bienvenida',contenido:'¡Hola [NOMBRE]! Gracias por contactar a Cremalleras LR 🚗 ¿En qué te puedo ayudar?',usos:0,oculta:false},
-    {id:'qr2',titulo:'Datos vehículo',contenido:'Para cotizarte necesito: marca, modelo, año y síntoma de la dirección ¿Me los compartes?',usos:0,oculta:false},
-    {id:'qr3',titulo:'Cotización lista',contenido:'Te comparto la cotización 👆 [NOMBRE], ¿tienes alguna pregunta?',usos:0,oculta:false},
-    {id:'qr4',titulo:'Seguimiento',contenido:'Buen día [NOMBRE], con el gusto de saludarlo. ¿Tuvo oportunidad de revisar la propuesta que le compartí?',usos:0,oculta:false},
-    {id:'qr5',titulo:'Mecánico Alianza',contenido:'Como mecánico aliado tienes 5% de descuento en toda la línea 💪 ¿Qué pieza necesitas?',usos:0,oculta:false},
+    {id:'qr1',titulo:'Bienvenida',contenido:'¡Hola [NOMBRE]! Gracias por contactar a Cremalleras LR 🚗 ¿En qué te puedo ayudar?',usos:0,oculta:false,compartida:true,creadaPor:null},
+    {id:'qr2',titulo:'Datos vehículo',contenido:'Para cotizarte necesito: marca, modelo, año y síntoma de la dirección ¿Me los compartes?',usos:0,oculta:false,compartida:true,creadaPor:null},
+    {id:'qr3',titulo:'Cotización lista',contenido:'Te comparto la cotización 👆 [NOMBRE], ¿tienes alguna pregunta?',usos:0,oculta:false,compartida:true,creadaPor:null},
+    {id:'qr4',titulo:'Seguimiento',contenido:'Buen día [NOMBRE], con el gusto de saludarlo. ¿Tuvo oportunidad de revisar la propuesta que le compartí?',usos:0,oculta:false,compartida:true,creadaPor:null},
+    {id:'qr5',titulo:'Mecánico Alianza',contenido:'Como mecánico aliado tienes 5% de descuento en toda la línea 💪 ¿Qué pieza necesitas?',usos:0,oculta:false,compartida:true,creadaPor:null},
   ];
+}
+function quickRepliesVisibles(){
+  return _quickReplies.filter(q=>!q.oculta && (q.compartida!==false || q.creadaPor===(_sessionAsesor?.nombre||'Luis R.')));
 }
 
 function demoEtapas(){
@@ -1605,8 +1615,8 @@ function personalizarTexto(texto){
 
 function renderQuickReplies(){
   const el=document.getElementById('quick-replies-bar');
-  el.innerHTML=_quickReplies.filter(qr=>!qr.oculta).map(qr=>`
-    <div class="qr-btn" onclick="useQuickReply('${qr.id}')">${escHtml(qr.titulo)}</div>
+  el.innerHTML=quickRepliesVisibles().map(qr=>`
+    <div class="qr-btn" onclick="useQuickReply('${qr.id}')">${escHtml(qr.titulo)}${qr.compartida===false?' <span class="qr-btn-privada" title="Privada, solo tú la ves">🔒</span>':''}</div>
   `).join('');
 }
 
@@ -1657,12 +1667,12 @@ function handleMsgInput(event){
 function openQRDropdown(filterText){
   const el=document.getElementById('qr-dropdown');
   const term=filterText.trim().toLowerCase();
-  const items=_quickReplies.filter(q=>!q.oculta && (!term || q.titulo.toLowerCase().includes(term)));
+  const items=quickRepliesVisibles().filter(q=>!term || q.titulo.toLowerCase().includes(term));
   const filas = items.length
     ? items.map(q=>`
         <div class="qr-drop-item" onclick="useQuickReply('${q.id}')">
           <div class="qr-drop-text">
-            <div class="qr-drop-title">${escHtml(q.titulo)}</div>
+            <div class="qr-drop-title">${escHtml(q.titulo)}${q.compartida===false?' <span class="qr-btn-privada" title="Privada, solo tú la ves">🔒</span>':''}</div>
             <div class="qr-drop-preview">${escHtml(personalizarTexto(q.contenido))}</div>
           </div>
           <button class="qr-drop-x" onclick="event.stopPropagation();hideQuickReply('${q.id}')" title="Ocultar de sugerencias (no se elimina)"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
@@ -1690,6 +1700,7 @@ function showAddQuickReplyModal(){
   closeQRDropdown();
   document.getElementById('qr-modal-titulo').value='';
   document.getElementById('qr-modal-contenido').value='';
+  document.getElementById('qr-modal-compartida').checked=false;
   document.getElementById('modal-qr').style.display='flex';
   document.getElementById('qr-modal-titulo').focus();
 }
@@ -1699,12 +1710,13 @@ function guardarQuickReplyDesdeModal(){
   const contenido=document.getElementById('qr-modal-contenido').value.trim();
   if(!titulo){ showToast('❌ Falta el título'); return; }
   if(!contenido){ showToast('❌ Falta el contenido del mensaje'); return; }
-  const nueva={id:'qr'+Date.now(), titulo, contenido, usos:0, oculta:false};
+  const compartida=document.getElementById('qr-modal-compartida').checked;
+  const nueva={id:'qr'+Date.now(), titulo, contenido, usos:0, oculta:false, compartida, creadaPor: compartida ? null : (_sessionAsesor?.nombre||'Luis R.')};
   _quickReplies.push(nueva);
   sortQuickReplies();
   renderQuickReplies();
   closeModal('modal-qr');
-  showToast('✅ Respuesta rápida agregada');
+  showToast('✅ Respuesta rápida agregada'+(compartida?'':' (privada, solo tú la ves)'));
   useQuickReply(nueva.id); // de una vez la inserta en lo que estabas escribiendo
 }
 
@@ -1937,8 +1949,9 @@ const TOUR_STEPS=[
   {selector:'.conv-item', title:'Cada conversación', text:'Un clic aquí abre el chat completo con ese cliente.', pos:'right'},
   {selector:'#quick-replies-bar', title:'Respuestas rápidas', text:'Un clic y mandas una respuesta ya armada — se personaliza sola con el nombre del cliente. Las más usadas se van al frente solas.', pos:'top'},
   {selector:'#msg-input', title:'Escribe, o usa "/"', text:'Escribe tu mensaje aquí, o teclea "/" para elegir una respuesta rápida sin soltar el teclado — incluso puedes encadenar varias en un mismo mensaje.', pos:'top'},
-  {selector:'.btn-attach', title:'Adjuntar', text:'Manda imágenes, documentos o notas de voz desde aquí.', pos:'top'},
+  {selector:'.btn-attach', title:'Adjuntar', text:'Manda imágenes, documentos, o agrega una nota interna desde aquí. Las notas de voz van en un botón aparte, el del micrófono — no se envían desde aquí.', pos:'top'},
   {selector:'[title="Emojis"]', title:'Emojis', text:'Agrega emojis a tu mensaje sin salir del teclado — clic aquí y elige el que quieras.', pos:'top'},
+  {selector:'.btn-mic', title:'Nota de voz', text:'Este botón, aparte de Adjuntar, es para grabar y mandar una nota de voz.', pos:'top'},
   {selector:'.msg-react-btn', title:'Reaccionar a un mensaje', text:'Pasa el mouse sobre cualquier mensaje y aparece este botón — reacciona como en WhatsApp (👍❤️😂😮😢🙏). Toca la reacción de nuevo para quitarla.', pos:'top'},
   {selector:'.msg-fwd-btn', title:'Reenviar un mensaje', text:'Manda cualquier mensaje a uno o varios chats a la vez. Siempre se marca como "Reenviado" con el nombre de quién lo escribió originalmente, aunque pase por varios chats.', pos:'top'},
   {selector:'[title="Perfil"]', title:'Ficha del cliente', text:'Aquí ves y editas los datos del lead: nombre, vehículo, etapa y asesor asignado.', pos:'left'},
