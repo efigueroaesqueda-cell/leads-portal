@@ -283,6 +283,10 @@ function initials(n){if(!n)return '?';const p=n.trim().split(' ');return(p[0][0]
 function relTime(ts){const d=(Date.now()-new Date(ts))/1000;if(d<60)return'ahora';if(d<3600)return`${Math.floor(d/60)}m`;if(d<86400)return`${Math.floor(d/3600)}h`;return`${Math.floor(d/86400)}d`;}
 
 function _sr(s,a,b){let x=s*1664525+1013904223;x=x&0xffffffff;return a+Math.abs(x)%(b-a+1);}
+// Escape para evitar que nombres/vehículos de clientes (que en producción
+// llegan de WhatsApp real) inyecten HTML en la vista.
+function escHtml(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // Etapas del embudo: viven en localStorage, compartidas con
 // Configuración y Bandeja -- renombrar/agregar/borrar/reordenar aquí
@@ -348,7 +352,7 @@ async function init(){
     }
   }
   const asesorSel=document.getElementById('filter-asesor');
-  asesorSel.innerHTML='<option value="">Todos los asesores</option>'+_asesores.map(a=>`<option value="${a.nombre}">${a.nombre}</option>`).join('');
+  asesorSel.innerHTML='<option value="">Todos los asesores</option>'+_asesores.map(a=>`<option value="${escAttr(a.nombre)}">${escHtml(a.nombre)}</option>`).join('');
   renderStats();
   renderKanban();
   if(_demo)document.getElementById('demo-banner').style.display='block';
@@ -489,7 +493,7 @@ function renderKanban(){
     col.innerHTML=`
       <div class="col-header">
         <span class="col-icono">${etapa.icono||'📋'}</span>
-        <span class="col-nombre">${etapa.nombre}</span>
+        <span class="col-nombre">${escHtml(etapa.nombre)}</span>
         <span class="col-count" style="background:${etapa.color}22;color:${etapa.color}">${leads.length}</span>
         <span class="col-action" onclick="renameEtapa('${etapa.id}')" title="Renombrar"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></span>
         <span class="col-action" onclick="deleteEtapa('${etapa.id}')" title="Borrar embudo"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></span>
@@ -512,20 +516,20 @@ function renderKanban(){
 function cardHTML(l){
   const col=avatarColor(l.nombre||l.telefono||'?');
   const ini=initials(l.nombre||l.telefono);
-  const veh=l.vehiculo_info?`<div style="font-size:10px;color:var(--text3);margin-top:2px;display:flex;align-items:center;gap:4px"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14M5 17a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm14 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM5 17l1.5-6.5A2 2 0 0 1 8.4 9h7.2a2 2 0 0 1 1.9 1.5L19 17M5 17h14M9 9V6h6v3"/></svg> ${l.vehiculo_info}</div>`:'';
+  const veh=l.vehiculo_info?`<div style="font-size:10px;color:var(--text3);margin-top:2px;display:flex;align-items:center;gap:4px"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14M5 17a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm14 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM5 17l1.5-6.5A2 2 0 0 1 8.4 9h7.2a2 2 0 0 1 1.9 1.5L19 17M5 17h14M9 9V6h6v3"/></svg> ${escHtml(l.vehiculo_info)}</div>`:'';
   return`<div class="lead-card" data-lead-id="${l.id}" onclick="openLeadModal('${l.id}')">
     ${(l.no_leidos||0)>0?`<div class="card-unread">${l.no_leidos}</div>`:''}
     <div class="card-avatar" style="background:${col}">${ini}</div>
     <div style="overflow:hidden">
-      <div class="card-name">${l.nombre||l.telefono}</div>
-      <div class="card-phone">${l.telefono||''}</div>
+      <div class="card-name">${escHtml(l.nombre||l.telefono)}</div>
+      <div class="card-phone">${escHtml(l.telefono||'')}</div>
     </div>
     <div class="card-clear"></div>
     ${veh}
     <div class="card-footer" style="margin-top:6px">
       <span class="tipo-icon ${tipoClass(l.tipo_cliente)}">${tipoLabel(l.tipo_cliente)}</span>
       <span class="card-time">${l.ultimo_contacto?relTime(l.ultimo_contacto):''}</span>
-      ${l.asesor?.nombre?`<span class="card-asesor">${l.asesor.nombre}</span>`:''}
+      ${l.asesor?.nombre?`<span class="card-asesor">${escHtml(l.asesor.nombre)}</span>`:''}
     </div>
   </div>`;
 }
@@ -752,12 +756,12 @@ function openLeadModal(id){
   document.getElementById('ml-name').textContent=l.nombre||'Sin nombre';
   document.getElementById('ml-phone').textContent=l.telefono||'';
   document.getElementById('ml-badges').innerHTML=`
-    <span class="badge" style="border-color:${l.etapa?.color||'#888'};color:${l.etapa?.color||'#888'}">${l.etapa?.icono||''} ${l.etapa?.nombre||'—'}</span>
+    <span class="badge" style="border-color:${l.etapa?.color||'#888'};color:${l.etapa?.color||'#888'}">${l.etapa?.icono||''} ${escHtml(l.etapa?.nombre||'—')}</span>
     <span class="badge" style="border-color:#555;color:#aaa">${tipoLabel(l.tipo_cliente)}</span>
-    ${l.asesor?.nombre?`<span class="badge" style="border-color:#555;color:#aaa">${ICO_PERSON} ${l.asesor.nombre}</span>`:''}
+    ${l.asesor?.nombre?`<span class="badge" style="border-color:#555;color:#aaa">${ICO_PERSON} ${escHtml(l.asesor.nombre)}</span>`:''}
   `;
-  document.getElementById('ml-etapa').innerHTML=_etapas.map(e=>`<option value="${e.id}" ${e.nombre===l.etapa?.nombre?'selected':''}>${e.icono} ${e.nombre}</option>`).join('');
-  document.getElementById('ml-asesor').innerHTML='<option value="">Sin asignar</option>'+_asesores.map(a=>`<option value="${a.id}" ${l.asesor?.nombre===a.nombre?'selected':''}>${a.nombre}</option>`).join('');
+  document.getElementById('ml-etapa').innerHTML=_etapas.map(e=>`<option value="${escAttr(e.id)}" ${e.nombre===l.etapa?.nombre?'selected':''}>${e.icono} ${escHtml(e.nombre)}</option>`).join('');
+  document.getElementById('ml-asesor').innerHTML='<option value="">Sin asignar</option>'+_asesores.map(a=>`<option value="${escAttr(a.id)}" ${l.asesor?.nombre===a.nombre?'selected':''}>${escHtml(a.nombre)}</option>`).join('');
   document.getElementById('ml-notas').value=l.notas||'';
   document.getElementById('ml-chat-link').href=`index.html?lead=${l.id}${_demo?'&demo=1':''}`;
   document.getElementById('modal-lead').style.display='flex';
@@ -775,9 +779,9 @@ async function moveLeadStage(){
     _selectedLead.asesor=asesor?{nombre:asesor.nombre}:null;
     _selectedLead.notas=notas;
     document.getElementById('ml-badges').innerHTML=`
-      <span class="badge" style="border-color:${_selectedLead.etapa?.color||'#888'};color:${_selectedLead.etapa?.color||'#888'}">${_selectedLead.etapa?.icono||''} ${_selectedLead.etapa?.nombre||'—'}</span>
+      <span class="badge" style="border-color:${_selectedLead.etapa?.color||'#888'};color:${_selectedLead.etapa?.color||'#888'}">${_selectedLead.etapa?.icono||''} ${escHtml(_selectedLead.etapa?.nombre||'—')}</span>
       <span class="badge" style="border-color:#555;color:#aaa">${tipoLabel(_selectedLead.tipo_cliente)}</span>
-      ${_selectedLead.asesor?.nombre?`<span class="badge" style="border-color:#555;color:#aaa">${ICO_PERSON} ${_selectedLead.asesor.nombre}</span>`:''}
+      ${_selectedLead.asesor?.nombre?`<span class="badge" style="border-color:#555;color:#aaa">${ICO_PERSON} ${escHtml(_selectedLead.asesor.nombre)}</span>`:''}
     `;
     renderKanban();
     return;

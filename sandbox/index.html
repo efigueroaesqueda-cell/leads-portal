@@ -1334,14 +1334,14 @@ function renderInbox(){
       </div>
       <div class="conv-body">
         <div class="conv-top">
-          <span class="conv-name">${l.nombre||l.telefono}</span>
+          <span class="conv-name">${escHtml(l.nombre||l.telefono)}</span>
           <span class="conv-time">${l.ultimo_contacto?relativeTime(l.ultimo_contacto):''}</span>
         </div>
-        <div class="conv-preview">${preview}</div>
+        <div class="conv-preview">${escHtml(preview)}</div>
         <div class="conv-tags" style="align-items:center;gap:5px">
-          <span class="stage-pill" style="background:${etapa.color}22;color:${etapa.color}">${etapa.nombre}</span>
+          <span class="stage-pill" style="background:${etapa.color}22;color:${etapa.color}">${escHtml(etapa.nombre)}</span>
           <span class="tipo-icon ${tipoClass(l.tipo_cliente)}">${tipoIconSvg(l.tipo_cliente)} ${tipoLabel(l.tipo_cliente)}</span>
-          ${etiquetas.map(e=>`<span class="tag-dot" style="background:${e.etiqueta.color}" title="${e.etiqueta.nombre}"></span>`).join('')}
+          ${etiquetas.map(e=>`<span class="tag-dot" style="background:${e.etiqueta.color}" title="${escAttr(e.etiqueta.nombre)}"></span>`).join('')}
           ${(l.no_leidos||0)>0?`<span class="unread-badge" style="margin-left:auto">${l.no_leidos}</span>`:''}
         </div>
       </div>
@@ -1677,7 +1677,10 @@ function apFormatTime(sec){
   return m+':'+String(s).padStart(2,'0');
 }
 
-function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
+function escHtml(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
+// Para valores dentro de atributos HTML (value="...", title="..."): escapa
+// comillas y NO convierte saltos de línea a <br>.
+function escAttr(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // Resalta links dentro de un mensaje ya escapado con escHtml (por eso solo
 // busca http/https — nunca corre sobre texto sin escapar, para no abrir
@@ -2107,12 +2110,12 @@ function renderProfile(){
   const etiquetas=(l.etiquetas_lead||[]);
   document.getElementById('profile-body').innerHTML=`
     <div class="profile-avatar" style="background:${col}">${initials(l.nombre||l.telefono)}</div>
-    <div class="profile-name">${l.nombre||'Sin nombre'}</div>
-    <div class="profile-phone">${l.telefono||'—'}</div>
+    <div class="profile-name">${escHtml(l.nombre||'Sin nombre')}</div>
+    <div class="profile-phone">${escHtml(l.telefono||'—')}</div>
 
     <div class="profile-section">
       <h4>Información</h4>
-      <div class="profile-field"><label>Nombre</label><input type="text" id="pf-nombre" value="${l.nombre||''}" oninput="this.value=this.value.toUpperCase()" onchange="updateProfileField('nombre',this.value)"></div>
+      <div class="profile-field"><label>Nombre</label><input type="text" id="pf-nombre" value="${escAttr(l.nombre||'')}" oninput="this.value=this.value.toUpperCase()" onchange="updateProfileField('nombre',this.value)"></div>
       <div class="profile-field">
         <label>Tipo de cliente</label>
         <select id="pf-tipo" onchange="updateProfileField('tipo_cliente',this.value)">
@@ -2125,11 +2128,11 @@ function renderProfile(){
         <label>Asesor asignado</label>
         <select id="pf-asesor" onchange="updateProfileField('asesor_id',this.value)">
           <option value="">Sin asignar</option>
-          ${_asesores.map(a=>`<option value="${a.id}" ${l.asesor?.nombre===a.nombre?'selected':''}>${a.nombre}</option>`).join('')}
+          ${_asesores.map(a=>`<option value="${escAttr(a.id)}" ${l.asesor?.nombre===a.nombre?'selected':''}>${escHtml(a.nombre)}</option>`).join('')}
         </select>
       </div>
-      <div class="profile-field"><label>Vehículo</label><input type="text" id="pf-vehiculo" value="${l.vehiculo_info||''}" placeholder="Ej: Toyota Corolla 2019" oninput="this.value=this.value.toUpperCase()" onchange="updateProfileField('vehiculo_info',this.value)"></div>
-      <div class="profile-field"><label>Notas</label><textarea id="pf-notas" oninput="this.value=this.value.toUpperCase()" onchange="updateProfileField('notas',this.value)">${l.notas||''}</textarea></div>
+      <div class="profile-field"><label>Vehículo</label><input type="text" id="pf-vehiculo" value="${escAttr(l.vehiculo_info||'')}" placeholder="Ej: Toyota Corolla 2019" oninput="this.value=this.value.toUpperCase()" onchange="updateProfileField('vehiculo_info',this.value)"></div>
+      <div class="profile-field"><label>Notas</label><textarea id="pf-notas" oninput="this.value=this.value.toUpperCase()" onchange="updateProfileField('notas',this.value)">${escHtml(l.notas||'')}</textarea></div>
     </div>
 
     <div class="profile-section">

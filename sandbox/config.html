@@ -651,8 +651,8 @@ function renderAsesores(list){
     const col=avatarColor(a.nombre);
     return`<div class="asesor-item">
       <div class="asesor-avatar" style="background:${col}">${initials(a.nombre)}</div>
-      <div class="asesor-info"><div class="asesor-nombre">${a.nombre}</div><div class="asesor-rol">${a.telefono||'Sin teléfono'}</div></div>
-      <span class="rol-badge ${a.rol==='admin'?'rol-admin':'rol-asesor'}">${a.rol}</span>
+      <div class="asesor-info"><div class="asesor-nombre">${escHtml(a.nombre)}</div><div class="asesor-rol">${escHtml(a.telefono||'Sin teléfono')}</div></div>
+      <span class="rol-badge ${a.rol==='admin'?'rol-admin':'rol-asesor'}">${escHtml(a.rol)}</span>
     </div>`;
   }).join('');
 }
