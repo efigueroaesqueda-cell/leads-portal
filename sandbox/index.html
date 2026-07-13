@@ -393,9 +393,15 @@ body.tour-force-react .msg-react-btn,body.tour-force-react .msg-fwd-btn{opacity:
 }
 @media(max-width:640px){
   #inbox-panel{display:none}
-  #inbox-panel.show-mobile{display:flex;position:fixed;inset:0;z-index:20;width:100%}
+  /* En móvil la bandeja es una capa que arranca a la derecha del menú
+     lateral (para que el menú siga accesible) y cubre el resto. */
+  #inbox-panel.show-mobile{display:flex;position:fixed;top:0;bottom:0;left:56px;right:0;z-index:20;width:auto;min-width:0}
   :root{--inbox-w:100%}
+  .btn-back-mobile{display:flex !important}
 }
+.btn-back-mobile{display:none;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:transparent;border:none;color:var(--text2);cursor:pointer;flex-shrink:0;margin-right:2px}
+.btn-back-mobile:hover{background:var(--bg3);color:var(--text)}
+.btn-back-mobile:active{transform:scale(.9)}
 </style>
 </head>
 <body>
@@ -480,6 +486,7 @@ body.tour-force-react .msg-react-btn,body.tour-force-react .msg-fwd-btn{opacity:
     <div id="chat-view" style="display:none;flex:1;flex-direction:column;height:100%;min-height:0">
       <!-- Chat Header -->
       <div id="chat-header">
+        <button class="btn-back-mobile" onclick="volverABandeja()" title="Volver a la bandeja"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
         <div class="conv-avatar-wrap" id="ch-avatar-wrap">
           <div class="conv-avatar" id="ch-avatar" style="width:36px;height:36px;font-size:14px;background:#888"></div>
           <span class="nota-indicador" id="ch-nota-indicador" style="display:none" title="Este lead tiene notas internas"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 0 0-5 5c0 3 2 4.5 2 7h6c0-2.5 2-4 2-7a5 5 0 0 0-5-5z"/><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="21" x2="14" y2="21"/></svg></span>
@@ -1121,7 +1128,15 @@ async function init(){
     document.getElementById('btn-tour').classList.add('pulse-attention');
     setTimeout(startTour, 900);
   }
+
+  // En móvil se arranca mostrando la lista de conversaciones (que es una
+  // capa encima); al abrir un chat se oculta, y el botón de "atrás" del
+  // header la vuelve a mostrar. En escritorio esta clase no hace nada.
+  if(esMovil() && !_activeLead) document.getElementById('inbox-panel').classList.add('show-mobile');
 }
+
+function esMovil(){ return window.matchMedia('(max-width:640px)').matches; }
+function volverABandeja(){ document.getElementById('inbox-panel').classList.add('show-mobile'); }
 
 async function loadLeads(){
   const list = await sb(`lp_leads?empresa_id=eq.${EMPRESA_ID}&order=updated_at.desc&select=*,etapa:lp_etapas(nombre,color),asesor:lp_asesores(nombre),etiquetas_lead:lp_lead_etiquetas(etiqueta:lp_etiquetas(nombre,color))`);
@@ -1358,6 +1373,8 @@ async function openLead(id){
   renderPendingAttach();
   if(_mediaRecorder && _mediaRecorder.state==='recording') _mediaRecorder.stop();
   cerrarBusquedaChat();
+  // En móvil, abrir un chat oculta la capa de la bandeja para ver la conversación
+  document.getElementById('inbox-panel').classList.remove('show-mobile');
 
   // Update active state in inbox
   document.querySelectorAll('.conv-item').forEach(el=>{
