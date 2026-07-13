@@ -112,12 +112,27 @@ html,body{height:100%;overflow:hidden;overscroll-behavior-x:none;font-family:'Se
 
 /* CHAT HEADER */
 #chat-header{height:var(--header-h);border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;background:var(--bg2)}
-.chat-lead-info{flex:1;min-width:0}
+.chat-lead-info{flex:1;min-width:0;cursor:pointer;border-radius:8px;padding:4px 8px;margin:-4px -8px;transition:background .16s ease}
+.chat-lead-info:hover{background:var(--bg3)}
+.chat-lead-info:active{transform:scale(.99)}
 .chat-lead-name{font-size:15px;font-weight:700;color:var(--text)}
 .chat-lead-meta{font-size:11px;color:var(--text2)}
 .chat-actions{display:flex;gap:8px;align-items:center}
 .stage-select{background:var(--bg4);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:12px;padding:5px 10px;cursor:pointer;outline:none}
 .stage-select:focus{border-color:var(--gold)}
+
+/* BÚSQUEDA DENTRO DEL CHAT */
+#chat-search-bar{display:none;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+#chat-search-bar svg{color:var(--text3);flex-shrink:0}
+#chat-search-input{flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 10px;color:var(--text);font-size:13px;outline:none;transition:border-color .18s ease}
+#chat-search-input:focus{border-color:var(--gold)}
+#chat-search-input::placeholder{color:var(--text3)}
+#chat-search-count{font-size:11px;color:var(--text3);white-space:nowrap;min-width:50px;text-align:center}
+.chat-search-nav-btn{width:26px;height:26px;border-radius:6px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;transition:background .16s ease,transform .14s cubic-bezier(.4,0,.2,1)}
+.chat-search-nav-btn:hover{background:var(--bg4);color:var(--text)}
+.chat-search-nav-btn:active{transform:scale(.9)}
+.msg-bubble.msg-search-match{box-shadow:0 0 0 2px rgba(200,169,81,.4)}
+.msg-bubble.msg-search-active{box-shadow:0 0 0 2px var(--gold)}
 
 /* CHAT MESSAGES */
 #chat-messages{flex:1;overflow-y:auto;overflow-x:hidden;padding:16px;display:flex;flex-direction:column;gap:8px}
@@ -210,6 +225,13 @@ body.tour-force-react .msg-react-btn,body.tour-force-react .msg-fwd-btn{opacity:
 .pf-nota-item:active{transform:scale(.98)}
 .pf-nota-texto{font-size:12px;color:var(--text);line-height:1.4}
 .pf-nota-meta{font-size:10px;color:var(--text3);margin-top:3px}
+.pf-compartido-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px}
+.pf-compartido-thumb{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;cursor:pointer;transition:transform .14s cubic-bezier(.4,0,.2,1)}
+.pf-compartido-thumb:hover{transform:scale(1.05)}
+.pf-compartido-docs{display:flex;flex-direction:column;gap:6px}
+.pf-compartido-doc{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;background:var(--bg3);color:var(--text);text-decoration:none;font-size:12px;transition:background .16s ease}
+.pf-compartido-doc:hover{background:var(--bg4)}
+.pf-compartido-doc span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fwd-lista{max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;margin:4px 0 14px}
 .fwd-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;border:1px solid transparent;transition:background .16s ease,border-color .16s ease,transform .12s cubic-bezier(.4,0,.2,1)}
 .fwd-item:hover{background:var(--bg3)}
@@ -431,7 +453,7 @@ body.tour-force-react .msg-react-btn,body.tour-force-react .msg-fwd-btn{opacity:
       <div class="btn-icon" id="btn-refresh" onclick="loadLeads()" title="Actualizar">↻</div>
     </div>
     <div class="inbox-search">
-      <input type="text" id="search-input" placeholder="Buscar por nombre o teléfono..." oninput="filterLeads()">
+      <input type="text" id="search-input" placeholder="Buscar por nombre, teléfono o palabra clave..." oninput="filterLeads()">
     </div>
     <div class="inbox-filters">
       <div id="filtros-chips-lista" style="display:contents"></div>
@@ -460,7 +482,7 @@ body.tour-force-react .msg-react-btn,body.tour-force-react .msg-fwd-btn{opacity:
           <div class="conv-avatar" id="ch-avatar" style="width:36px;height:36px;font-size:14px;background:#888"></div>
           <span class="nota-indicador" id="ch-nota-indicador" style="display:none" title="Este lead tiene notas internas">📌</span>
         </div>
-        <div class="chat-lead-info">
+        <div class="chat-lead-info" onclick="toggleProfile()" title="Ver perfil, compartido y notas internas">
           <div class="chat-lead-name" id="ch-name">—</div>
           <div class="chat-lead-meta" id="ch-meta">—</div>
         </div>
@@ -468,8 +490,19 @@ body.tour-force-react .msg-react-btn,body.tour-force-react .msg-fwd-btn{opacity:
           <select class="stage-select" id="stage-select" onchange="moveStage()">
             <option value="">Etapa...</option>
           </select>
+          <div class="btn-icon" onclick="toggleChatSearch()" title="Buscar en este chat"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
           <div class="btn-icon" onclick="toggleProfile()" title="Perfil"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
         </div>
+      </div>
+
+      <!-- Búsqueda dentro del chat -->
+      <div id="chat-search-bar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="chat-search-input" placeholder="Buscar en este chat..." oninput="buscarEnChat(this.value)" onkeydown="if(event.key==='Enter')chatSearchNav(event.shiftKey?-1:1)">
+        <span id="chat-search-count"></span>
+        <button class="chat-search-nav-btn" onclick="chatSearchNav(-1)" title="Anterior">↑</button>
+        <button class="chat-search-nav-btn" onclick="chatSearchNav(1)" title="Siguiente">↓</button>
+        <button class="chat-search-nav-btn" onclick="cerrarBusquedaChat()" title="Cerrar">✕</button>
       </div>
 
       <!-- Messages -->
@@ -991,7 +1024,15 @@ function getFilteredLeads(){
     else if(chip.tipo==='tipo_cliente') list = list.filter(l=>l.tipo_cliente===chip.valor);
     else if(chip.tipo==='etapa') list = list.filter(l=>l.etapa?.nombre===chip.valor);
   }
-  if(_search) list = list.filter(l=>(l.nombre||'').toLowerCase().includes(_search)||(l.telefono||'').includes(_search));
+  if(_search){
+    list = list.filter(l=>{
+      if((l.nombre||'').toLowerCase().includes(_search)) return true;
+      if((l.telefono||'').includes(_search)) return true;
+      if(!_demo) return false;
+      const msgs = _mensajesPorLead[l.id] || (_mensajesPorLead[l.id]=demoMensajes(l.id));
+      return msgs.some(m=>(m.contenido||'').toLowerCase().includes(_search));
+    });
+  }
   return list;
 }
 
@@ -1062,6 +1103,7 @@ async function openLead(id){
   _pendingAttachments=[];
   renderPendingAttach();
   if(_mediaRecorder && _mediaRecorder.state==='recording') _mediaRecorder.stop();
+  cerrarBusquedaChat();
 
   // Update active state in inbox
   document.querySelectorAll('.conv-item').forEach(el=>{
@@ -1234,6 +1276,49 @@ function confirmarReenvio(){
   renderInbox();
   showToast(`↪ Reenviado a ${_fwdSeleccion.size} chat${_fwdSeleccion.size>1?'s':''}`);
   closeModal('modal-reenviar');
+}
+
+// ── BÚSQUEDA DENTRO DEL CHAT ────────────────────────────────────
+let _chatSearchMatches=[];
+let _chatSearchIndex=-1;
+function toggleChatSearch(){
+  const bar=document.getElementById('chat-search-bar');
+  if(bar.style.display==='flex'){ cerrarBusquedaChat(); return; }
+  bar.style.display='flex';
+  const input=document.getElementById('chat-search-input');
+  input.value='';
+  input.focus();
+  buscarEnChat('');
+}
+function cerrarBusquedaChat(){
+  document.getElementById('chat-search-bar').style.display='none';
+  document.querySelectorAll('#chat-messages .msg-search-match, #chat-messages .msg-search-active').forEach(el=>el.classList.remove('msg-search-match','msg-search-active'));
+  _chatSearchMatches=[]; _chatSearchIndex=-1;
+}
+function buscarEnChat(q){
+  document.querySelectorAll('#chat-messages .msg-search-match, #chat-messages .msg-search-active').forEach(el=>el.classList.remove('msg-search-match','msg-search-active'));
+  const term=q.trim().toLowerCase();
+  const countEl=document.getElementById('chat-search-count');
+  if(!term){ _chatSearchMatches=[]; _chatSearchIndex=-1; countEl.textContent=''; return; }
+  const bubbles=[...document.querySelectorAll('#chat-messages .msg-bubble')];
+  _chatSearchMatches=bubbles.filter(b=>b.textContent.toLowerCase().includes(term));
+  _chatSearchMatches.forEach(b=>b.classList.add('msg-search-match'));
+  _chatSearchIndex=_chatSearchMatches.length?0:-1;
+  countEl.textContent=_chatSearchMatches.length?`${_chatSearchIndex+1}/${_chatSearchMatches.length}`:'Sin resultados';
+  irAResultadoBusqueda();
+}
+function chatSearchNav(dir){
+  if(!_chatSearchMatches.length) return;
+  _chatSearchMatches[_chatSearchIndex]?.classList.remove('msg-search-active');
+  _chatSearchIndex=(_chatSearchIndex+dir+_chatSearchMatches.length)%_chatSearchMatches.length;
+  document.getElementById('chat-search-count').textContent=`${_chatSearchIndex+1}/${_chatSearchMatches.length}`;
+  irAResultadoBusqueda();
+}
+function irAResultadoBusqueda(){
+  if(_chatSearchIndex<0) return;
+  const el=_chatSearchMatches[_chatSearchIndex];
+  el.classList.add('msg-search-active');
+  el.scrollIntoView({block:'center', behavior:'smooth'});
 }
 
 // ── NOTAS INTERNAS ────────────────────────────────────────────
@@ -1793,6 +1878,11 @@ function renderProfile(){
     </div>
 
     <div class="profile-section">
+      <h4>Compartido en este chat</h4>
+      <div id="pf-compartido">${renderCompartidoEnChat()}</div>
+    </div>
+
+    <div class="profile-section">
       <h4>Etiquetas</h4>
       <div class="etiquetas-wrap" id="pf-etiquetas">
         ${etiquetas.map(e=>`<span class="etiqueta-chip remove" style="background:${e.etiqueta.color}22;color:${e.etiqueta.color}">${e.etiqueta.nombre}</span>`).join('')}
@@ -1821,6 +1911,15 @@ function irANotaEnChat(notaId){
     const el=document.getElementById(`note-${notaId}`);
     if(el){ el.scrollIntoView({block:'center',behavior:'smooth'}); el.classList.add('nota-flash'); setTimeout(()=>el.classList.remove('nota-flash'),1400); }
   }, 250);
+}
+function renderCompartidoEnChat(){
+  const imgs=(_mensajes||[]).filter(m=>m.tipo==='imagen' && m.attachUrl);
+  const docs=(_mensajes||[]).filter(m=>m.tipo==='documento' && m.attachUrl);
+  if(!imgs.length && !docs.length) return `<div style="font-size:12px;color:var(--text3);padding:6px 0">Sin imágenes ni documentos compartidos todavía.</div>`;
+  let html='';
+  if(imgs.length) html+=`<div class="pf-compartido-grid">${imgs.map(m=>`<img src="${m.attachUrl}" class="pf-compartido-thumb" onclick="openLightbox('${m.attachUrl}')" alt="">`).join('')}</div>`;
+  if(docs.length) html+=`<div class="pf-compartido-docs">${docs.map(m=>`<a href="${m.attachUrl}" target="_blank" rel="noopener noreferrer" class="pf-compartido-doc"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>${escHtml(m.attachName||'documento')}</span></a>`).join('')}</div>`;
+  return html;
 }
 
 let _profileChanges={};
@@ -1960,6 +2059,7 @@ const LS_KEY_TOUR_VISTO='henryleads_tour_visto';
 const TOUR_STEPS=[
   {selector:'#sidenav', title:'Menú principal', text:'Desde aquí te mueves entre Bandeja, Pipeline, Leads y Configuración. Este mismo botón de brújula vive abajo del todo, por si quieres repetir el recorrido después.', pos:'right'},
   {selector:'.inbox-header', title:'Tu bandeja de conversaciones', text:'Aquí ves todos los chats de WhatsApp. El botón ＋ crea un lead nuevo a mano, sin esperar a que el cliente escriba primero.', pos:'bottom'},
+  {selector:'#search-input', title:'Buscar en toda la bandeja', text:'Busca por nombre o teléfono, o escribe una palabra clave — también busca dentro de las conversaciones, para encontrar con quién se habló de cierto tema.', pos:'bottom'},
   {selector:'.inbox-filters', title:'Filtros rápidos', text:'Filtra por tipo de cliente o solo los que no has leído. Puedes renombrar cada filtro (✎ al pasar el mouse), arrastrarlos para acomodarlos como quieras, y agregar más con el botón ＋ (por etapa del embudo).', pos:'bottom'},
   {selector:'.conv-item', title:'Cada conversación', text:'Un clic aquí abre el chat completo con ese cliente.', pos:'right'},
   {selector:'#quick-replies-bar', title:'Respuestas rápidas', text:'Un clic y mandas una respuesta ya armada — se personaliza sola con el nombre del cliente. Las más usadas se van al frente solas.', pos:'top'},
@@ -1969,7 +2069,8 @@ const TOUR_STEPS=[
   {selector:'.btn-mic', title:'Nota de voz', text:'Este botón, aparte de Adjuntar, es para grabar y mandar una nota de voz.', pos:'top'},
   {selector:'.msg-react-btn', title:'Reaccionar a un mensaje', text:'Pasa el mouse sobre cualquier mensaje y aparece este botón — reacciona como en WhatsApp (👍❤️😂😮😢🙏). Toca la reacción de nuevo para quitarla.', pos:'top'},
   {selector:'.msg-fwd-btn', title:'Reenviar un mensaje', text:'Manda cualquier mensaje a uno o varios chats a la vez. Siempre se marca como "Reenviado" con el nombre de quién lo escribió originalmente, aunque pase por varios chats.', pos:'top'},
-  {selector:'[title="Perfil"]', title:'Ficha del cliente', text:'Aquí ves y editas los datos del lead: nombre, vehículo, etapa y asesor asignado.', pos:'left'},
+  {selector:'[title="Buscar en este chat"]', title:'Buscar en este chat', text:'Encuentra una palabra dentro de esta conversación — los mensajes que coinciden se resaltan y puedes saltar entre ellos.', pos:'top'},
+  {selector:'[title="Perfil"]', title:'Ficha del cliente', text:'Aquí ves y editas los datos del lead, lo que se ha compartido en el chat (fotos y documentos), sus etiquetas y sus notas internas. También puedes llegar aquí tocando el nombre arriba del chat.', pos:'left'},
 ];
 let _tourIndex=0;
 
@@ -2054,6 +2155,7 @@ document.addEventListener('keydown', (e)=>{
   if(document.getElementById('tour-tooltip').classList.contains('show')){ endTour(); return; }
   const modalAbierto=[...document.querySelectorAll('.modal-overlay')].find(m=>m.style.display && m.style.display!=='none');
   if(modalAbierto){ closeModal(modalAbierto.id); return; }
+  if(document.getElementById('chat-search-bar').style.display==='flex'){ cerrarBusquedaChat(); return; }
   if(_profileVisible){ toggleProfile(); return; }
 });
 
