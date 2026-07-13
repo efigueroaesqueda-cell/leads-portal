@@ -763,7 +763,8 @@ function demoLeads(){
     ultimo_contacto:new Date(ahora - _sr(i*5,1,72)*3600000).toISOString(),
     preview:previews[i],
     asesor:{nombre:['Luis R.','Karla M.','Diego V.'][i%3]},
-    etiquetas_lead:i%3===0?[{etiqueta:{nombre:'Mecánico Alianza',color:'#27ae60'}}]:[]
+    etiquetas_lead:i%3===0?[{etiqueta:{nombre:'Mecánico Alianza',color:'#27ae60'}}]:[],
+    tieneNotas:[0,2,5].includes(i)
   }));
 }
 
@@ -781,6 +782,18 @@ function demoMensajes(leadId){
     msgs.push({ id:`dm-${idx}-${i*2}`, lead_id:leadId, direccion:'entrante', contenido:ent, created_at:new Date(now-(pares.length-i)*7200000+1000).toISOString() });
     msgs.push({ id:`dm-${idx}-${i*2+1}`, lead_id:leadId, direccion:'saliente', contenido:sal, asesor:{nombre:asesorNombre}, created_at:new Date(now-(pares.length-i)*7200000+60000).toISOString() });
   });
+  // Notas internas de ejemplo en algunos chats, solo para que Enrique vea
+  // cómo se ven sin tener que crearlas a mano en cada chat.
+  const NOTAS_EJEMPLO={
+    0:[{texto:'Cliente pidió que le llamemos después de las 6pm, trabaja hasta tarde.', autor:'Luis R.', haceMin:95}],
+    2:[{texto:'Ojo: es cliente recurrente, ya compró con nosotros en 2025 — darle prioridad.', autor:'Karla M.', haceMin:130},
+       {texto:'Pidió factura con RFC, falta que la mande.', autor:'Karla M.', haceMin:20}],
+    5:[{texto:'Precio especial autorizado por mayoreo (10 piezas) — ya lo aprobó Enrique.', autor:'Diego V.', haceMin:60}],
+  };
+  (NOTAS_EJEMPLO[idx]||[]).forEach((n,i)=>{
+    msgs.push({ id:`demo-nota-${idx}-${i}`, lead_id:leadId, direccion:'nota', contenido:n.texto, autor:n.autor, created_at:new Date(now-n.haceMin*60000).toISOString() });
+  });
+  msgs.sort((a,b)=> new Date(a.created_at)-new Date(b.created_at));
   return msgs;
 }
 
