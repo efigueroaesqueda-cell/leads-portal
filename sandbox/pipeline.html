@@ -284,23 +284,35 @@ function relTime(ts){const d=(Date.now()-new Date(ts))/1000;if(d<60)return'ahora
 
 function _sr(s,a,b){let x=s*1664525+1013904223;x=x&0xffffffff;return a+Math.abs(x)%(b-a+1);}
 
-function demoEtapas(){return[
-  {id:'et1',nombre:'Pendiente',color:'#888888',icono:'⏳',orden:1},
-  {id:'et2',nombre:'Contestado',color:'#3498db',icono:'💬',orden:2},
-  {id:'et3',nombre:'Prospecto',color:'#9b59b6',icono:'🎯',orden:3},
-  {id:'et4',nombre:'Cotizado',color:'#f39c12',icono:'📋',orden:4},
-  {id:'et5',nombre:'Agendado',color:'#1abc9c',icono:'📅',orden:5},
-  {id:'et6',nombre:'Cerrado',color:'#2ecc71',icono:'✅',orden:6},
+// Etapas del embudo: viven en localStorage, compartidas con
+// Configuración y Bandeja -- renombrar/agregar/borrar/reordenar aquí
+// o en Configuración se refleja en ambos lados.
+const LS_KEY_ETAPAS='henryleads_etapas';
+function etapasDefault(){return[
+  {id:'et1',nombre:'Pendiente',color:'#888888',icono:'⏳'},
+  {id:'et2',nombre:'Contestado',color:'#3498db',icono:'💬'},
+  {id:'et3',nombre:'Prospecto',color:'#9b59b6',icono:'🎯'},
+  {id:'et4',nombre:'Cotizado',color:'#f39c12',icono:'📋'},
+  {id:'et5',nombre:'Agendado',color:'#1abc9c',icono:'📅'},
+  {id:'et6',nombre:'Cerrado',color:'#2ecc71',icono:'✅'},
 ];}
+function cargarEtapasGuardadas(){
+  try{
+    const g=JSON.parse(localStorage.getItem(LS_KEY_ETAPAS)||'null');
+    return (g && g.length) ? g : etapasDefault();
+  }catch(e){ return etapasDefault(); }
+}
+function guardarEtapasCompartidas(list){ localStorage.setItem(LS_KEY_ETAPAS, JSON.stringify(list)); }
+function demoEtapas(){ return cargarEtapasGuardadas(); }
 function demoLeads(){
   const nombres=['Carlos Hdz','María López','Roberto Vega','Ana Flores','Luis Torres','Pedro Ruiz','Diana Castro','Miguel Ángel','José Martínez','Elena García','Fernando Ríos','Claudia Mora','Jorge Soto','Patricia Núñez','Andrés Villa','Ricardo Sánchez','Verónica Ramos','Alejandro Cruz','Gabriela Ortiz','Sergio Medina','Lupita Herrera','Óscar Delgado','Mónica Reyes','Iván Salazar','Beatriz Cano','Raúl Ponce','Silvia Aguilar','Tomás Vargas','Norma Chávez','Emilio Rangel','Cecilia Duarte','Arturo Bermúdez','Yolanda Peña','Gustavo Rivas','Marisol Contreras','Héctor Zamora','Adriana Solís','Rodrigo Fuentes','Teresa Nava','Julián Escobar','Rosa Elena Camacho','Ignacio Barrera','Leticia Montes','Federico Guzmán','Ximena Robles'];
   const tipos=['usuario_final','usuario_final','mecanico','refaccionaria','mecanico','usuario_final','usuario_final','mecanico','refaccionaria','usuario_final','usuario_final','usuario_final','usuario_final','refaccionaria','mecanico','mecanico','usuario_final','mecanico','usuario_final','refaccionaria','usuario_final','mecanico','usuario_final','usuario_final','refaccionaria','usuario_final','mecanico','usuario_final','usuario_final','usuario_final','mecanico','usuario_final','usuario_final','refaccionaria','usuario_final','mecanico','usuario_final','usuario_final','mecanico','usuario_final','usuario_final','refaccionaria','usuario_final','mecanico','usuario_final'];
   const vehiculos=['Nissan Tsuru 2012','Nissan Altima 2016','Toyota Hilux 2019','Varios (mayoreo)','RAM 1500 2015','Camioneta (sin especificar)','Por confirmar','Chevrolet Aveo (cliente)','Varios (pedido)','Chevrolet Spark 2017','Por confirmar','VW Jetta','Por confirmar','VW Pointer (mayoreo)','Varios (taller)','VW Jetta A4 2015','Chevrolet Aveo 2018','Toyota Hilux 2019','Nissan Versa 2021','Varios (mayoreo)','Honda CRV 2017','Ford Ranger 2020','Mazda 3 2019','Kia Rio 2016','Varios (mayoreo)','Nissan Sentra 2014','Chevrolet Spark 2020','VW Vento 2018','Hyundai Accent 2019','RAM 2500 2018','Toyota Corolla 2016','Ford Fiesta 2015','Nissan March 2020','Varios (mayoreo)','Honda Civic 2019','Dodge Attitude 2017','Mazda CX-5 2021','Chevrolet Onix 2022','Nissan Altima 2015 (cliente)','Toyota Yaris 2018','VW Gol 2016','Varios (mayoreo)','Kia Forte 2020','RAM 1500 2019 (cliente)','Nissan Altima 2020'];
-  const etapas=demoEtapas();
+  const etapas=(_etapas && _etapas.length) ? _etapas : cargarEtapasGuardadas();
   return nombres.map((n,i)=>({
     id:`demo-lead-${i}`,nombre:n,telefono:`+52 33 ${_sr(i*7,1000,9999)} ${_sr(i*13,1000,9999)}`,
     tipo_cliente:tipos[i],
-    etapa:etapas[_sr(i*3,0,5)],
+    etapa:etapas[i%etapas.length],
     no_leidos:_sr(i*11,0,3)>2?_sr(i*17,1,9):0,
     ultimo_contacto:new Date(Date.now()-_sr(i*5,1,72)*3600000).toISOString(),
     asesor:{nombre:['Luis R.','Karla M.','Diego V.'][i%3]},
@@ -632,8 +644,8 @@ function attachColumnDrag(){
           item.classList.remove('dragging');
           const ids=[...document.querySelectorAll('.kanban-col')].map(c=>c.dataset.etapaId);
           const newOrder=ids.map(id=>_etapas.find(e=>e.id===id)).filter(Boolean);
-          newOrder.forEach((e,i)=>e.orden=i+1);
           _etapas=newOrder;
+          guardarEtapasCompartidas(_etapas);
         }
       };
       document.addEventListener('pointermove', onMove);
@@ -647,8 +659,9 @@ function promptNewEtapa(){
   const nombre=prompt('Nombre del nuevo embudo:');
   if(!nombre||!nombre.trim()) return;
   const colores=['#888888','#3498db','#9b59b6','#f39c12','#1abc9c','#2ecc71','#e74c3c','#e67e22'];
-  const nueva={ id:'et-'+Date.now(), nombre:nombre.trim().toUpperCase(), color:colores[_etapas.length%colores.length], icono:'📌', orden:_etapas.length+1 };
+  const nueva={ id:'et-'+Date.now(), nombre:nombre.trim(), color:colores[_etapas.length%colores.length], icono:'📌' };
   _etapas.push(nueva);
+  guardarEtapasCompartidas(_etapas);
   renderKanban();
   showToast('✅ Embudo creado');
 }
@@ -658,7 +671,8 @@ function renameEtapa(id){
   if(!etapa) return;
   const nombre=prompt('Nuevo nombre del embudo:', etapa.nombre);
   if(!nombre||!nombre.trim()) return;
-  etapa.nombre=nombre.trim().toUpperCase();
+  etapa.nombre=nombre.trim();
+  guardarEtapasCompartidas(_etapas);
   renderKanban();
   showToast('✅ Embudo renombrado');
 }
@@ -682,6 +696,7 @@ function deleteEtapa(id){
     }
   }
   _etapas=otras;
+  guardarEtapasCompartidas(_etapas);
   renderKanban();
   showToast('✅ Embudo borrado');
 }

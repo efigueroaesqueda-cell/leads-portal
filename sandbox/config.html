@@ -117,9 +117,16 @@ html,body{height:100%;overflow:hidden;overscroll-behavior-x:none;font-family:'Se
 
 /* ETAPA LIST */
 .etapa-list{display:flex;flex-direction:column;gap:6px}
-.etapa-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px}
-.etapa-color{width:12px;height:12px;border-radius:50%}
+.etapa-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;cursor:grab;transition:background .16s ease,opacity .16s ease}
+.etapa-item:active{cursor:grabbing}
+.etapa-item.dragging-chip{opacity:.4}
+.etapa-color{width:12px;height:12px;border-radius:50%;flex-shrink:0}
 .etapa-name{flex:1;font-size:13px;font-weight:600}
+.etapa-actions{display:flex;gap:4px;opacity:0;transition:opacity .15s ease;flex-shrink:0}
+.etapa-item:hover .etapa-actions{opacity:1}
+.etapa-edit,.etapa-del{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;transition:background .15s ease,transform .14s cubic-bezier(.4,0,.2,1)}
+.etapa-edit:hover,.etapa-del:hover{background:var(--bg4)}
+.etapa-edit:active,.etapa-del:active{transform:scale(.88)}
 .etapa-count{font-size:11px;color:var(--text3)}
 
 /* TOGGLE */
@@ -282,14 +289,16 @@ html,body{height:100%;overflow:hidden;overscroll-behavior-x:none;font-family:'Se
           <p class="config-desc">Define las etapas por las que pasan tus leads, desde el primer contacto hasta el cierre.</p>
           <div class="config-card">
             <h3>Pipeline actual</h3>
+            <p class="config-desc" style="margin-bottom:10px">Arrastra para reordenar. Los nombres, el color y hasta cuántas etapas tengas son tuyos — cámbialos como los necesites.</p>
             <div class="etapa-list" id="etapa-list">
               <div style="text-align:center;padding:20px;color:var(--text3)"><div class="spinner"></div></div>
             </div>
+            <button class="btn btn-ghost" style="width:100%;margin-top:10px;font-size:12px;padding:8px" onclick="agregarEtapaNueva()">＋ Agregar etapa</button>
           </div>
           <div class="config-card" style="background:rgba(200,169,81,.04);border-color:rgba(200,169,81,.15)">
-            <h3 style="color:var(--gold)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7 3.5 3.5 0 0 1 1.5 2.8v.5h5v-.5a3.5 3.5 0 0 1 1.5-2.8A7 7 0 0 0 12 2z"/></svg> Tip: Protocolo Cremalleras LR</h3>
+            <h3 style="color:var(--gold)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7 3.5 3.5 0 0 1 1.5 2.8v.5h5v-.5a3.5 3.5 0 0 1 1.5-2.8A7 7 0 0 0 12 2z"/></svg> Tip: de dónde salen estas 6 etapas</h3>
             <p style="font-size:12px;color:var(--text2);line-height:1.7">
-              El embudo está diseñado según el protocolo de emprendimiento:<br>
+              Son solo el punto de partida — las puedes renombrar, agregar o quitar arriba. Así es como las pensamos originalmente para Cremalleras LR:<br>
               <strong>Pendiente</strong> → llegó un WA sin atender<br>
               <strong>Contestado</strong> → ya respondiste, abriste conversación<br>
               <strong>Prospecto</strong> → tiene interés real, está calificado<br>
@@ -666,24 +675,96 @@ async function saveAsesor(){
   }catch(e){showToast('❌ '+e.message);}
 }
 
+// Etapas del embudo: se guardan en localStorage para que lo que se
+// agregue/renombre/borre aquí se refleje también en Bandeja y Pipeline.
+const LS_KEY_ETAPAS='henryleads_etapas';
+function etapasDefault(){
+  return [
+    {id:'et1',nombre:'Pendiente',color:'#888888',icono:'⏳'},
+    {id:'et2',nombre:'Contestado',color:'#3498db',icono:'💬'},
+    {id:'et3',nombre:'Prospecto',color:'#9b59b6',icono:'🎯'},
+    {id:'et4',nombre:'Cotizado',color:'#f39c12',icono:'📋'},
+    {id:'et5',nombre:'Agendado',color:'#1abc9c',icono:'📅'},
+    {id:'et6',nombre:'Cerrado',color:'#2ecc71',icono:'✅'},
+  ];
+}
+function cargarEtapasGuardadas(){
+  try{
+    const g=JSON.parse(localStorage.getItem(LS_KEY_ETAPAS)||'null');
+    return (g && g.length) ? g : etapasDefault();
+  }catch(e){ return etapasDefault(); }
+}
+function guardarEtapasCompartidas(list){ localStorage.setItem(LS_KEY_ETAPAS, JSON.stringify(list)); }
+
+let _etapasConfig=[];
 async function loadEtapas(){
-  const el=document.getElementById('etapa-list');
   if(_demo){
-    const list=[{nombre:'Pendiente',color:'#888888',icono:'⏳'},{nombre:'Contestado',color:'#3498db',icono:'💬'},{nombre:'Prospecto',color:'#9b59b6',icono:'🎯'},{nombre:'Cotizado',color:'#f39c12',icono:'📋'},{nombre:'Agendado',color:'#1abc9c',icono:'📅'},{nombre:'Cerrado',color:'#2ecc71',icono:'✅'}];
-    renderEtapas(list);return;
+    _etapasConfig=cargarEtapasGuardadas();
+    renderEtapas(_etapasConfig);
+    return;
   }
-  try{const list=await sb(`lp_etapas?empresa_id=eq.${EMPRESA_ID}&order=orden.asc`);renderEtapas(list||[]);}
+  const el=document.getElementById('etapa-list');
+  try{const list=await sb(`lp_etapas?empresa_id=eq.${EMPRESA_ID}&order=orden.asc`);_etapasConfig=list||[];renderEtapas(_etapasConfig);}
   catch(e){el.innerHTML='<div style="color:var(--red);font-size:12px">Error al cargar</div>';}
 }
 function renderEtapas(list){
   document.getElementById('etapa-list').innerHTML=list.map((e,i)=>`
-    <div class="etapa-item">
+    <div class="etapa-item" draggable="true" ondragstart="etDragStart(event,'${e.id}')" ondragover="etDragOver(event)" ondrop="etDrop(event,'${e.id}')" ondragend="etDragEnd(event)">
       <span style="color:var(--text3);font-size:11px">${i+1}</span>
       <div class="etapa-color" style="background:${e.color}"></div>
       <span style="font-size:16px">${e.icono||''}</span>
-      <span class="etapa-name">${e.nombre}</span>
+      <span class="etapa-name">${escHtml(e.nombre)}</span>
+      <span class="etapa-actions">
+        <span class="etapa-edit" onclick="renombrarEtapaConfig('${e.id}')" title="Renombrar">✎</span>
+        <span class="etapa-del" onclick="eliminarEtapaConfig('${e.id}')" title="Eliminar">✕</span>
+      </span>
     </div>`).join('');
 }
+function guardarYRefrescarEtapas(){
+  if(_demo) guardarEtapasCompartidas(_etapasConfig);
+  renderEtapas(_etapasConfig);
+}
+function renombrarEtapaConfig(id){
+  const e=_etapasConfig.find(x=>x.id===id);
+  if(!e) return;
+  const nuevo=(prompt('Nuevo nombre de la etapa:', e.nombre)||'').trim();
+  if(!nuevo) return;
+  e.nombre=nuevo;
+  guardarYRefrescarEtapas();
+  showToast('✅ Etapa renombrada');
+}
+function eliminarEtapaConfig(id){
+  if(_etapasConfig.length<=1){ showToast('❌ Debe quedar al menos una etapa'); return; }
+  const e=_etapasConfig.find(x=>x.id===id);
+  if(!e) return;
+  if(!confirm(`¿Eliminar la etapa "${e.nombre}"? Los leads que tenía se van a repartir entre las etapas que queden la próxima vez que abras Bandeja o Pipeline.`)) return;
+  _etapasConfig=_etapasConfig.filter(x=>x.id!==id);
+  guardarYRefrescarEtapas();
+  showToast('🗑 Etapa eliminada');
+}
+const COLORES_ETAPA=['#888888','#3498db','#9b59b6','#f39c12','#1abc9c','#2ecc71','#e74c3c','#e67e22','#16a085','#8e44ad'];
+function agregarEtapaNueva(){
+  const nombre=(prompt('Nombre de la nueva etapa:')||'').trim();
+  if(!nombre) return;
+  const nueva={id:'et-'+Date.now(), nombre, color:COLORES_ETAPA[_etapasConfig.length%COLORES_ETAPA.length], icono:'📌'};
+  _etapasConfig.push(nueva);
+  guardarYRefrescarEtapas();
+  showToast('✅ Etapa agregada');
+}
+let _etDragId=null;
+function etDragStart(e,id){ _etDragId=id; e.dataTransfer.effectAllowed='move'; e.currentTarget.classList.add('dragging-chip'); }
+function etDragOver(e){ e.preventDefault(); }
+function etDrop(e,targetId){
+  e.preventDefault();
+  if(!_etDragId || _etDragId===targetId) return;
+  const fromIdx=_etapasConfig.findIndex(x=>x.id===_etDragId);
+  const toIdx=_etapasConfig.findIndex(x=>x.id===targetId);
+  if(fromIdx<0||toIdx<0) return;
+  const [moved]=_etapasConfig.splice(fromIdx,1);
+  _etapasConfig.splice(toIdx,0,moved);
+  guardarYRefrescarEtapas();
+}
+function etDragEnd(e){ e.currentTarget.classList.remove('dragging-chip'); _etDragId=null; }
 
 function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
@@ -884,6 +965,7 @@ const TOUR_STEPS=[
   {selector:'#sidenav', title:'Menú principal', text:'Desde aquí te mueves entre Bandeja, Pipeline, Leads y Configuración. Este mismo botón de brújula vive abajo del todo, por si quieres repetir el recorrido después.', pos:'right'},
   {selector:'.config-nav', title:'Secciones de Configuración', text:'Aquí ajustas cada parte del sistema: conexión de WhatsApp, tu equipo, las etapas del embudo, respuestas rápidas, automatizaciones, apariencia y los datos de la empresa.', pos:'right'},
   {selector:'#sec-whatsapp .config-card', title:'Conexión con WhatsApp', text:'Aquí están las credenciales que conectan el sistema con tu número de WhatsApp Business.', pos:'left', section:'whatsapp'},
+  {selector:'#etapa-list', title:'Etapas del embudo', text:'Son tuyas: arrastra para reordenar, toca el lápiz para renombrar, la ✕ para eliminar, y el botón de abajo para agregar las que necesites. Se reflejan también en Pipeline y Bandeja.', pos:'top', section:'etapas'},
   {selector:'#qr-list', title:'Respuestas rápidas', text:'Todas las plantillas que tus asesores usan en el chat viven aquí — puedes agregar, editar, ocultar o eliminar cualquiera.', pos:'top', section:'mensajes'},
   {selector:'#emp-ubicacion', title:'Ubicación del negocio', text:'Lo que escribas aquí (y el link de Google Maps de abajo, si lo agregas) es justo lo que se rellena solo cuando alguien usa (UBI) en una respuesta rápida.', pos:'top', section:'empresa'},
   {selector:'#sec-apariencia .config-card', title:'Modo claro, oscuro o automático', text:'Cada quien elige cómo se ve el sistema en su propia computadora — se guarda solo, no afecta a los demás. "Automático" cambia solo según la hora: claro de día, oscuro de noche, para no dañar la vista.', pos:'top', section:'apariencia'},

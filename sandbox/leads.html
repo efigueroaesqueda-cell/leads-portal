@@ -300,18 +300,28 @@ function relTime(ts){const d=(Date.now()-new Date(ts))/1000;if(d<60)return'ahora
 function demoLeads(){
   const nombres=['Carlos Hdz','María López','Roberto Vega','Ana Flores','Luis Torres','Pedro Ruiz','Diana Castro','Miguel Ángel','José Martínez','Elena García','Fernando Ríos','Claudia Mora','Jorge Soto','Patricia Núñez','Andrés Villa','Ricardo Sánchez','Verónica Ramos','Alejandro Cruz','Gabriela Ortiz','Sergio Medina','Lupita Herrera','Óscar Delgado','Mónica Reyes','Iván Salazar','Beatriz Cano','Raúl Ponce','Silvia Aguilar','Tomás Vargas','Norma Chávez','Emilio Rangel','Cecilia Duarte','Arturo Bermúdez','Yolanda Peña','Gustavo Rivas','Marisol Contreras','Héctor Zamora','Adriana Solís','Rodrigo Fuentes','Teresa Nava','Julián Escobar','Rosa Elena Camacho','Ignacio Barrera','Leticia Montes','Federico Guzmán','Ximena Robles'];
   const tipos=['usuario_final','usuario_final','mecanico','refaccionaria','mecanico','usuario_final','usuario_final','mecanico','refaccionaria','usuario_final','usuario_final','usuario_final','usuario_final','refaccionaria','mecanico','mecanico','usuario_final','mecanico','usuario_final','refaccionaria','usuario_final','mecanico','usuario_final','usuario_final','refaccionaria','usuario_final','mecanico','usuario_final','usuario_final','usuario_final','mecanico','usuario_final','usuario_final','refaccionaria','usuario_final','mecanico','usuario_final','usuario_final','mecanico','usuario_final','usuario_final','refaccionaria','usuario_final','mecanico','usuario_final'];
-  const etapas=[{nombre:'Pendiente',color:'#888'},{nombre:'Contestado',color:'#3498db'},{nombre:'Prospecto',color:'#9b59b6'},{nombre:'Cotizado',color:'#f39c12'},{nombre:'Agendado',color:'#1abc9c'},{nombre:'Cerrado',color:'#2ecc71'}];
+  const etapas=(_etapas && _etapas.length) ? _etapas : cargarEtapasGuardadas();
   const vehiculos=['Nissan Tsuru 2012','Nissan Altima 2016','Toyota Hilux 2019','Varios (mayoreo)','RAM 1500 2015','Camioneta (sin especificar)','Por confirmar','Chevrolet Aveo (cliente)','Varios (pedido)','Chevrolet Spark 2017','Por confirmar','VW Jetta','Por confirmar','VW Pointer (mayoreo)','Varios (taller)','VW Jetta A4 2015','Chevrolet Aveo 2018','Toyota Hilux 2019','Nissan Versa 2021','Varios (mayoreo)','Honda CRV 2017','Ford Ranger 2020','Mazda 3 2019','Kia Rio 2016','Varios (mayoreo)','Nissan Sentra 2014','Chevrolet Spark 2020','VW Vento 2018','Hyundai Accent 2019','RAM 2500 2018','Toyota Corolla 2016','Ford Fiesta 2015','Nissan March 2020','Varios (mayoreo)','Honda Civic 2019','Dodge Attitude 2017','Mazda CX-5 2021','Chevrolet Onix 2022','Nissan Altima 2015 (cliente)','Toyota Yaris 2018','VW Gol 2016','Varios (mayoreo)','Kia Forte 2020','RAM 1500 2019 (cliente)','Nissan Altima 2020'];
   const now=Date.now();
   return nombres.map((n,i)=>({
     id:`demo-lead-${i}`,nombre:n,telefono:`+52 33 ${_sr(i*7,1000,9999)} ${_sr(i*13,1000,9999)}`,
-    tipo_cliente:tipos[i],etapa:etapas[_sr(i*3,0,5)],
+    tipo_cliente:tipos[i],etapa:etapas[i%etapas.length],
     vehiculo_info:vehiculos[i],no_leidos:_sr(i*11,0,3)>2?_sr(i*17,1,9):0,
     updated_at:new Date(now-_sr(i*5,1,72)*3600000).toISOString(),
     asesor:{nombre:['Luis R.','Karla M.','Diego V.'][i%3]},
     notas:'',etiquetas_lead:i%3===0?[{etiqueta:{nombre:'Mecánico Alianza',color:'#27ae60'}}]:[]
   }));}
-function demoEtapas(){return[{id:'et1',nombre:'Pendiente',color:'#888888'},{id:'et2',nombre:'Contestado',color:'#3498db'},{id:'et3',nombre:'Prospecto',color:'#9b59b6'},{id:'et4',nombre:'Cotizado',color:'#f39c12'},{id:'et5',nombre:'Agendado',color:'#1abc9c'},{id:'et6',nombre:'Cerrado',color:'#2ecc71'}];}
+// Etapas del embudo: compartidas con Configuración y Pipeline vía
+// localStorage -- lo que renombres/agregues/borres allá se ve aquí.
+const LS_KEY_ETAPAS='henryleads_etapas';
+function etapasDefault(){return[{id:'et1',nombre:'Pendiente',color:'#888888'},{id:'et2',nombre:'Contestado',color:'#3498db'},{id:'et3',nombre:'Prospecto',color:'#9b59b6'},{id:'et4',nombre:'Cotizado',color:'#f39c12'},{id:'et5',nombre:'Agendado',color:'#1abc9c'},{id:'et6',nombre:'Cerrado',color:'#2ecc71'}];}
+function cargarEtapasGuardadas(){
+  try{
+    const g=JSON.parse(localStorage.getItem(LS_KEY_ETAPAS)||'null');
+    return (g && g.length) ? g : etapasDefault();
+  }catch(e){ return etapasDefault(); }
+}
+function demoEtapas(){ return cargarEtapasGuardadas(); }
 function demoAsesores(){return[{id:'a1',nombre:'Luis R.'},{id:'a2',nombre:'Karla M.'},{id:'a3',nombre:'Diego V.'}];}
 
 async function sb(path,opts={}){const r=await fetch(`${SUPABASE_URL}/rest/v1/${path}`,{headers:HEADERS,...opts});if(!r.ok){const e=await r.json();throw new Error(e.message);}if(r.status===204)return null;return r.json();}
@@ -319,7 +329,7 @@ async function sb(path,opts={}){const r=await fetch(`${SUPABASE_URL}/rest/v1/${p
 function toggleDemo(){_demo=!_demo;document.getElementById('demo-banner').style.display=_demo?'block':'none';document.getElementById('btn-demo').style.color=_demo?'var(--gold)':'';init();}
 
 async function init(){
-  if(_demo){_leads=demoLeads();_etapas=demoEtapas();_asesores=demoAsesores();}
+  if(_demo){_etapas=demoEtapas();_leads=demoLeads();_asesores=demoAsesores();}
   else{
     try{
       const[l,e,a]=await Promise.all([

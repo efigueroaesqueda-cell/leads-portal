@@ -964,7 +964,7 @@ const CASOS_DEMO=[
 ];
 
 function demoLeads(){
-  const etapas_keys=['Pendiente','Contestado','Prospecto','Cotizado','Agendado','Cerrado'];
+  const etapasList = (_etapas && _etapas.length) ? _etapas : cargarEtapasGuardadas();
   const ahora = Date.now();
   const conNotas=[0,2,5,17,24,36];
   return CASOS_DEMO.map((c,i)=>({
@@ -972,7 +972,7 @@ function demoLeads(){
     nombre:c.nombre,
     telefono:`+52 33 ${_sr(i*7,1000,9999)} ${_sr(i*13,1000,9999)}`,
     tipo_cliente:c.tipo,
-    etapa:{nombre:etapas_keys[_sr(i*3,0,5)],color:['#888','#3498db','#9b59b6','#f39c12','#1abc9c','#2ecc71'][_sr(i*3,0,5)]},
+    etapa:etapasList[i%etapasList.length],
     no_leidos:_sr(i*11,0,3)>2?_sr(i*17,1,9):0,
     ultimo_contacto:new Date(ahora - _sr(i*5,1,72)*3600000).toISOString(),
     preview:c.conv[0][0],
@@ -1023,7 +1023,11 @@ function quickRepliesVisibles(){
   return _quickReplies.filter(q=>!q.oculta && (q.compartida!==false || q.creadaPor===(_sessionAsesor?.nombre||'Luis R.')));
 }
 
-function demoEtapas(){
+// Etapas del embudo: viven en localStorage para que lo que se
+// renombre/agregue/borre en Configuración (o en Pipeline) se refleje
+// aquí también, en vez de ser una lista fija de fábrica.
+const LS_KEY_ETAPAS='henryleads_etapas';
+function etapasDefault(){
   return [
     {id:'et1',nombre:'Pendiente',color:'#888',icono:'⏳'},
     {id:'et2',nombre:'Contestado',color:'#3498db',icono:'💬'},
@@ -1033,6 +1037,14 @@ function demoEtapas(){
     {id:'et6',nombre:'Cerrado',color:'#2ecc71',icono:'✅'},
   ];
 }
+function cargarEtapasGuardadas(){
+  try{
+    const g=JSON.parse(localStorage.getItem(LS_KEY_ETAPAS)||'null');
+    return (g && g.length) ? g : etapasDefault();
+  }catch(e){ return etapasDefault(); }
+}
+function guardarEtapasCompartidas(list){ localStorage.setItem(LS_KEY_ETAPAS, JSON.stringify(list)); }
+function demoEtapas(){ return cargarEtapasGuardadas(); }
 
 function demoAsesores(){
   return [{id:'a1',nombre:'Luis R.',rol:'admin'},{id:'a2',nombre:'Karla M.',rol:'asesor'},{id:'a3',nombre:'Diego V.',rol:'asesor'}];
