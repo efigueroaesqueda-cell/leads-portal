@@ -308,17 +308,20 @@ function escHtml(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/
 function escAttr(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function relTime(ts){const d=(Date.now()-new Date(ts))/1000;if(d<60)return'ahora';if(d<3600)return`${Math.floor(d/60)}min`;if(d<86400)return`${Math.floor(d/3600)}h`;return`${Math.floor(d/86400)}d`;}
 
+// Misma fórmula que index.html (Bandeja): así el "último contacto" que
+// se ve aquí siempre coincide con lo que se ve al abrir el chat.
+function leadBaseTs(idx){ return Date.now() - _sr(idx*5,1,72)*3600000; }
+
 function demoLeads(){
   const nombres=['Carlos Hdz','María López','Roberto Vega','Ana Flores','Luis Torres','Pedro Ruiz','Diana Castro','Miguel Ángel','José Martínez','Elena García','Fernando Ríos','Claudia Mora','Jorge Soto','Patricia Núñez','Andrés Villa','Ricardo Sánchez','Verónica Ramos','Alejandro Cruz','Gabriela Ortiz','Sergio Medina','Lupita Herrera','Óscar Delgado','Mónica Reyes','Iván Salazar','Beatriz Cano','Raúl Ponce','Silvia Aguilar','Tomás Vargas','Norma Chávez','Emilio Rangel','Cecilia Duarte','Arturo Bermúdez','Yolanda Peña','Gustavo Rivas','Marisol Contreras','Héctor Zamora','Adriana Solís','Rodrigo Fuentes','Teresa Nava','Julián Escobar','Rosa Elena Camacho','Ignacio Barrera','Leticia Montes','Federico Guzmán','Ximena Robles'];
   const tipos=['usuario_final','usuario_final','mecanico','refaccionaria','mecanico','usuario_final','usuario_final','mecanico','refaccionaria','usuario_final','usuario_final','usuario_final','usuario_final','refaccionaria','mecanico','mecanico','usuario_final','mecanico','usuario_final','refaccionaria','usuario_final','mecanico','usuario_final','usuario_final','refaccionaria','usuario_final','mecanico','usuario_final','usuario_final','usuario_final','mecanico','usuario_final','usuario_final','refaccionaria','usuario_final','mecanico','usuario_final','usuario_final','mecanico','usuario_final','usuario_final','refaccionaria','usuario_final','mecanico','usuario_final'];
   const etapas=(_etapas && _etapas.length) ? _etapas : cargarEtapasGuardadas();
   const vehiculos=['Nissan Tsuru 2012','Nissan Altima 2016','Toyota Hilux 2019','Varios (mayoreo)','RAM 1500 2015','Camioneta (sin especificar)','Por confirmar','Chevrolet Aveo (cliente)','Varios (pedido)','Chevrolet Spark 2017','Por confirmar','VW Jetta','Por confirmar','VW Pointer (mayoreo)','Varios (taller)','VW Jetta A4 2015','Chevrolet Aveo 2018','Toyota Hilux 2019','Nissan Versa 2021','Varios (mayoreo)','Honda CRV 2017','Ford Ranger 2020','Mazda 3 2019','Kia Rio 2016','Varios (mayoreo)','Nissan Sentra 2014','Chevrolet Spark 2020','VW Vento 2018','Hyundai Accent 2019','RAM 2500 2018','Toyota Corolla 2016','Ford Fiesta 2015','Nissan March 2020','Varios (mayoreo)','Honda Civic 2019','Dodge Attitude 2017','Mazda CX-5 2021','Chevrolet Onix 2022','Nissan Altima 2015 (cliente)','Toyota Yaris 2018','VW Gol 2016','Varios (mayoreo)','Kia Forte 2020','RAM 1500 2019 (cliente)','Nissan Altima 2020'];
-  const now=Date.now();
   return nombres.map((n,i)=>({
     id:`demo-lead-${i}`,nombre:n,telefono:`+52 33 ${_sr(i*7,1000,9999)} ${_sr(i*13,1000,9999)}`,
     tipo_cliente:tipos[i],etapa:etapas[i%etapas.length],
     vehiculo_info:vehiculos[i],no_leidos:_sr(i*11,0,3)>2?_sr(i*17,1,9):0,
-    updated_at:new Date(now-_sr(i*5,1,72)*3600000).toISOString(),
+    updated_at:new Date(leadBaseTs(i)).toISOString(),
     asesor:{nombre:['Luis R.','Karla M.','Diego V.'][i%3]},
     notas:'',etiquetas_lead:i%3===0?[{etiqueta:{nombre:'Mecánico Alianza',color:'#27ae60'}}]:[]
   }));}
@@ -470,8 +473,13 @@ function applyFilters(){
     return true;
   });
   // Sort
+  const sortVal=(l)=>{
+    if(_sortCol==='asesor') return l.asesor?.nombre||'';
+    if(_sortCol==='etapa') return l.etapa?.nombre||'';
+    return l[_sortCol]||'';
+  };
   _filtered.sort((a,b)=>{
-    const av=a[_sortCol]||'',bv=b[_sortCol]||'';
+    const av=sortVal(a),bv=sortVal(b);
     return _sortDir==='asc'?av.localeCompare(bv):bv.localeCompare(av);
   });
   document.getElementById('count-label').textContent=`${_filtered.length} de ${_leads.length}`;
@@ -507,9 +515,9 @@ function renderTable(){
     <thead><tr>
       <th onclick="sortBy('nombre')" class="${thCls('nombre')}">Lead</th>
       <th onclick="sortBy('tipo_cliente')" class="${thCls('tipo_cliente')}">Tipo</th>
-      <th>Vehículo</th>
+      <th onclick="sortBy('vehiculo_info')" class="${thCls('vehiculo_info')}">Vehículo</th>
       <th onclick="sortBy('etapa')" class="${thCls('etapa')}">Etapa</th>
-      <th>Asesor</th>
+      <th onclick="sortBy('asesor')" class="${thCls('asesor')}">Asesor</th>
       <th onclick="sortBy('updated_at')" class="${thCls('updated_at')}">Último contacto</th>
       <th></th>
     </tr></thead>

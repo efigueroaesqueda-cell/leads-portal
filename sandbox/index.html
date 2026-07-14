@@ -1010,9 +1010,13 @@ const CASOS_DEMO=[
   ]},
 ];
 
+// Hora del último contacto de un lead demo: una sola fuente para que la
+// bandeja, el CRM y el chat abierto siempre digan lo mismo (antes cada
+// vista calculaba su propia hora al azar y no coincidían entre sí).
+function leadBaseTs(idx){ return Date.now() - _sr(idx*5,1,72)*3600000; }
+
 function demoLeads(){
   const etapasList = (_etapas && _etapas.length) ? _etapas : cargarEtapasGuardadas();
-  const ahora = Date.now();
   const conNotas=[0,2,5,17,24,36];
   return CASOS_DEMO.map((c,i)=>({
     id:`demo-lead-${i}`,
@@ -1021,8 +1025,8 @@ function demoLeads(){
     tipo_cliente:c.tipo,
     etapa:etapasList[i%etapasList.length],
     no_leidos:_sr(i*11,0,3)>2?_sr(i*17,1,9):0,
-    ultimo_contacto:new Date(ahora - _sr(i*5,1,72)*3600000).toISOString(),
-    preview:c.conv[0][0],
+    ultimo_contacto:new Date(leadBaseTs(i)).toISOString(),
+    preview:c.conv[c.conv.length-1][1],
     asesor:{nombre:['Luis R.','Karla M.','Diego V.'][i%3]},
     etiquetas_lead:i%3===0?[{etiqueta:{nombre:'Mecánico Alianza',color:'#27ae60'}}]:[],
     tieneNotas:conNotas.includes(i)
@@ -1031,13 +1035,13 @@ function demoLeads(){
 
 function demoMensajes(leadId){
   const idx = parseInt(leadId.split('-')[2]||'0');
-  const now = Date.now();
+  const now = leadBaseTs(idx); // ancla: el último mensaje cae exacto en la misma hora que muestra la bandeja
   const asesorNombre = ['Luis R.','Karla M.','Diego V.'][idx%3];
   const pares = (CASOS_DEMO[idx] || CASOS_DEMO[0]).conv;
   const msgs = [];
   pares.forEach(([ent,sal],i)=>{
-    msgs.push({ id:`dm-${idx}-${i*2}`, lead_id:leadId, direccion:'entrante', contenido:ent, created_at:new Date(now-(pares.length-i)*7200000+1000).toISOString() });
-    msgs.push({ id:`dm-${idx}-${i*2+1}`, lead_id:leadId, direccion:'saliente', contenido:sal, asesor:{nombre:asesorNombre}, created_at:new Date(now-(pares.length-i)*7200000+60000).toISOString() });
+    msgs.push({ id:`dm-${idx}-${i*2}`, lead_id:leadId, direccion:'entrante', contenido:ent, created_at:new Date(now-(pares.length-1-i)*1800000-60000).toISOString() });
+    msgs.push({ id:`dm-${idx}-${i*2+1}`, lead_id:leadId, direccion:'saliente', contenido:sal, asesor:{nombre:asesorNombre}, created_at:new Date(now-(pares.length-1-i)*1800000).toISOString() });
   });
   // Notas internas de ejemplo en algunos chats, solo para que Enrique vea
   // cómo se ven sin tener que crearlas a mano en cada chat.
