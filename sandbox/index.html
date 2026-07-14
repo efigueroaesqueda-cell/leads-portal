@@ -170,6 +170,16 @@ body.tour-force-react .msg-react-btn,body.tour-force-react .msg-menu-btn{opacity
 .msg-menu-sep{height:1px;background:var(--border);margin:4px 6px}
 /* Estrella de destacado */
 .msg-star{float:right;color:var(--gold);font-size:12px;margin-left:6px;margin-top:1px}
+/* Panel de mensajes destacados */
+.destacado-item{display:flex;align-items:flex-start;gap:10px;padding:10px;border-radius:10px;background:var(--bg3);border:1px solid var(--border2);cursor:pointer;transition:background .15s ease,transform .12s cubic-bezier(.4,0,.2,1)}
+.destacado-item:hover{background:var(--bg4)}
+.destacado-item:active{transform:scale(.98)}
+.destacado-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#111;flex-shrink:0}
+.destacado-body{flex:1;min-width:0}
+.destacado-nombre{font-size:12px;font-weight:700;color:var(--text)}
+.destacado-texto{font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.destacado-fecha{font-size:10px;color:var(--text3);margin-top:2px}
+.destacado-empty{text-align:center;padding:30px 10px;color:var(--text3);font-size:13px}
 /* Cita de respuesta dentro del mensaje */
 .msg-reply-quote{border-left:3px solid var(--gold);background:rgba(255,255,255,.05);border-radius:5px;padding:4px 8px;margin-bottom:5px;font-size:12px;color:var(--text2);line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .msg-reply-autor{display:block;font-weight:700;color:var(--gold);font-size:11px}
@@ -251,6 +261,8 @@ body.tour-force-react .msg-react-btn,body.tour-force-react .msg-menu-btn{opacity
 .nota-aviso{background:rgba(242,193,78,.12);border:1px solid rgba(242,193,78,.35);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--text2);margin-bottom:12px}
 .nota-interna{align-self:center;width:88%;max-width:420px;background:rgba(242,193,78,.1);border:1px dashed rgba(212,160,23,.5);border-radius:10px;padding:8px 12px;margin:2px 0;transition:background .5s ease}
 .nota-interna.nota-flash{background:rgba(242,193,78,.35)}
+.msg-bubble{transition:box-shadow .5s ease}
+.msg-bubble.nota-flash{box-shadow:0 0 0 3px rgba(200,169,81,.6) !important}
 .nota-interna-header{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#d4a017;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
 .nota-interna-texto{font-size:13px;color:var(--text);white-space:pre-wrap;word-break:break-word;line-height:1.4}
 .nota-interna-time{font-size:10px;color:var(--text3);margin-top:4px;text-align:right}
@@ -468,6 +480,10 @@ body.tour-force-react .msg-react-btn,body.tour-force-react .msg-menu-btn{opacity
       <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
       <span class="tooltip">Respuestas rápidas</span>
     </a>
+    <div class="snav-btn" id="btn-destacados" title="Mensajes destacados" onclick="abrirDestacados()">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <span class="tooltip">Mensajes destacados</span>
+    </div>
 
     <div class="snav-bottom">
       <div class="snav-btn" id="btn-tour" title="Recorrido por aplicación" onclick="startTour()">
@@ -709,6 +725,16 @@ body.tour-force-react .msg-react-btn,body.tour-force-react .msg-menu-btn{opacity
 
 <!-- MENÚ DE MENSAJE (estilo WhatsApp) -->
 <div class="msg-menu" id="msg-menu"></div>
+
+<!-- MENSAJES DESTACADOS -->
+<div class="modal-overlay" id="destacados-overlay" style="display:none" onclick="if(event.target===this)cerrarDestacados()">
+  <div class="modal" style="width:420px">
+    <h3 style="margin-bottom:2px">⭐ Mensajes destacados</h3>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:14px">De todos los chats que has abierto en esta sesión.</p>
+    <div id="destacados-list" style="max-height:60vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px"></div>
+    <button class="btn btn-ghost" style="width:100%;margin-top:14px" onclick="cerrarDestacados()">Cerrar</button>
+  </div>
+</div>
 
 <!-- RECORRIDO GUIADO -->
 <div id="tour-backdrop" onclick="endTour()"></div>
@@ -1881,6 +1907,44 @@ function eliminarMensaje(msgId){
   renderMessages();
   if(eraFijado) renderPinned();
   showToast('🗑 Mensaje eliminado');
+}
+
+// ── PANEL DE MENSAJES DESTACADOS (todos los chats abiertos) ────
+function abrirDestacados(){
+  const el=document.getElementById('destacados-list');
+  const items=[];
+  Object.keys(_mensajesPorLead).forEach(leadId=>{
+    (_mensajesPorLead[leadId]||[]).forEach(m=>{ if(m.destacado) items.push({leadId, m}); });
+  });
+  items.sort((a,b)=> new Date(b.m.created_at)-new Date(a.m.created_at));
+  if(!items.length){
+    el.innerHTML='<div class="destacado-empty">Todavía no has destacado ningún mensaje.<br>Abre el menú ⌄ de cualquier mensaje y elige "Destacar".</div>';
+  } else {
+    el.innerHTML=items.map(({leadId,m})=>{
+      const lead=_leadsAll.find(l=>l.id===leadId);
+      const nombre=lead?.nombre||'Chat';
+      const texto = m.tipo==='imagen' ? '📷 Imagen' : m.tipo==='documento' ? ('📄 '+(m.attachName||'documento')) : m.tipo==='audio' ? '🎤 Nota de voz' : m.contenido;
+      return `<div class="destacado-item" onclick="irADestacadoChat('${leadId}','${m.id}')">
+        <div class="destacado-avatar" style="background:${avatarColor(nombre)}">${initials(nombre)}</div>
+        <div class="destacado-body">
+          <div class="destacado-nombre">${escHtml(nombre)}</div>
+          <div class="destacado-texto">${escHtml(texto)}</div>
+          <div class="destacado-fecha">${formatTime(m.created_at)}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('destacados-overlay').style.display='flex';
+}
+function cerrarDestacados(){ document.getElementById('destacados-overlay').style.display='none'; }
+function irADestacadoChat(leadId, msgId){
+  cerrarDestacados();
+  openLead(leadId).then(()=>{
+    setTimeout(()=>{
+      const el=document.getElementById('msg-'+msgId);
+      if(el){ el.scrollIntoView({block:'center',behavior:'smooth'}); el.classList.add('nota-flash'); setTimeout(()=>el.classList.remove('nota-flash'),1400); }
+    },150);
+  });
 }
 
 // ── FIJAR MENSAJE ─────────────────────────────────────────────
