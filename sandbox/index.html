@@ -188,6 +188,15 @@ body.tour-force-react .msg-react-btn,body.tour-force-react .msg-menu-btn{opacity
 /* Barra de mensaje fijado arriba del chat */
 #chat-pinned{display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid var(--border);background:var(--bg2);cursor:pointer;flex-shrink:0}
 #chat-pinned:hover{background:var(--bg3)}
+/* Barra de selección múltiple de mensajes */
+#selection-bar{display:none;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+#selection-count{font-size:13px;font-weight:600;color:var(--text)}
+.msg-select-row{display:flex;align-items:center;gap:8px}
+.msg-select-row.selectable{cursor:pointer}
+.msg-select-row .msg-group{flex:1;min-width:0}
+.msg-select-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--bg3);transition:background .15s ease,border-color .15s ease,transform .12s cubic-bezier(.4,0,.2,1)}
+.msg-select-row.selectable:active .msg-select-check{transform:scale(.88)}
+.msg-select-check.checked{background:var(--gold);border-color:var(--gold)}
 .pin-ico{color:var(--gold);flex-shrink:0}
 .pin-texto{flex:1;min-width:0;font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pin-texto b{color:var(--gold);font-weight:700;margin-right:5px}
@@ -565,6 +574,15 @@ body.tour-force-react .msg-react-btn,body.tour-force-react .msg-menu-btn{opacity
 
       <!-- Barra de mensaje fijado -->
       <div id="chat-pinned" style="display:none" onclick="irAMensajeFijado()"></div>
+
+      <!-- Barra de selección múltiple -->
+      <div id="selection-bar" style="display:none">
+        <button class="chat-search-nav-btn" onclick="cancelarSeleccion()" title="Cancelar" style="width:auto;padding:0 8px">✕</button>
+        <span id="selection-count">0 seleccionados</span>
+        <div style="flex:1"></div>
+        <button class="chat-search-nav-btn" onclick="reenviarSeleccionados()" title="Reenviar seleccionados" style="width:auto;padding:0 10px;gap:5px;display:flex;align-items:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 17 20 12 15 7"/><path d="M4 18v-2a4 4 0 0 1 4-4h12"/></svg> Reenviar</button>
+        <button class="chat-search-nav-btn" onclick="eliminarSeleccionados()" title="Eliminar seleccionados" style="width:auto;padding:0 10px;gap:5px;display:flex;align-items:center;color:var(--red)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Eliminar</button>
+      </div>
 
       <!-- Messages -->
       <div id="chat-messages"></div>
@@ -1456,6 +1474,7 @@ async function openLead(id){
   if(_mediaRecorder && _mediaRecorder.state==='recording') _mediaRecorder.stop();
   cerrarBusquedaChat();
   cancelarResponder();
+  if(_modoSeleccion){ _modoSeleccion=false; _mensajesSeleccionados=new Set(); document.getElementById('chat-header').style.display=''; document.getElementById('selection-bar').style.display='none'; }
   // En móvil, abrir un chat oculta la capa de la bandeja para ver la conversación
   document.getElementById('inbox-panel').classList.remove('show-mobile');
 
@@ -1550,7 +1569,7 @@ function renderMessages(){
     const fwdTag = m.reenviado ? `<div class="msg-forwarded-tag"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 17 20 12 15 7"/><path d="M4 18v-2a4 4 0 0 1 4-4h12"/></svg> Reenviado · originalmente de ${escHtml(m.reenviado_origen?.nombre||'')}</div>` : '';
     const replyQuote = m.respondeA ? `<div class="msg-reply-quote"><span class="msg-reply-autor">${escHtml(m.respondeA.autor||'')}</span>${escHtml(m.respondeA.texto||'')}</div>` : '';
     const estrella = m.destacado ? `<span class="msg-star" title="Destacado">★</span>` : '';
-    html+=`<div class="msg-group" style="align-items:${ent?'flex-start':'flex-end'}">
+    const grupo=`<div class="msg-group" style="align-items:${ent?'flex-start':'flex-end'}">
       ${!ent&&m.asesor?.nombre?`<div class="msg-asesor">${m.asesor.nombre}</div>`:''}
       <div class="msg-bubble-wrap ${wrapClase}">
         <div class="msg-bubble msg-${m.direccion}${claseExtra}${m.fijado?' msg-pinned':''}" id="msg-${m.id}">${estrella}${fwdTag}${replyQuote}${bubbleContent}</div>
@@ -1560,17 +1579,38 @@ function renderMessages(){
       </div>
       <div class="msg-time${ent?'':' right'}">${formatTime(m.created_at)}</div>
     </div>`;
+    if(_modoSeleccion){
+      const marcado=_mensajesSeleccionados.has(m.id);
+      html+=`<div class="msg-select-row selectable" onclick="toggleMensajeSeleccionado('${m.id}')">
+        <div class="msg-select-check${marcado?' checked':''}">${marcado?'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>':''}</div>
+        ${grupo}
+      </div>`;
+    } else {
+      html+=grupo;
+    }
   });
   el.innerHTML=html;
   initAudioPlayers(el);
 }
 
-// ── REENVIAR MENSAJE ──────────────────────────────────────────
-let _fwdMensajeOrigen = null;
+// ── REENVIAR MENSAJE (uno o varios) ────────────────────────────
+let _fwdOrigenes = []; // siempre un arreglo, aunque sea de 1 solo mensaje
 let _fwdSeleccion = new Set();
 function abrirReenviar(msgId){
-  _fwdMensajeOrigen = _mensajes.find(m=>m.id===msgId);
-  if(!_fwdMensajeOrigen) return;
+  const m=_mensajes.find(m=>m.id===msgId);
+  if(!m) return;
+  _fwdOrigenes = [m];
+  _fwdSeleccion = new Set();
+  document.getElementById('fwd-buscar').value='';
+  renderFwdLista('');
+  const btn=document.getElementById('fwd-confirmar');
+  btn.disabled=true; btn.textContent='Reenviar';
+  document.getElementById('modal-reenviar').style.display='flex';
+}
+function abrirReenviarSeleccionados(){
+  const ids=_mensajesSeleccionados;
+  _fwdOrigenes = _mensajes.filter(m=>ids.has(m.id));
+  if(!_fwdOrigenes.length) return;
   _fwdSeleccion = new Set();
   document.getElementById('fwd-buscar').value='';
   renderFwdLista('');
@@ -1628,11 +1668,13 @@ function reenviarA(targetId, msg){
   if(_activeLead && _activeLead.id===targetId){ renderMessages(); scrollToBottom(); }
 }
 function confirmarReenvio(){
-  if(!_fwdMensajeOrigen || !_fwdSeleccion.size) return;
-  _fwdSeleccion.forEach(targetId=>reenviarA(targetId, _fwdMensajeOrigen));
+  if(!_fwdOrigenes.length || !_fwdSeleccion.size) return;
+  _fwdSeleccion.forEach(targetId=>_fwdOrigenes.forEach(origen=>reenviarA(targetId, origen)));
   renderInbox();
-  showToast(`↪ Reenviado a ${_fwdSeleccion.size} chat${_fwdSeleccion.size>1?'s':''}`);
+  const msgTxt = _fwdOrigenes.length>1 ? `${_fwdOrigenes.length} mensajes` : '1 mensaje';
+  showToast(`↪ ${msgTxt} reenviado${_fwdOrigenes.length>1?'s':''} a ${_fwdSeleccion.size} chat${_fwdSeleccion.size>1?'s':''}`);
   closeModal('modal-reenviar');
+  if(_modoSeleccion) cancelarSeleccion();
 }
 
 // ── BÚSQUEDA DENTRO DEL CHAT ────────────────────────────────────
@@ -1855,6 +1897,7 @@ const ICO={
   fijar:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14l-1.5-4.5a3 3 0 0 1-.2-1V4H6.7v7.5a3 3 0 0 1-.2 1L5 17z"/></svg>',
   destacar:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
   eliminar:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+  seleccionar:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>',
 };
 function abrirMenuMensaje(e, msgId){
   e.stopPropagation();
@@ -1870,6 +1913,7 @@ function abrirMenuMensaje(e, msgId){
     `<div class="msg-menu-sep"></div>` +
     it('fijar', m.fijado?'Dejar de fijar':'Fijar', `fijarMensaje('${msgId}')`) +
     it('destacar', m.destacado?'Quitar destacado':'Destacar', `destacarMensaje('${msgId}')`) +
+    it('seleccionar','Seleccionar', `cerrarMenuMensaje();activarModoSeleccion('${msgId}')`) +
     `<div class="msg-menu-sep"></div>` +
     it('eliminar','Eliminar',`eliminarMensaje('${msgId}')`,'danger');
   // posicionar cerca del botón, sin salirse de la pantalla
@@ -1907,6 +1951,51 @@ function eliminarMensaje(msgId){
   renderMessages();
   if(eraFijado) renderPinned();
   showToast('🗑 Mensaje eliminado');
+}
+
+// ── SELECCIONAR VARIOS (estilo WhatsApp) ────────────────────────
+let _modoSeleccion=false;
+let _mensajesSeleccionados=new Set();
+function activarModoSeleccion(msgId){
+  _modoSeleccion=true;
+  _mensajesSeleccionados=new Set(msgId?[msgId]:[]);
+  document.getElementById('chat-header').style.display='none';
+  document.getElementById('selection-bar').style.display='flex';
+  actualizarBarraSeleccion();
+  renderMessages();
+}
+function cancelarSeleccion(){
+  _modoSeleccion=false;
+  _mensajesSeleccionados=new Set();
+  document.getElementById('chat-header').style.display='';
+  document.getElementById('selection-bar').style.display='none';
+  renderMessages();
+}
+function toggleMensajeSeleccionado(msgId){
+  if(_mensajesSeleccionados.has(msgId)) _mensajesSeleccionados.delete(msgId);
+  else _mensajesSeleccionados.add(msgId);
+  if(!_mensajesSeleccionados.size){ cancelarSeleccion(); return; }
+  actualizarBarraSeleccion();
+  renderMessages();
+}
+function actualizarBarraSeleccion(){
+  const n=_mensajesSeleccionados.size;
+  document.getElementById('selection-count').textContent=`${n} seleccionado${n===1?'':'s'}`;
+}
+function reenviarSeleccionados(){
+  if(!_mensajesSeleccionados.size) return;
+  abrirReenviarSeleccionados();
+}
+function eliminarSeleccionados(){
+  const n=_mensajesSeleccionados.size;
+  if(!n) return;
+  if(!confirm(`¿Eliminar ${n} mensaje${n===1?'':'s'}? Esta acción no se puede deshacer.`)) return;
+  const habiaFijado=_mensajes.some(m=>_mensajesSeleccionados.has(m.id)&&m.fijado);
+  _mensajes=_mensajes.filter(m=>!_mensajesSeleccionados.has(m.id));
+  _mensajesPorLead[_activeLead.id]=_mensajes;
+  cancelarSeleccion();
+  if(habiaFijado) renderPinned();
+  showToast(`🗑 ${n} mensaje${n===1?'':'s'} eliminado${n===1?'':'s'}`);
 }
 
 // ── PANEL DE MENSAJES DESTACADOS (todos los chats abiertos) ────
@@ -1995,7 +2084,7 @@ function cancelarResponder(){
   const bar=document.getElementById('reply-compose');
   bar.style.display='none'; bar.innerHTML='';
 }
-document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ if(document.getElementById('msg-menu').classList.contains('show')) cerrarMenuMensaje(); else if(_respondiendoA) cancelarResponder(); } });
+document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ if(document.getElementById('msg-menu').classList.contains('show')) cerrarMenuMensaje(); else if(_modoSeleccion) cancelarSeleccion(); else if(_respondiendoA) cancelarResponder(); } });
 
 let _pendingAttachments = []; // [{ tipo, icon, name, url }]
 
