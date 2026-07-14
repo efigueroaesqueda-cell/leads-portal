@@ -2555,15 +2555,28 @@ function positionTour(el, step){
   hl.classList.add('show');
 
   const tip=document.getElementById('tour-tooltip');
-  const tw=280, gap=14;
+  const tw=280, gap=16;
   const th=tip.offsetHeight||160;
+  const vw=window.innerWidth, vh=window.innerHeight;
+  // Espacio libre a cada lado del elemento resaltado
+  const space={ top:r.top, bottom:vh-r.bottom, left:r.left, right:vw-r.right };
+  const necesita=(l)=> (l==='top'||l==='bottom') ? th+gap+8 : tw+gap+8;
+  // Usar el lado pedido SOLO si le cabe; si no, elegir el lado con más
+  // espacio, para que el globo del recorrido nunca tape lo que señala.
+  let lado = step.pos || 'top';
+  if(space[lado] < necesita(lado)){
+    lado = ['bottom','top','right','left'].reduce((mejor,l)=>
+      (space[l]-necesita(l)) > (space[mejor]-necesita(mejor)) ? l : mejor, 'bottom');
+  }
   let left, top;
-  if(step.pos==='right'){ left=r.right+gap; top=r.top; }
-  else if(step.pos==='left'){ left=r.left-tw-gap; top=r.top; }
-  else if(step.pos==='bottom'){ left=r.left; top=r.bottom+gap; }
+  if(lado==='right'){ left=r.right+gap; top=r.top; }
+  else if(lado==='left'){ left=r.left-tw-gap; top=r.top; }
+  else if(lado==='bottom'){ left=r.left; top=r.bottom+gap; }
   else { left=r.left; top=r.top-th-gap; }
-  left=Math.max(10, Math.min(left, window.innerWidth-tw-10));
-  top=Math.max(10, Math.min(top, window.innerHeight-th-10));
+  // Clamp para que no se salga de pantalla (el eje principal ya no tapa
+  // porque elegimos un lado con espacio).
+  left=Math.max(8, Math.min(left, vw-tw-8));
+  top=Math.max(8, Math.min(top, vh-th-8));
   tip.style.left=left+'px';
   tip.style.top=top+'px';
 }
