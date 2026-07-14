@@ -151,12 +151,45 @@ html,body{height:100%;overflow:hidden;overscroll-behavior-x:none;font-family:'Se
 .msg-bubble-wrap{display:flex;align-items:flex-end;gap:4px}
 .msg-bubble-wrap.wrap-entrante{align-self:flex-start}
 .msg-bubble-wrap.wrap-saliente{align-self:flex-end;flex-direction:row-reverse}
-.msg-react-btn,.msg-fwd-btn{opacity:0;flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1;cursor:pointer;transition:opacity .15s ease,transform .15s ease,color .15s ease}
-.msg-bubble-wrap:hover .msg-react-btn,.msg-bubble-wrap:hover .msg-fwd-btn{opacity:1}
-body.tour-force-react .msg-react-btn,body.tour-force-react .msg-fwd-btn{opacity:1}
-.msg-react-btn:hover,.msg-fwd-btn:hover{transform:scale(1.2);color:var(--gold)}
-.msg-react-btn:active,.msg-fwd-btn:active{transform:scale(1)}
+.msg-react-btn,.msg-menu-btn{opacity:0;flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1;cursor:pointer;transition:opacity .15s ease,transform .15s ease,color .15s ease}
+.msg-bubble-wrap:hover .msg-react-btn,.msg-bubble-wrap:hover .msg-menu-btn{opacity:1}
+body.tour-force-react .msg-react-btn,body.tour-force-react .msg-menu-btn{opacity:1}
+.msg-react-btn:hover,.msg-menu-btn:hover{transform:scale(1.2);color:var(--gold)}
+.msg-react-btn:active,.msg-menu-btn:active{transform:scale(1)}
 .msg-forwarded-tag{display:flex;align-items:center;gap:4px;font-size:11px;font-style:italic;color:var(--text3);opacity:.85;margin-bottom:3px}
+/* Menú de mensaje (estilo WhatsApp) */
+.msg-menu{display:none;position:fixed;background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:5px;min-width:180px;box-shadow:0 10px 30px rgba(0,0,0,.5);z-index:30}
+.msg-menu.show{display:block;animation:menuIn .14s ease}
+@keyframes menuIn{from{opacity:0;transform:scale(.96) translateY(-4px)}to{opacity:1;transform:none}}
+.msg-menu-item{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:8px;font-size:13px;color:var(--text);cursor:pointer;transition:background .14s ease}
+.msg-menu-item:hover{background:var(--bg4)}
+.msg-menu-item:active{transform:scale(.98)}
+.msg-menu-item svg{flex-shrink:0;color:var(--text2)}
+.msg-menu-item.danger{color:var(--red)}
+.msg-menu-item.danger svg{color:var(--red)}
+.msg-menu-sep{height:1px;background:var(--border);margin:4px 6px}
+/* Estrella de destacado */
+.msg-star{float:right;color:var(--gold);font-size:12px;margin-left:6px;margin-top:1px}
+/* Cita de respuesta dentro del mensaje */
+.msg-reply-quote{border-left:3px solid var(--gold);background:rgba(255,255,255,.05);border-radius:5px;padding:4px 8px;margin-bottom:5px;font-size:12px;color:var(--text2);line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.msg-reply-autor{display:block;font-weight:700;color:var(--gold);font-size:11px}
+/* Mensaje fijado: resaltado sutil */
+.msg-bubble.msg-pinned{box-shadow:0 0 0 1.5px rgba(200,169,81,.45)}
+/* Barra de mensaje fijado arriba del chat */
+#chat-pinned{display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid var(--border);background:var(--bg2);cursor:pointer;flex-shrink:0}
+#chat-pinned:hover{background:var(--bg3)}
+.pin-ico{color:var(--gold);flex-shrink:0}
+.pin-texto{flex:1;min-width:0;font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pin-texto b{color:var(--gold);font-weight:700;margin-right:5px}
+.pin-quitar{flex-shrink:0;width:22px;height:22px;border-radius:50%;border:none;background:transparent;color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s ease,color .15s ease}
+.pin-quitar:hover{background:var(--bg4);color:var(--text)}
+/* Barra de "respondiendo a" arriba del input */
+#reply-compose{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border);background:var(--bg3)}
+.reply-compose-body{flex:1;min-width:0;border-left:3px solid var(--gold);padding-left:8px}
+.reply-compose-autor{font-size:11px;font-weight:700;color:var(--gold)}
+.reply-compose-texto{font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.reply-compose-x{flex-shrink:0;width:26px;height:26px;border-radius:50%;border:none;background:transparent;color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s ease,color .15s ease}
+.reply-compose-x:hover{background:var(--bg4);color:var(--text)}
 .msg-reaction-badge{align-self:flex-start;margin-top:-11px;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:2px 8px;font-size:16px;line-height:1.3;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.35);transition:transform .12s ease;animation:reactionPop .32s cubic-bezier(.34,1.56,.64,1)}
 .msg-reaction-badge:hover{transform:scale(1.1)}
 .msg-reaction-badge:active{transform:scale(.94)}
@@ -514,11 +547,15 @@ body.tour-force-react .msg-react-btn,body.tour-force-react .msg-fwd-btn{opacity:
         <button class="chat-search-nav-btn" onclick="cerrarBusquedaChat()" title="Cerrar">✕</button>
       </div>
 
+      <!-- Barra de mensaje fijado -->
+      <div id="chat-pinned" style="display:none" onclick="irAMensajeFijado()"></div>
+
       <!-- Messages -->
       <div id="chat-messages"></div>
 
       <!-- Input area -->
       <div id="chat-input-area">
+        <div id="reply-compose" style="display:none"></div>
         <div class="quick-replies" id="quick-replies-bar"></div>
         <div class="pending-attach-list" id="pending-attach-list" style="display:none"></div>
         <div class="input-row">
@@ -669,6 +706,9 @@ body.tour-force-react .msg-react-btn,body.tour-force-react .msg-fwd-btn{opacity:
 
 <!-- REACCIONES A MENSAJE -->
 <div class="reaction-picker" id="reaction-picker"></div>
+
+<!-- MENÚ DE MENSAJE (estilo WhatsApp) -->
+<div class="msg-menu" id="msg-menu"></div>
 
 <!-- RECORRIDO GUIADO -->
 <div id="tour-backdrop" onclick="endTour()"></div>
@@ -1385,6 +1425,7 @@ async function openLead(id){
   renderPendingAttach();
   if(_mediaRecorder && _mediaRecorder.state==='recording') _mediaRecorder.stop();
   cerrarBusquedaChat();
+  cancelarResponder();
   // En móvil, abrir un chat oculta la capa de la bandeja para ver la conversación
   document.getElementById('inbox-panel').classList.remove('show-mobile');
 
@@ -1427,6 +1468,7 @@ async function openLead(id){
       renderInbox();
     }
     renderMessages();
+    renderPinned();
     scrollToBottom();
   } catch(e){ console.error(e); }
 
@@ -1476,12 +1518,14 @@ function renderMessages(){
     else { bubbleContent=linkify(escHtml(m.contenido)); }
     const wrapClase = ent?'wrap-entrante':'wrap-saliente';
     const fwdTag = m.reenviado ? `<div class="msg-forwarded-tag"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 17 20 12 15 7"/><path d="M4 18v-2a4 4 0 0 1 4-4h12"/></svg> Reenviado · originalmente de ${escHtml(m.reenviado_origen?.nombre||'')}</div>` : '';
+    const replyQuote = m.respondeA ? `<div class="msg-reply-quote"><span class="msg-reply-autor">${escHtml(m.respondeA.autor||'')}</span>${escHtml(m.respondeA.texto||'')}</div>` : '';
+    const estrella = m.destacado ? `<span class="msg-star" title="Destacado">★</span>` : '';
     html+=`<div class="msg-group" style="align-items:${ent?'flex-start':'flex-end'}">
       ${!ent&&m.asesor?.nombre?`<div class="msg-asesor">${m.asesor.nombre}</div>`:''}
       <div class="msg-bubble-wrap ${wrapClase}">
-        <div class="msg-bubble msg-${m.direccion}${claseExtra}">${fwdTag}${bubbleContent}</div>
+        <div class="msg-bubble msg-${m.direccion}${claseExtra}${m.fijado?' msg-pinned':''}" id="msg-${m.id}">${estrella}${fwdTag}${replyQuote}${bubbleContent}</div>
         <button class="msg-react-btn" onclick="abrirReactionPicker(event,'${m.id}')" title="Reaccionar">🙂</button>
-        <button class="msg-fwd-btn" onclick="abrirReenviar('${m.id}')" title="Reenviar"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 17 20 12 15 7"/><path d="M4 18v-2a4 4 0 0 1 4-4h12"/></svg></button>
+        <button class="msg-menu-btn" onclick="abrirMenuMensaje(event,'${m.id}')" title="Más opciones"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
       </div>
       ${m.reaccion?`<div class="msg-reaction-badge ${wrapClase}" onclick="quitarReaccion('${m.id}')" title="Quitar reacción">${m.reaccion}</div>`:''}
       <div class="msg-time${ent?'':' right'}">${formatTime(m.created_at)}</div>
@@ -1773,6 +1817,118 @@ function quitarReaccion(msgId){
 }
 document.addEventListener('click', ()=> document.getElementById('reaction-picker')?.classList.remove('show'));
 
+// ── MENÚ DE MENSAJE (estilo WhatsApp: Responder, Copiar, etc.) ─
+const ICO={
+  responder:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>',
+  copiar:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+  reenviar:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 17 20 12 15 7"/><path d="M4 18v-2a4 4 0 0 1 4-4h12"/></svg>',
+  fijar:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14l-1.5-4.5a3 3 0 0 1-.2-1V4H6.7v7.5a3 3 0 0 1-.2 1L5 17z"/></svg>',
+  destacar:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+  eliminar:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+};
+function abrirMenuMensaje(e, msgId){
+  e.stopPropagation();
+  const m=_mensajes.find(x=>x.id===msgId);
+  if(!m) return;
+  const panel=document.getElementById('msg-menu');
+  const textoPlano = m.tipo==='imagen' ? '📷 Imagen' : m.tipo==='documento' ? ('📄 '+(m.attachName||'documento')) : m.tipo==='audio' ? '🎤 Nota de voz' : m.contenido;
+  const it=(icon,label,fn,cls='')=>`<div class="msg-menu-item ${cls}" onclick="${fn}">${ICO[icon]} ${label}</div>`;
+  panel.innerHTML =
+    it('responder','Responder',`responderMensaje('${msgId}')`) +
+    it('copiar','Copiar',`copiarMensaje('${msgId}')`) +
+    it('reenviar','Reenviar',`cerrarMenuMensaje();abrirReenviar('${msgId}')`) +
+    `<div class="msg-menu-sep"></div>` +
+    it('fijar', m.fijado?'Dejar de fijar':'Fijar', `fijarMensaje('${msgId}')`) +
+    it('destacar', m.destacado?'Quitar destacado':'Destacar', `destacarMensaje('${msgId}')`) +
+    `<div class="msg-menu-sep"></div>` +
+    it('eliminar','Eliminar',`eliminarMensaje('${msgId}')`,'danger');
+  // posicionar cerca del botón, sin salirse de la pantalla
+  const r=e.currentTarget.getBoundingClientRect();
+  panel.classList.add('show');
+  const pw=panel.offsetWidth, ph=panel.offsetHeight;
+  let left=r.right - pw; if(left<8) left=8; if(left+pw>window.innerWidth-8) left=window.innerWidth-pw-8;
+  let top=r.bottom+4; if(top+ph>window.innerHeight-8) top=r.top-ph-4;
+  if(top<8) top=8; if(top+ph>window.innerHeight-8) top=window.innerHeight-ph-8;
+  panel.style.left=left+'px'; panel.style.top=top+'px';
+}
+function cerrarMenuMensaje(){ document.getElementById('msg-menu').classList.remove('show'); }
+document.addEventListener('click', ()=> cerrarMenuMensaje());
+
+function copiarMensaje(msgId){
+  const m=_mensajes.find(x=>x.id===msgId); cerrarMenuMensaje();
+  if(!m) return;
+  const txt = m.tipo==='documento' ? (m.attachName||'') : (m.contenido||'');
+  navigator.clipboard?.writeText(txt).then(()=>showToast('📋 Copiado')).catch(()=>showToast('No se pudo copiar'));
+}
+function destacarMensaje(msgId){
+  const m=_mensajes.find(x=>x.id===msgId); cerrarMenuMensaje();
+  if(!m) return;
+  m.destacado=!m.destacado;
+  showToast(m.destacado?'⭐ Destacado':'Quitado de destacados');
+  renderMessages();
+}
+function eliminarMensaje(msgId){
+  cerrarMenuMensaje();
+  const idx=_mensajes.findIndex(x=>x.id===msgId);
+  if(idx<0) return;
+  if(!confirm('¿Eliminar este mensaje? Esta acción no se puede deshacer.')) return;
+  const eraFijado=_mensajes[idx].fijado;
+  _mensajes.splice(idx,1);
+  renderMessages();
+  if(eraFijado) renderPinned();
+  showToast('🗑 Mensaje eliminado');
+}
+
+// ── FIJAR MENSAJE ─────────────────────────────────────────────
+function fijarMensaje(msgId){
+  cerrarMenuMensaje();
+  const m=_mensajes.find(x=>x.id===msgId);
+  if(!m) return;
+  if(m.fijado){ m.fijado=false; }
+  else { _mensajes.forEach(x=>x.fijado=false); m.fijado=true; } // solo uno fijado a la vez, como WhatsApp
+  renderMessages();
+  renderPinned();
+  showToast(m.fijado?'📌 Mensaje fijado':'Se quitó el fijado');
+}
+function renderPinned(){
+  const bar=document.getElementById('chat-pinned');
+  const m=(_mensajes||[]).find(x=>x.fijado);
+  if(!m){ bar.style.display='none'; bar.innerHTML=''; return; }
+  const txt = m.tipo==='imagen' ? '📷 Imagen' : m.tipo==='documento' ? ('📄 '+(m.attachName||'documento')) : m.tipo==='audio' ? '🎤 Nota de voz' : m.contenido;
+  bar.innerHTML=`<svg class="pin-ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14l-1.5-4.5a3 3 0 0 1-.2-1V4H6.7v7.5a3 3 0 0 1-.2 1L5 17z"/></svg>
+    <span class="pin-texto"><b>Fijado</b>${escHtml(txt)}</span>
+    <button class="pin-quitar" onclick="event.stopPropagation();fijarMensaje('${m.id}')" title="Quitar fijado"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+  bar.style.display='flex';
+}
+function irAMensajeFijado(){
+  const m=(_mensajes||[]).find(x=>x.fijado);
+  if(!m) return;
+  const el=document.getElementById('msg-'+m.id);
+  if(el){ el.scrollIntoView({block:'center',behavior:'smooth'}); el.classList.add('nota-flash'); setTimeout(()=>el.classList.remove('nota-flash'),1400); }
+}
+
+// ── RESPONDER (citar mensaje) ─────────────────────────────────
+let _respondiendoA=null;
+function responderMensaje(msgId){
+  cerrarMenuMensaje();
+  const m=_mensajes.find(x=>x.id===msgId);
+  if(!m) return;
+  const texto = m.tipo==='imagen' ? '📷 Imagen' : m.tipo==='documento' ? ('📄 '+(m.attachName||'documento')) : m.tipo==='audio' ? '🎤 Nota de voz' : m.contenido;
+  const autor = m.direccion==='entrante' ? (_activeLead?.nombre||_activeLead?.telefono||'Cliente') : (m.asesor?.nombre||'Tú');
+  _respondiendoA={ id:m.id, autor, texto };
+  const bar=document.getElementById('reply-compose');
+  bar.innerHTML=`<div class="reply-compose-body"><div class="reply-compose-autor">${escHtml(autor)}</div><div class="reply-compose-texto">${escHtml(texto)}</div></div>
+    <button class="reply-compose-x" onclick="cancelarResponder()" title="Cancelar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+  bar.style.display='flex';
+  document.getElementById('msg-input').focus();
+}
+function cancelarResponder(){
+  _respondiendoA=null;
+  const bar=document.getElementById('reply-compose');
+  bar.style.display='none'; bar.innerHTML='';
+}
+document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ if(document.getElementById('msg-menu').classList.contains('show')) cerrarMenuMensaje(); else if(_respondiendoA) cancelarResponder(); } });
+
 let _pendingAttachments = []; // [{ tipo, icon, name, url }]
 
 function attachFile(tipo){
@@ -1932,7 +2088,9 @@ async function sendMessage(){
       asesor:{nombre:'Luis R.'},
       created_at:new Date().toISOString()
     };
+    if(_respondiendoA) msg.respondeA={ autor:_respondiendoA.autor, texto:_respondiendoA.texto };
     _mensajes.push(msg);
+    if(_respondiendoA) cancelarResponder();
   }
 
   // Sube el reloj y la vista previa de la bandeja con lo que se acaba de
@@ -2356,7 +2514,7 @@ const TOUR_STEPS=[
   {selector:'[title="Emojis"]', title:'Emojis', text:'Agrega emojis a tu mensaje sin salir del teclado — clic aquí y elige el que quieras.', pos:'top'},
   {selector:'.btn-mic', title:'Nota de voz', text:'Este botón, aparte de Adjuntar, es para grabar y mandar una nota de voz.', pos:'top'},
   {selector:'.msg-react-btn', title:'Reaccionar a un mensaje', text:'Pasa el mouse sobre cualquier mensaje y aparece este botón — reacciona como en WhatsApp (👍❤️😂😮😢🙏). Toca la reacción de nuevo para quitarla.', pos:'top'},
-  {selector:'.msg-fwd-btn', title:'Reenviar un mensaje', text:'Manda cualquier mensaje a uno o varios chats a la vez. Siempre se marca como "Reenviado" con el nombre de quién lo escribió originalmente, aunque pase por varios chats.', pos:'top'},
+  {selector:'.msg-menu-btn', title:'Menú del mensaje', text:'Pasa el mouse sobre cualquier mensaje y aparece esta flechita ⌄ — ábrela para Responder (citando), Copiar, Reenviar, Fijar, Destacar o Eliminar, igual que en WhatsApp.', pos:'top'},
   {selector:'[title="Buscar en este chat"]', title:'Buscar en este chat', text:'Encuentra una palabra dentro de esta conversación — los mensajes que coinciden se resaltan y puedes saltar entre ellos.', pos:'top'},
   {selector:'[title="Perfil"]', title:'Ficha del cliente', text:'Aquí ves y editas los datos del lead, lo que se ha compartido en el chat (fotos y documentos), sus etiquetas y sus notas internas. También puedes llegar aquí tocando el nombre arriba del chat.', pos:'left'},
 ];
@@ -2382,7 +2540,7 @@ function showTourStep(){
   document.getElementById('tour-text').textContent=step.text;
   document.getElementById('tour-btn-prev').style.visibility=_tourIndex===0?'hidden':'visible';
   document.getElementById('tour-btn-next').textContent=_tourIndex===TOUR_STEPS.length-1?'Terminar':'Siguiente';
-  document.body.classList.toggle('tour-force-react', step.selector==='.msg-react-btn' || step.selector==='.msg-fwd-btn');
+  document.body.classList.toggle('tour-force-react', step.selector==='.msg-react-btn' || step.selector==='.msg-menu-btn');
   el.scrollIntoView({block:'center', behavior:'smooth'});
   positionTour(el, step);
 }
